@@ -1,25 +1,25 @@
-# Unowire Frontend UI Implementation Plan
+# Unowire Frontend UI Implementation Plan（Unowire 前端 UI 实现计划）
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a complete, SEO-optimized yellow-pages directory website frontend with mock data, runnable independently of backend. Swap to real API by changing one file later.
+**Goal:** 构建一个完整的、SEO 优化的黄页目录网站前端，使用 mock 数据，可独立于后端运行。后续只需修改一个文件即可切换到真实 API。
 
-**Architecture:** Next.js 14 App Router with mock JSON data files. All detail pages use ISR + slug-based pseudo-static URLs for Google indexing. Match tool uses client-side mock matching logic. Data access abstracted through `lib/api.ts` so backend swap is a single-file change.
+**Architecture:** Next.js 14 App Router 配合 mock JSON 数据文件。所有详情页使用 ISR + 基于 slug 的伪静态 URL 以便 Google 收录。匹配工具使用客户端 mock 匹配逻辑。数据访问通过 `lib/api.ts` 抽象封装，因此后端切换只需修改一个文件。
 
-**Tech Stack:** Next.js 14, TypeScript, Tailwind CSS, shadcn/ui, React Server Components + Client Components
+**Tech Stack:** Next.js 14、TypeScript、Tailwind CSS、shadcn/ui、React Server Components + Client Components
 
 **Spec:** `docs/superpowers/specs/2026-06-27-unowire-mvp-design.md`
 
-**Key principles:**
-- Yellow pages directory form — browseable, content-rich, indexable pages
-- Pseudo-static URLs: `/cables/[brand_slug]/[slug]`, not query params
-- SEO-first: sitemap, robots, JSON-LD structured data, per-page metadata
-- Mock data in `frontend/data/*.json` — UI runs with `npm run dev`, no backend needed
-- Mock matching logic in `lib/mock-match.ts` — implements the same 3-phase algorithm as the backend spec (section 4.3)
+**关键原则：**
+- 黄页目录形式——可浏览、内容丰富、可被搜索引擎收录的页面
+- 伪静态 URL：`/cables/[brand_slug]/[slug]`，不使用查询参数
+- SEO 优先：sitemap、robots、JSON-LD 结构化数据、每页独立的 metadata
+- Mock 数据放在 `frontend/data/*.json` —— UI 通过 `npm run dev` 即可运行，无需后端
+- Mock 匹配逻辑放在 `lib/mock-match.ts` —— 实现与后端规范（4.3 节）相同的 3 阶段算法
 
 ---
 
-## File Structure
+## 文件结构（File Structure）
 
 ```
 frontend/
@@ -89,51 +89,51 @@ frontend/
 
 ---
 
-## Phase 1: Project Setup
+## Phase 1: Project Setup（项目搭建）
 
 ### Task 1: Next.js Scaffolding
 
-**Files:**
-- Create: `frontend/` (via create-next-app)
-- Create: `frontend/.env.local.example`
-- Modify: `frontend/next.config.js`
+**文件：**
+- 创建：`frontend/`（通过 create-next-app）
+- 创建：`frontend/.env.local.example`
+- 修改：`frontend/next.config.js`
 
-- [ ] **Step 1: Scaffold Next.js project**
+- [ ] **步骤 1：搭建 Next.js 项目**
 
-Run from `d:\projects\unowire`:
+从 `d:\projects\unowire` 运行：
 ```bash
 npx create-next-app@latest frontend --typescript --tailwind --app --no-src-dir --import-alias "@/*" --eslint --use-npm
 ```
 
-Answer any interactive prompts with defaults (TypeScript Yes, Tailwind Yes, ESLint Yes, App Router Yes, src/ No, import alias `@/*`).
+所有交互式提示均使用默认值（TypeScript Yes、Tailwind Yes、ESLint Yes、App Router Yes、src/ No、import alias `@/*`）。
 
-- [ ] **Step 2: Install shadcn/ui**
+- [ ] **步骤 2：安装 shadcn/ui**
 
 ```bash
 cd frontend
 npx shadcn@latest init -d
 ```
 
-- [ ] **Step 3: Add shadcn/ui components**
+- [ ] **步骤 3：添加 shadcn/ui 组件**
 
 ```bash
 npx shadcn@latest add button card input label select badge separator
 ```
 
-- [ ] **Step 4: Create .env.local.example**
+- [ ] **步骤 4：创建 .env.local.example**
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://www.unowire.com
 NEXT_PUBLIC_API_MODE=mock
 ```
 
-- [ ] **Step 5: Create .env.local (copy for dev)**
+- [ ] **步骤 5：创建 .env.local（开发用副本）**
 
 ```bash
 copy .env.local.example .env.local
 ```
 
-- [ ] **Step 6: Update next.config.js**
+- [ ] **步骤 6：更新 next.config.js**
 
 ```javascript
 /** @type {import('next').NextConfig} */
@@ -148,16 +148,16 @@ const nextConfig = {
 module.exports = nextConfig;
 ```
 
-- [ ] **Step 7: Verify dev server starts**
+- [ ] **步骤 7：验证开发服务器启动**
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Expected: `http://localhost:3000` loads the default Next.js starter page without errors.
+预期：`http://localhost:3000` 能正常加载默认的 Next.js 启动页面，无错误。
 
-- [ ] **Step 8: Commit**
+- [ ] **步骤 8：提交**
 
 ```bash
 cd d:\projects\unowire
@@ -169,13 +169,13 @@ git commit -m "feat: scaffold Next.js 14 frontend with Tailwind and shadcn/ui"
 
 ### Task 2: Mock Data Files
 
-**Files:**
-- Create: `frontend/data/manufacturers.json`
-- Create: `frontend/data/cables.json`
-- Create: `frontend/data/equipments.json`
-- Create: `frontend/data/match-rules.json`
+**文件：**
+- 创建：`frontend/data/manufacturers.json`
+- 创建：`frontend/data/cables.json`
+- 创建：`frontend/data/equipments.json`
+- 创建：`frontend/data/match-rules.json`
 
-- [ ] **Step 1: Create manufacturers.json**
+- [ ] **步骤 1：创建 manufacturers.json**
 
 ```json
 [
@@ -227,7 +227,7 @@ git commit -m "feat: scaffold Next.js 14 frontend with Tailwind and shadcn/ui"
 ]
 ```
 
-- [ ] **Step 2: Create cables.json**
+- [ ] **步骤 2：创建 cables.json**
 
 ```json
 [
@@ -444,7 +444,7 @@ git commit -m "feat: scaffold Next.js 14 frontend with Tailwind and shadcn/ui"
 ]
 ```
 
-- [ ] **Step 3: Create equipments.json**
+- [ ] **步骤 3：创建 equipments.json**
 
 ```json
 [
@@ -595,7 +595,7 @@ git commit -m "feat: scaffold Next.js 14 frontend with Tailwind and shadcn/ui"
 ]
 ```
 
-- [ ] **Step 4: Create match-rules.json**
+- [ ] **步骤 4：创建 match-rules.json**
 
 ```json
 [
@@ -614,7 +614,7 @@ git commit -m "feat: scaffold Next.js 14 frontend with Tailwind and shadcn/ui"
 ]
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 cd d:\projects\unowire
@@ -626,14 +626,14 @@ git commit -m "feat: add mock JSON data (manufacturers, cables, equipments, matc
 
 ### Task 3: Core Library Files (Types, Utils, SEO, API)
 
-**Files:**
-- Create: `frontend/lib/types.ts`
-- Create: `frontend/lib/utils.ts`
-- Create: `frontend/lib/seo.ts`
-- Create: `frontend/lib/api.ts`
-- Create: `frontend/lib/mock-match.ts`
+**文件：**
+- 创建：`frontend/lib/types.ts`
+- 创建：`frontend/lib/utils.ts`
+- 创建：`frontend/lib/seo.ts`
+- 创建：`frontend/lib/api.ts`
+- 创建：`frontend/lib/mock-match.ts`
 
-- [ ] **Step 1: Create lib/types.ts**
+- [ ] **步骤 1：创建 lib/types.ts**
 
 ```typescript
 export interface Manufacturer {
@@ -772,7 +772,7 @@ export interface EquipmentListResponse {
 }
 ```
 
-- [ ] **Step 2: Create lib/utils.ts**
+- [ ] **步骤 2：创建 lib/utils.ts**
 
 ```typescript
 export function cn(...classes: (string | undefined | false | null)[]) {
@@ -827,7 +827,7 @@ export function formatJacket(jacket: string): string {
 }
 ```
 
-- [ ] **Step 3: Create lib/seo.ts**
+- [ ] **步骤 3：创建 lib/seo.ts**
 
 ```typescript
 import type { Metadata } from 'next';
@@ -944,9 +944,9 @@ export function buildBreadcrumbJsonLd(items: { name: string; url: string }[]) {
 }
 ```
 
-- [ ] **Step 4: Create lib/api.ts (mock data access layer)**
+- [ ] **步骤 4：创建 lib/api.ts（mock 数据访问层）**
 
-This is the single file to swap when backend is ready. All page components import from here.
+这是后端就绪后唯一需要替换的文件。所有页面组件均从此处导入数据。
 
 ```typescript
 import type {
@@ -1114,9 +1114,9 @@ export const api = {
 };
 ```
 
-- [ ] **Step 5: Create lib/mock-match.ts (client-side mock matching engine)**
+- [ ] **步骤 5：创建 lib/mock-match.ts（客户端 mock 匹配引擎）**
 
-Implements the same 3-phase algorithm as the backend spec (section 4.3). Runs entirely in the browser.
+实现与后端规范（4.3 节）相同的 3 阶段算法。完全在浏览器中运行。
 
 ```typescript
 import type {
@@ -1284,7 +1284,7 @@ export function runMatch(params: {
 }
 ```
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 cd d:\projects\unowire
@@ -1294,18 +1294,18 @@ git commit -m "feat: add core lib files (types, utils, seo, mock API, mock match
 
 ---
 
-## Phase 2: Layout & Shared Components
+## Phase 2: Layout & Shared Components（布局与共享组件）
 
 ### Task 4: Root Layout, Nav, Footer
 
-**Files:**
-- Create: `frontend/components/layout/Container.tsx`
-- Create: `frontend/components/layout/Nav.tsx`
-- Create: `frontend/components/layout/Footer.tsx`
-- Modify: `frontend/app/layout.tsx`
-- Modify: `frontend/app/globals.css` (ensure container styles)
+**文件：**
+- 创建：`frontend/components/layout/Container.tsx`
+- 创建：`frontend/components/layout/Nav.tsx`
+- 创建：`frontend/components/layout/Footer.tsx`
+- 修改：`frontend/app/layout.tsx`
+- 修改：`frontend/app/globals.css`（确保 container 样式）
 
-- [ ] **Step 1: Create Container.tsx**
+- [ ] **步骤 1：创建 Container.tsx**
 
 ```tsx
 import { cn } from '@/lib/utils';
@@ -1319,7 +1319,7 @@ export function Container({ children, className }: { children: React.ReactNode; 
 }
 ```
 
-- [ ] **Step 2: Create Nav.tsx**
+- [ ] **步骤 2：创建 Nav.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -1351,7 +1351,7 @@ export function Nav() {
 }
 ```
 
-- [ ] **Step 3: Create Footer.tsx**
+- [ ] **步骤 3：创建 Footer.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -1390,7 +1390,7 @@ export function Footer() {
 }
 ```
 
-- [ ] **Step 4: Update app/layout.tsx**
+- [ ] **步骤 4：更新 app/layout.tsx**
 
 ```tsx
 import type { Metadata } from 'next';
@@ -1420,14 +1420,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-- [ ] **Step 5: Verify dev server and commit**
+- [ ] **步骤 5：验证开发服务器并提交**
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Visit `http://localhost:3000` — should show Nav + Footer with default page content.
+访问 `http://localhost:3000` —— 应显示 Nav 和 Footer 以及默认页面内容。
 
 ```bash
 cd d:\projects\unowire
@@ -1439,15 +1439,15 @@ git commit -m "feat: add root layout with Nav and Footer"
 
 ### Task 5: Shared Components (Breadcrumbs, Pagination, SearchBox, ScoreBar, JsonLd)
 
-**Files:**
-- Create: `frontend/components/layout/Breadcrumbs.tsx`
-- Create: `frontend/components/seo/JsonLd.tsx`
-- Create: `frontend/components/shared/Pagination.tsx`
-- Create: `frontend/components/shared/SearchBox.tsx`
-- Create: `frontend/components/shared/ScoreBar.tsx`
-- Create: `frontend/app/not-found.tsx`
+**文件：**
+- 创建：`frontend/components/layout/Breadcrumbs.tsx`
+- 创建：`frontend/components/seo/JsonLd.tsx`
+- 创建：`frontend/components/shared/Pagination.tsx`
+- 创建：`frontend/components/shared/SearchBox.tsx`
+- 创建：`frontend/components/shared/ScoreBar.tsx`
+- 创建：`frontend/app/not-found.tsx`
 
-- [ ] **Step 1: Create JsonLd.tsx**
+- [ ] **步骤 1：创建 JsonLd.tsx**
 
 ```tsx
 export function JsonLd({ data }: { data: object | object[] }) {
@@ -1461,7 +1461,7 @@ export function JsonLd({ data }: { data: object | object[] }) {
 }
 ```
 
-- [ ] **Step 2: Create Breadcrumbs.tsx**
+- [ ] **步骤 2：创建 Breadcrumbs.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -1486,7 +1486,7 @@ export function Breadcrumbs({ items }: { items: { name: string; url?: string }[]
 }
 ```
 
-- [ ] **Step 3: Create Pagination.tsx**
+- [ ] **步骤 3：创建 Pagination.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -1551,7 +1551,7 @@ export function Pagination({
 }
 ```
 
-- [ ] **Step 4: Create SearchBox.tsx (client component)**
+- [ ] **步骤 4：创建 SearchBox.tsx（客户端组件）**
 
 ```tsx
 'use client';
@@ -1594,7 +1594,7 @@ export function SearchBox({
 }
 ```
 
-- [ ] **Step 5: Create ScoreBar.tsx**
+- [ ] **步骤 5：创建 ScoreBar.tsx**
 
 ```tsx
 export function ScoreBar({ score }: { score: number }) {
@@ -1611,7 +1611,7 @@ export function ScoreBar({ score }: { score: number }) {
 }
 ```
 
-- [ ] **Step 6: Create not-found.tsx**
+- [ ] **步骤 6：创建 not-found.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -1631,7 +1631,7 @@ export default function NotFound() {
 }
 ```
 
-- [ ] **Step 7: Commit**
+- [ ] **步骤 7：提交**
 
 ```bash
 cd d:\projects\unowire
@@ -1641,14 +1641,14 @@ git commit -m "feat: add shared components (Breadcrumbs, Pagination, SearchBox, 
 
 ---
 
-## Phase 3: Home & Directory Pages
+## Phase 3: Home & Directory Pages（首页与目录页）
 
 ### Task 6: Home Page
 
-**Files:**
-- Create: `frontend/app/page.tsx`
+**文件：**
+- 创建：`frontend/app/page.tsx`
 
-- [ ] **Step 1: Create home page**
+- [ ] **步骤 1：创建首页**
 
 ```tsx
 import Link from 'next/link';
@@ -1794,9 +1794,9 @@ export default function HomePage() {
 }
 ```
 
-- [ ] **Step 2: Verify and commit**
+- [ ] **步骤 2：验证并提交**
 
-Visit `http://localhost:3000` — should show full home page with hero, stats, categories, brands, how-it-works.
+访问 `http://localhost:3000` —— 应显示完整的首页，包含 hero 区、统计数据、分类、品牌、使用说明等模块。
 
 ```bash
 cd d:\projects\unowire
@@ -1808,12 +1808,12 @@ git commit -m "feat: add home page (directory portal with search, stats, categor
 
 ### Task 7: Cable Directory List Page
 
-**Files:**
-- Create: `frontend/components/cable/CableCard.tsx`
-- Create: `frontend/components/cable/CableFilters.tsx`
-- Create: `frontend/app/cables/page.tsx`
+**文件：**
+- 创建：`frontend/components/cable/CableCard.tsx`
+- 创建：`frontend/components/cable/CableFilters.tsx`
+- 创建：`frontend/app/cables/page.tsx`
 
-- [ ] **Step 1: Create CableCard.tsx**
+- [ ] **步骤 1：创建 CableCard.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -1851,7 +1851,7 @@ export function CableCard({ cable }: { cable: CableListItem }) {
 }
 ```
 
-- [ ] **Step 2: Create CableFilters.tsx (client component)**
+- [ ] **步骤 2：创建 CableFilters.tsx（客户端组件）**
 
 ```tsx
 'use client';
@@ -2016,7 +2016,7 @@ export function CableFilters({ brands }: { brands: { name: string; slug: string 
 }
 ```
 
-- [ ] **Step 3: Create cables list page (server component)**
+- [ ] **步骤 3：创建 cables 列表页（服务端组件）**
 
 ```tsx
 import type { Metadata } from 'next';
@@ -2112,9 +2112,9 @@ export default function CablesPage({ searchParams }: { searchParams: SearchParam
 }
 ```
 
-- [ ] **Step 4: Verify and commit**
+- [ ] **步骤 4：验证并提交**
 
-Visit `http://localhost:3000/cables` — should show list of 10 cables, filters on left, search box, pagination.
+访问 `http://localhost:3000/cables` —— 应显示 10 条线缆列表，左侧有筛选器、搜索框、分页。
 
 ```bash
 cd d:\projects\unowire
@@ -2126,11 +2126,11 @@ git commit -m "feat: add cable directory list page with filters and pagination"
 
 ### Task 8: Equipment Directory List Page
 
-**Files:**
-- Create: `frontend/components/equipment/EquipmentCard.tsx`
-- Create: `frontend/app/equipments/page.tsx`
+**文件：**
+- 创建：`frontend/components/equipment/EquipmentCard.tsx`
+- 创建：`frontend/app/equipments/page.tsx`
 
-- [ ] **Step 1: Create EquipmentCard.tsx**
+- [ ] **步骤 1：创建 EquipmentCard.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -2160,7 +2160,7 @@ export function EquipmentCard({ equipment }: { equipment: EquipmentListItem }) {
 }
 ```
 
-- [ ] **Step 2: Create equipments list page**
+- [ ] **步骤 2：创建 equipments 列表页**
 
 ```tsx
 import type { Metadata } from 'next';
@@ -2249,9 +2249,9 @@ export default function EquipmentsPage({ searchParams }: { searchParams: SearchP
 }
 ```
 
-- [ ] **Step 3: Verify and commit**
+- [ ] **步骤 3：验证并提交**
 
-Visit `http://localhost:3000/equipments` — should show 6 equipment items with type filter chips.
+访问 `http://localhost:3000/equipments` —— 应显示 6 条设备，并带有类型筛选标签。
 
 ```bash
 cd d:\projects\unowire
@@ -2263,11 +2263,11 @@ git commit -m "feat: add equipment directory list page with type filter"
 
 ### Task 9: Manufacturer Directory List Page
 
-**Files:**
-- Create: `frontend/components/manufacturer/ManufacturerCard.tsx`
-- Create: `frontend/app/manufacturers/page.tsx`
+**文件：**
+- 创建：`frontend/components/manufacturer/ManufacturerCard.tsx`
+- 创建：`frontend/app/manufacturers/page.tsx`
 
-- [ ] **Step 1: Create ManufacturerCard.tsx**
+- [ ] **步骤 1：创建 ManufacturerCard.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -2294,7 +2294,7 @@ export function ManufacturerCard({ manufacturer }: { manufacturer: Manufacturer 
 }
 ```
 
-- [ ] **Step 2: Create manufacturers list page**
+- [ ] **步骤 2：创建 manufacturers 列表页**
 
 ```tsx
 import type { Metadata } from 'next';
@@ -2350,9 +2350,9 @@ export default function ManufacturersPage() {
 }
 ```
 
-- [ ] **Step 3: Verify and commit**
+- [ ] **步骤 3：验证并提交**
 
-Visit `http://localhost:3000/manufacturers` — should show 5 manufacturers split by type.
+访问 `http://localhost:3000/manufacturers` —— 应显示 5 家制造商，按类型分组。
 
 ```bash
 cd d:\projects\unowire
@@ -2362,15 +2362,15 @@ git commit -m "feat: add manufacturer directory list page"
 
 ---
 
-## Phase 4: Detail Pages (ISR + SEO)
+## Phase 4: Detail Pages (ISR + SEO)（详情页）
 
 ### Task 10: Cable Detail Page
 
-**Files:**
-- Create: `frontend/components/cable/CableSpecTable.tsx`
-- Create: `frontend/app/cables/[brand_slug]/[slug]/page.tsx`
+**文件：**
+- 创建：`frontend/components/cable/CableSpecTable.tsx`
+- 创建：`frontend/app/cables/[brand_slug]/[slug]/page.tsx`
 
-- [ ] **Step 1: Create CableSpecTable.tsx**
+- [ ] **步骤 1：创建 CableSpecTable.tsx**
 
 ```tsx
 import type { Cable } from '@/lib/types';
@@ -2407,7 +2407,7 @@ export function CableSpecTable({ cable }: { cable: Cable }) {
 }
 ```
 
-- [ ] **Step 2: Create cable detail page (ISR)**
+- [ ] **步骤 2：创建 cable 详情页（ISR）**
 
 ```tsx
 import { notFound } from 'next/navigation';
@@ -2553,9 +2553,9 @@ export default function CableDetailPage({
 }
 ```
 
-- [ ] **Step 3: Verify and commit**
+- [ ] **步骤 3：验证并提交**
 
-Visit `http://localhost:3000/cables/hitachi-cable/ul1007-awg24` — should show full spec table, description, match CTA, related cables. View page source — verify JSON-LD scripts present.
+访问 `http://localhost:3000/cables/hitachi-cable/ul1007-awg24` —— 应显示完整的规格表、描述、匹配 CTA、相关线缆。查看页面源码——验证 JSON-LD 脚本是否存在。
 
 ```bash
 cd d:\projects\unowire
@@ -2567,11 +2567,11 @@ git commit -m "feat: add cable detail page with ISR, SEO metadata, JSON-LD, rela
 
 ### Task 11: Equipment Detail Page
 
-**Files:**
-- Create: `frontend/components/equipment/EquipmentSpecTable.tsx`
-- Create: `frontend/app/equipments/[brand_slug]/[slug]/page.tsx`
+**文件：**
+- 创建：`frontend/components/equipment/EquipmentSpecTable.tsx`
+- 创建：`frontend/app/equipments/[brand_slug]/[slug]/page.tsx`
 
-- [ ] **Step 1: Create EquipmentSpecTable.tsx**
+- [ ] **步骤 1：创建 EquipmentSpecTable.tsx**
 
 ```tsx
 import type { Equipment } from '@/lib/types';
@@ -2606,7 +2606,7 @@ export function EquipmentSpecTable({ equipment }: { equipment: Equipment }) {
 }
 ```
 
-- [ ] **Step 2: Create equipment detail page (ISR)**
+- [ ] **步骤 2：创建 equipment 详情页（ISR）**
 
 ```tsx
 import { notFound } from 'next/navigation';
@@ -2737,17 +2737,17 @@ export default function EquipmentDetailPage({
 }
 ```
 
-Note: `formatEquipmentType` is imported from `@/lib/utils` which was created in Task 3.
+注意：`formatEquipmentType` 从 `@/lib/utils` 导入，该文件在 Task 3 中创建。
 
-Add missing import to the top of the file:
+在文件顶部添加缺失的 import：
 
 ```tsx
 import { formatEquipmentType } from '@/lib/utils';
 ```
 
-- [ ] **Step 3: Verify and commit**
+- [ ] **步骤 3：验证并提交**
 
-Visit `http://localhost:3000/equipments/kmv/cs-800` — should show full specs, description, manufacturer link, similar equipment.
+访问 `http://localhost:3000/equipments/kmv/cs-800` —— 应显示完整规格、描述、制造商链接、相似设备。
 
 ```bash
 cd d:\projects\unowire
@@ -2759,10 +2759,10 @@ git commit -m "feat: add equipment detail page with ISR, SEO, structured data"
 
 ### Task 12: Manufacturer Detail Page
 
-**Files:**
-- Create: `frontend/app/manufacturers/[slug]/page.tsx`
+**文件：**
+- 创建：`frontend/app/manufacturers/[slug]/page.tsx`
 
-- [ ] **Step 1: Create manufacturer detail page (ISR)**
+- [ ] **步骤 1：创建 manufacturer 详情页（ISR）**
 
 ```tsx
 import { notFound } from 'next/navigation';
@@ -2886,9 +2886,9 @@ export default function ManufacturerDetailPage({
 }
 ```
 
-- [ ] **Step 2: Verify and commit**
+- [ ] **步骤 2：验证并提交**
 
-Visit `http://localhost:3000/manufacturers/kmv` — should show manufacturer info + their equipment list.
+访问 `http://localhost:3000/manufacturers/kmv` —— 应显示制造商信息及其设备列表。
 
 ```bash
 cd d:\projects\unowire
@@ -2898,17 +2898,17 @@ git commit -m "feat: add manufacturer detail page with ISR, SEO, cable/equipment
 
 ---
 
-## Phase 5: Match Tool
+## Phase 5: Match Tool（匹配工具）
 
 ### Task 13: Match Page
 
-**Files:**
-- Create: `frontend/components/match/RuleBadge.tsx`
-- Create: `frontend/components/match/MatchResultCard.tsx`
-- Create: `frontend/components/match/MatchForm.tsx`
-- Create: `frontend/app/match/page.tsx`
+**文件：**
+- 创建：`frontend/components/match/RuleBadge.tsx`
+- 创建：`frontend/components/match/MatchResultCard.tsx`
+- 创建：`frontend/components/match/MatchForm.tsx`
+- 创建：`frontend/app/match/page.tsx`
 
-- [ ] **Step 1: Create RuleBadge.tsx**
+- [ ] **步骤 1：创建 RuleBadge.tsx**
 
 ```tsx
 export function RuleBadge({ passed, required, skipped }: { passed: boolean; required: boolean; skipped: boolean }) {
@@ -2930,7 +2930,7 @@ export function RuleBadge({ passed, required, skipped }: { passed: boolean; requ
 }
 ```
 
-- [ ] **Step 2: Create MatchResultCard.tsx**
+- [ ] **步骤 2：创建 MatchResultCard.tsx**
 
 ```tsx
 import Link from 'next/link';
@@ -2995,9 +2995,9 @@ export function MatchResultCard({ result, rank }: { result: MatchResultItem; ran
 }
 ```
 
-- [ ] **Step 3: Create MatchForm.tsx (client component)**
+- [ ] **步骤 3：创建 MatchForm.tsx（客户端组件）**
 
-This is the main interactive component. It handles both entry modes (cable_id from URL, or direct param input) and calls the mock match engine.
+这是主要的交互组件。它处理两种入口模式（通过 URL 传入 cable_id，或直接输入参数），并调用 mock 匹配引擎。
 
 ```tsx
 'use client';
@@ -3251,7 +3251,7 @@ export function MatchForm() {
 }
 ```
 
-- [ ] **Step 4: Create match page (noindex)**
+- [ ] **步骤 4：创建 match 页面（noindex）**
 
 ```tsx
 import type { Metadata } from 'next';
@@ -3285,12 +3285,12 @@ export default function MatchPage() {
 }
 ```
 
-- [ ] **Step 5: Verify both entry modes**
+- [ ] **步骤 5：验证两种入口模式**
 
-1. Direct: Visit `http://localhost:3000/match` → fill params → click Match → see results
-2. From cable: Visit `http://localhost:3000/cables/hitachi-cable/ul1007-awg24` → click "Match Equipment →" → should auto-fill and show results
+1. 直接模式：访问 `http://localhost:3000/match` → 填写参数 → 点击 Match → 查看结果
+2. 从线缆进入：访问 `http://localhost:3000/cables/hitachi-cable/ul1007-awg24` → 点击 "Match Equipment →" → 应自动填充并显示结果
 
-- [ ] **Step 6: Commit**
+- [ ] **步骤 6：提交**
 
 ```bash
 cd d:\projects\unowire
@@ -3300,14 +3300,14 @@ git commit -m "feat: add match page with dual entry (cable_id + direct input), n
 
 ---
 
-## Phase 6: SEO Infrastructure
+## Phase 6: SEO Infrastructure（SEO 基础设施）
 
 ### Task 14: Sitemap
 
-**Files:**
-- Create: `frontend/app/sitemap.ts`
+**文件：**
+- 创建：`frontend/app/sitemap.ts`
 
-- [ ] **Step 1: Create sitemap.ts**
+- [ ] **步骤 1：创建 sitemap.ts**
 
 ```typescript
 import type { MetadataRoute } from 'next';
@@ -3349,9 +3349,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 }
 ```
 
-- [ ] **Step 2: Verify and commit**
+- [ ] **步骤 2：验证并提交**
 
-Visit `http://localhost:3000/sitemap.xml` — should show XML with all URLs.
+访问 `http://localhost:3000/sitemap.xml` —— 应显示包含所有 URL 的 XML。
 
 ```bash
 cd d:\projects\unowire
@@ -3363,10 +3363,10 @@ git commit -m "feat: add dynamic sitemap.xml route"
 
 ### Task 15: Robots.txt
 
-**Files:**
-- Create: `frontend/app/robots.ts`
+**文件：**
+- 创建：`frontend/app/robots.ts`
 
-- [ ] **Step 1: Create robots.ts**
+- [ ] **步骤 1：创建 robots.ts**
 
 ```typescript
 import type { MetadataRoute } from 'next';
@@ -3387,9 +3387,9 @@ export default function robots(): MetadataRoute.Robots {
 }
 ```
 
-- [ ] **Step 2: Verify and commit**
+- [ ] **步骤 2：验证并提交**
 
-Visit `http://localhost:3000/robots.txt` — should show rules + sitemap URL.
+访问 `http://localhost:3000/robots.txt` —— 应显示规则和 sitemap URL。
 
 ```bash
 cd d:\projects\unowire
@@ -3399,103 +3399,103 @@ git commit -m "feat: add robots.txt route (disallow /match and /api/)"
 
 ---
 
-## Phase 7: Production Build & Verification
+## Phase 7: Production Build & Verification（生产构建与验证）
 
 ### Task 16: Build Verification
 
-**Files:**
-- Modify: `frontend/app/globals.css` (ensure no Tailwind purge issues)
-- No new files
+**文件：**
+- 修改：`frontend/app/globals.css`（确保无 Tailwind purge 问题）
+- 无新文件
 
-- [ ] **Step 1: Run production build**
+- [ ] **步骤 1：运行生产构建**
 
 ```bash
 cd frontend
 npm run build
 ```
 
-Expected: Build completes without errors. All pages pre-rendered:
-- `○ (Static)` for home, manufacturers list
-- `● (ISR)` for cable/equipment/manufacturer detail pages
-- `ƒ (Dynamic)` for cables/equipments list (search params)
+预期：构建无错误完成。所有页面预渲染：
+- `○ (Static)` 用于首页、制造商列表
+- `● (ISR)` 用于线缆/设备/制造商详情页
+- `ƒ (Dynamic)` 用于 cables/equipments 列表（含搜索参数）
 
-If build fails, check:
-- TypeScript errors: fix any type mismatches
-- Missing imports: ensure all `@/lib/` and `@/components/` imports resolve
-- shadcn/ui: ensure all added components exist in `components/ui/`
+如果构建失败，请检查：
+- TypeScript 错误：修复任何类型不匹配
+- 缺失的 import：确保所有 `@/lib/` 和 `@/components/` import 都能正确解析
+- shadcn/ui：确保所有添加的组件都存在于 `components/ui/`
 
-- [ ] **Step 2: Run production server**
+- [ ] **步骤 2：运行生产服务器**
 
 ```bash
 cd frontend
 npm run start
 ```
 
-Visit `http://localhost:3000` — full site should work.
+访问 `http://localhost:3000` —— 整站应正常运行。
 
-- [ ] **Step 3: Manual acceptance checklist**
+- [ ] **步骤 3：手动验收清单**
 
-Verify each item:
-1. Home `/` — hero, search, stats, categories, brands, how-it-works render
-2. `/cables` — list shows 10 cables, filters work (try AWG 24, brand hitachi-cable)
-3. `/cables/hitachi-cable/ul1007-awg24` — full spec table, description, Match CTA, related cables
-4. View page source on cable detail — verify `<title>`, `<meta name="description">`, `<link rel="canonical">`, JSON-LD `<script type="application/ld+json">` present
-5. `/equipments` — list shows 6 equipment, type filter chips work
-6. `/equipments/kmv/cs-800` — full specs, description, manufacturer link, similar equipment
-7. `/manufacturers` — 5 manufacturers split by type
-8. `/manufacturers/kmv` — manufacturer info + equipment list
-9. `/match` direct mode — fill params, click Match, see results with scores
-10. `/match?cable_id=cable-1` — auto-fills params and shows results
-11. `/sitemap.xml` — valid XML with all detail page URLs
-12. `/robots.txt` — disallows /match and /api/, points to sitemap
-13. Mobile responsive — resize browser to mobile width, verify sidebar collapses, cards stack
+逐项验证：
+1. 首页 `/` —— hero 区、搜索、统计数据、分类、品牌、使用说明等模块正常渲染
+2. `/cables` —— 列表显示 10 条线缆，筛选器可用（试试 AWG 24、品牌 hitachi-cable）
+3. `/cables/hitachi-cable/ul1007-awg24` —— 完整规格表、描述、Match CTA、相关线缆
+4. 在线缆详情页查看页面源码 —— 验证 `<title>`、`<meta name="description">`、`<link rel="canonical">`、JSON-LD `<script type="application/ld+json">` 是否存在
+5. `/equipments` —— 列表显示 6 条设备，类型筛选标签可用
+6. `/equipments/kmv/cs-800` —— 完整规格、描述、制造商链接、相似设备
+7. `/manufacturers` —— 5 家制造商按类型分组
+8. `/manufacturers/kmv` —— 制造商信息及设备列表
+9. `/match` 直接模式 —— 填写参数，点击 Match，查看带评分的结果
+10. `/match?cable_id=cable-1` —— 自动填充参数并显示结果
+11. `/sitemap.xml` —— 有效的 XML，包含所有详情页 URL
+12. `/robots.txt` —— 禁止 /match 和 /api/，并指向 sitemap
+13. 移动端响应式 —— 将浏览器调整为移动端宽度，验证侧边栏折叠、卡片堆叠效果
 
-- [ ] **Step 4: Commit any fixes**
+- [ ] **步骤 4：提交修复（如有）**
 
-If any fixes were needed during verification:
+如果在验证过程中需要任何修复：
 ```bash
 git add -A
 git commit -m "fix: address build/verification issues"
 ```
 
-- [ ] **Step 5: Final commit (if not already committed)**
+- [ ] **步骤 5：最终提交（如尚未提交）**
 
-The frontend UI implementation is complete. Tag it:
+前端 UI 实现已完成。打标签：
 ```bash
 git tag frontend-ui-complete
 ```
 
 ---
 
-## Self-Review Summary
+## 自检总结（Self-Review Summary）
 
-### Spec Coverage
-- ✅ Section 1 (Overview): All 4 goals covered — cable search, equipment match, top-N, MVP scope
-- ✅ Section 2 (Architecture): Next.js frontend standalone with mock data; swap path documented in api.ts
-- ✅ Section 3 (Data Model): All fields from cables/equipments/manufacturers/match_rules represented in JSON + types
-- ✅ Section 4 (Matching Engine): mock-match.ts implements 3-phase algorithm (filter required → score → top-N) per spec 4.3
-- ✅ Section 5 (API Design): Mock api.ts covers all endpoints (list, by-slug, sitemap, match); backend swap is one file
-- ✅ Section 6 (Frontend Pages): All 10 routes built (home, 3 list pages, 3 detail pages, match, sitemap, robots, 404)
-- ✅ Section 6.8 (SEO Infrastructure): sitemap.ts, robots.ts, generateMetadata, JSON-LD on all detail pages
-- ✅ Section 6.9 (Design Decisions): Yellow pages form, pseudo-static URLs, ISR, noindex on /match, top-N backend-configured (mock reads from config)
+### 规范覆盖（Spec Coverage）
+- ✅ Section 1（概览）：4 个目标全部覆盖——线缆搜索、设备匹配、top-N、MVP 范围
+- ✅ Section 2（架构）：Next.js 前端独立运行，使用 mock 数据；切换路径在 api.ts 中有文档说明
+- ✅ Section 3（数据模型）：cables/equipments/manufacturers/match_rules 的所有字段均在 JSON + types 中体现
+- ✅ Section 4（匹配引擎）：mock-match.ts 实现了 3 阶段算法（过滤必需规则 → 评分 → top-N），符合规范 4.3
+- ✅ Section 5（API 设计）：Mock api.ts 覆盖所有端点（list、by-slug、sitemap、match）；后端切换只需替换一个文件
+- ✅ Section 6（前端页面）：全部 10 条路由已构建（首页、3 个列表页、3 个详情页、match、sitemap、robots、404）
+- ✅ Section 6.8（SEO 基础设施）：sitemap.ts、robots.ts、generateMetadata、所有详情页的 JSON-LD
+- ✅ Section 6.9（设计决策）：黄页形式、伪静态 URL、ISR、/match 设置 noindex、top-N 由后端配置（mock 从 config 读取）
 
-### Critical Requirements Verified
-- ✅ Pseudo-static URLs: `/cables/[brand_slug]/[slug]` etc.
-- ✅ Yellow pages directory form: list pages with filters, detail pages with rich content
-- ✅ Google indexing focus: sitemap, robots, JSON-LD, meta tags, canonical URLs
-- ✅ Dynamic pages for content generation: ISR with generateStaticParams
-- ✅ Match page noindex
-- ✅ Mock data independent of backend
-- ✅ cut_length is top-level param (not in cable_params / CableMatchInput)
-- ✅ Top N from config (not user-tunable in UI)
+### 关键需求验证（Critical Requirements Verified）
+- ✅ 伪静态 URL：`/cables/[brand_slug]/[slug]` 等
+- ✅ 黄页目录形式：带筛选器的列表页、内容丰富的详情页
+- ✅ Google 收录优先：sitemap、robots、JSON-LD、meta 标签、canonical URL
+- ✅ 用于内容生成的动态页面：通过 generateStaticParams 实现 ISR
+- ✅ Match 页面 noindex
+- ✅ Mock 数据独立于后端
+- ✅ cut_length 为顶层参数（不在 cable_params / CableMatchInput 中）
+- ✅ Top N 来自配置（UI 中不可由用户调整）
 
-### Placeholder Scan
-- No TBD/TODO/"similar to above"/"fill in details" found
-- All code blocks contain complete, runnable code
+### 占位符扫描（Placeholder Scan）
+- 未发现 TBD/TODO/"similar to above"/"fill in details"
+- 所有代码块均包含完整、可运行的代码
 
-### Type Consistency
-- `Cable`, `Equipment`, `Manufacturer`, `MatchRule`, `MatchResultItem`, `MatchResponse` defined in types.ts, used consistently across all components
-- `api` object methods match usage in all pages
-- `runMatch` signature in mock-match.ts matches usage in MatchForm.tsx
-- SEO helpers (`generateCableMetadata`, `buildCableJsonLd`, etc.) defined in seo.ts, used in detail pages
-- Utility functions (`formatCableUrl`, `formatEquipmentType`, etc.) defined in utils.ts, used consistently
+### 类型一致性（Type Consistency）
+- `Cable`、`Equipment`、`Manufacturer`、`MatchRule`、`MatchResultItem`、`MatchResponse` 在 types.ts 中定义，在所有组件中一致使用
+- `api` 对象方法与所有页面的使用方式匹配
+- `runMatch` 签名在 mock-match.ts 中与 MatchForm.tsx 中的使用匹配
+- SEO 辅助函数（`generateCableMetadata`、`buildCableJsonLd` 等）在 seo.ts 中定义，在详情页中使用
+- 工具函数（`formatCableUrl`、`formatEquipmentType` 等）在 utils.ts 中定义，一致使用
