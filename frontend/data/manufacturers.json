@@ -1,0 +1,47 @@
+[
+  {
+    "id": "mfr-1",
+    "name": "Hitachi Cable",
+    "slug": "hitachi-cable",
+    "type": "cable_manufacturer",
+    "country": "Japan",
+    "website": "https://www.hitachi-cable.com",
+    "description": "Leading Japanese manufacturer of wire and cable products for automotive, industrial, and electronics applications."
+  },
+  {
+    "id": "mfr-2",
+    "name": "Sumitomo Electric",
+    "slug": "sumitomo-electric",
+    "type": "cable_manufacturer",
+    "country": "Japan",
+    "website": "https://global-sei.com",
+    "description": "Global wire and cable manufacturer specializing in automotive and industrial wiring solutions."
+  },
+  {
+    "id": "mfr-3",
+    "name": "KMV",
+    "slug": "kmv",
+    "type": "equipment_manufacturer",
+    "country": "Japan",
+    "website": "https://www.kmv.co.jp",
+    "description": "Wire harness processing equipment manufacturer offering stripping and cutting machines."
+  },
+  {
+    "id": "mfr-4",
+    "name": "Komax",
+    "slug": "komax",
+    "type": "equipment_manufacturer",
+    "country": "Switzerland",
+    "website": "https://www.komaxgroup.com",
+    "description": "Swiss manufacturer of wire processing machines with global presence."
+  },
+  {
+    "id": "mfr-5",
+    "name": "JST Mfg",
+    "slug": "jst-mfg",
+    "type": "equipment_manufacturer",
+    "country": "Japan",
+    "website": "https://www.jst-mfg.com",
+    "description": "Connector and terminal manufacturer also producing wire processing equipment."
+  }
+]
