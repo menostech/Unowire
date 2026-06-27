@@ -106,12 +106,15 @@ PostgreSQL schema. All field names in English.
 |-------|------|-------|
 | id | UUID PK | |
 | name | varchar | Manufacturer name |
+| slug | varchar UNIQUE | URL slug, e.g. "hitachi-cable" |
 | type | enum | `cable_manufacturer` / `equipment_manufacturer` |
 | country | varchar | Country |
 | website | varchar | Official website |
 | description | text | Brief intro |
 | created_at | timestamp | |
 | updated_at | timestamp | |
+
+**Indexes:** `slug` (UNIQUE)
 
 ### 3.2 `cables`
 
@@ -120,7 +123,9 @@ PostgreSQL schema. All field names in English.
 | id | UUID PK | | |
 | manufacturer_id | FK → manufacturers | | |
 | brand | varchar | Brand | "Hitachi Cable" |
+| brand_slug | varchar | Brand slug (denormalized for URL) | "hitachi-cable" |
 | model | varchar | Model | "UL1007" |
+| slug | varchar UNIQUE | Full slug, e.g. "ul1007-awg24" | "ul1007-awg24" |
 | spec | varchar | Full spec | "UL1007 AWG24" |
 | awg | varchar | AWG number | "24" |
 | conductor_area | numeric (mm²) | Conductor cross-section | 0.205 |
@@ -131,11 +136,15 @@ PostgreSQL schema. All field names in English.
 | core_structure | enum | Core structure | `single` / `2_core` / `3_core` / `4_core` / `multi_core` |
 | rated_voltage | varchar | Rated voltage | "300V" |
 | temperature_rating | varchar | Temperature rating | "105°C" |
-| description | text | | |
+| description | text | SEO-friendly long description (for Google indexing) | |
+| meta_title | varchar | Custom SEO title (optional, falls back to spec) | |
+| meta_description | varchar | Custom meta description (optional) | |
 | created_at | timestamp | | |
 | updated_at | timestamp | | |
 
-**Indexes:** `brand`, `model`, `awg`, `manufacturer_id`
+**Indexes:** `brand`, `model`, `awg`, `manufacturer_id`, `slug` (UNIQUE), `(brand_slug, slug)` composite
+
+**URL pattern:** `/cables/{brand_slug}/{slug}` — pseudo-static, e.g. `/cables/hitachi-cable/ul1007-awg24`
 
 **Note:** `rated_voltage` and `temperature_rating` are display-only fields in MVP (not match dimensions). They can be promoted to match rules later without schema changes — just insert new rows into `match_rules` and add corresponding capacity fields to `equipments` if needed.
 
@@ -146,7 +155,9 @@ PostgreSQL schema. All field names in English.
 | id | UUID PK | | |
 | manufacturer_id | FK → manufacturers | | |
 | brand | varchar | Brand | "KMV" |
+| brand_slug | varchar | Brand slug (denormalized for URL) | "kmv" |
 | model | varchar | Model | "CS-800" |
+| slug | varchar UNIQUE | Full slug, e.g. "cs-800" | "cs-800" |
 | equipment_type | enum | Type | `semi_auto_stripping` / `fully_auto_cutting_stripping` |
 | automation_level | enum | Automation | `semi_auto` / `fully_auto` |
 | conductor_area_min | numeric (mm²) | Conductor area lower bound | 0.05 |
@@ -160,11 +171,15 @@ PostgreSQL schema. All field names in English.
 | supported_cores | jsonb | Supported core structures | `["single","2_core","3_core"]` |
 | image_url | varchar | Equipment image URL | |
 | spec_pdf_url | varchar | Spec sheet PDF URL | |
-| description | text | | |
+| description | text | SEO-friendly long description | |
+| meta_title | varchar | Custom SEO title (optional) | |
+| meta_description | varchar | Custom meta description (optional) | |
 | created_at | timestamp | | |
 | updated_at | timestamp | | |
 
-**Indexes:** `brand`, `equipment_type`, `(equipment_type, conductor_area_min, conductor_area_max)`; GIN index on `supported_shieldings`, `supported_jackets`, `supported_cores`
+**Indexes:** `brand`, `equipment_type`, `slug` (UNIQUE), `(brand_slug, slug)` composite, `(equipment_type, conductor_area_min, conductor_area_max)`; GIN index on `supported_shieldings`, `supported_jackets`, `supported_cores`
+
+**URL pattern:** `/equipments/{brand_slug}/{slug}` — pseudo-static, e.g. `/equipments/kmv/cs-800`
 
 **Design decision:** Both equipment types (`semi_auto_stripping` and `fully_auto_cutting_stripping`) share the same matching dimensions and the same schema fields. The difference is only the `equipment_type` and `automation_level` enum values. This keeps the match rules table uniform across types.
 
@@ -354,11 +369,18 @@ RESTful JSON API. FastAPI auto-generates OpenAPI docs at `/docs`.
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/cables` | Cable list (pagination, filtering, search) |
-| GET | `/api/cables/{id}` | Cable detail |
+| GET | `/api/cables/{id}` | Cable detail by UUID |
+| GET | `/api/cables/by-slug/{brand_slug}/{slug}` | Cable detail by slug (for ISR pages) |
 | GET | `/api/cables/search` | Search by AWG/model/brand |
+| GET | `/api/cables/sitemap` | All cable slugs + lastmod (for sitemap generation) |
 | GET | `/api/equipments` | Equipment list |
-| GET | `/api/equipments/{id}` | Equipment detail |
+| GET | `/api/equipments/{id}` | Equipment detail by UUID |
+| GET | `/api/equipments/by-slug/{brand_slug}/{slug}` | Equipment detail by slug |
+| GET | `/api/equipments/sitemap` | All equipment slugs + lastmod |
 | GET | `/api/manufacturers` | Manufacturer list |
+| GET | `/api/manufacturers/{slug}` | Manufacturer detail by slug |
+| GET | `/api/manufacturers/{slug}/cables` | Cables by manufacturer |
+| GET | `/api/manufacturers/{slug}/equipments` | Equipments by manufacturer |
 | **POST** | **`/api/match`** | **Core match endpoint** |
 | GET | `/api/health` | Health check |
 
@@ -440,51 +462,78 @@ Common codes: `BAD_REQUEST`, `NOT_FOUND`, `UNPROCESSABLE_ENTITY`, `INTERNAL_ERRO
 
 Next.js 14 App Router. Tailwind + shadcn/ui. English-only UI (i18n deferred).
 
+**SEO-first design:** The site is a "yellow pages" directory — content generation for Google indexing is a primary goal. All detail pages use pseudo-static URLs (slug-based), Server-Side Rendering (SSR) or Incremental Static Regeneration (ISR), structured data (Schema.org), and full meta tag support.
+
 ### 6.1 Page Inventory
 
-| Route | Page |
-|-------|------|
-| `/` | Home (hero + search box + how-it-works) |
-| `/cables` | Cable search & list (filters sidebar) |
-| `/cables/[id]` | Cable detail |
-| `/equipments` | Equipment list |
-| `/equipments/[id]` | Equipment detail |
-| `/manufacturers` | Manufacturer list |
-| `/match` | Match result (core page, dual entry) |
+| Route | Page | Rendering |
+|-------|------|-----------|
+| `/` | Home (directory portal + search) | SSG |
+| `/cables` | Cable directory list (filters sidebar) | SSR (dynamic filters) |
+| `/cables/[brand_slug]/[slug]` | Cable detail (pseudo-static) | ISR (revalidate every 3600s) |
+| `/equipments` | Equipment directory list | SSR |
+| `/equipments/[brand_slug]/[slug]` | Equipment detail (pseudo-static) | ISR |
+| `/manufacturers` | Manufacturer directory list | SSG |
+| `/manufacturers/[slug]` | Manufacturer detail (pseudo-static) | ISR |
+| `/match` | Match result (interactive tool) | CSR (client-side) |
+| `/sitemap.xml` | Dynamic sitemap | Route handler |
+| `/robots.txt` | Robots | Static |
 
 ### 6.2 Home `/`
 
-- Hero with tagline "Find the right wire processing equipment for your cable"
-- Single search box (brand/model/AWG) → `/cables?q=xxx`
-- "Match by parameters" link → `/match`
+Yellow pages directory portal:
+- Hero with tagline "Wire Harness Industry Directory — Find Cables & Processing Equipment"
+- Prominent search box (brand/model/AWG/spec) → `/cables?q=xxx`
+- "Browse by category" cards: Cables, Equipment, Manufacturers
+- "Match by parameters" CTA → `/match`
+- Popular cable brands (browseable links for SEO internal linking)
 - How-it-works: 1. Search cable → 2. View specs → 3. Get matched equipment
 
-### 6.3 Cable Search `/cables`
+### 6.3 Cable Directory `/cables`
 
-Left sidebar filters:
-- Manufacturer (multi-select, searchable)
-- AWG (multi-select)
-- Cross-section (mm²) range slider
-- OD (mm) range slider
-- Shielding (multi-select)
-- Jacket (multi-select)
-- Core structure (multi-select)
+Yellow pages style directory listing with filters:
+- Left sidebar filters:
+  - Manufacturer (multi-select, searchable)
+  - AWG (multi-select)
+  - Cross-section (mm²) range slider
+  - OD (mm) range slider
+  - Shielding (multi-select)
+  - Jacket (multi-select)
+  - Core structure (multi-select)
+- Right: directory cards (model, brand, key params, link to detail). Pagination at bottom.
+- Each card links to pseudo-static detail page `/cables/{brand_slug}/{slug}` (SEO internal linking)
+- Breadcrumbs: Home > Cables > [Brand] (structured data)
 
-Right: result cards (model, brand, key params, `[View]` + `[Match]` buttons). Pagination at bottom.
+### 6.4 Cable Detail `/cables/[brand_slug]/[slug]`
 
-### 6.4 Cable Detail `/cables/[id]`
+**Pseudo-static, ISR-rendered, SEO-optimized.**
 
-Full spec table (all fields including rated_voltage, temperature_rating). `[Match Equipment →]` button → `/match?cable_id=xxx`.
+- `generateStaticParams()` pre-generates all cable pages at build time
+- `generateMetadata()` produces per-page title/description/OG tags
+- Full spec table (all fields including rated_voltage, temperature_rating)
+- SEO long description section (rendered from `description` field)
+- Breadcrumbs: Home > Cables > [Brand] > [Model] (with BreadcrumbList structured data)
+- Schema.org Product structured data (JSON-LD) with all specs
+- `[Match Equipment →]` button → `/match?cable_id=xxx`
+- Internal links: same-brand cables, same-AWG cables (SEO cross-linking)
 
-### 6.5 Equipment Detail `/equipments/[id]`
+### 6.5 Equipment Detail `/equipments/[brand_slug]/[slug]`
 
-- Full equipment params
-- Capacity ranges
-- Supported cable types (shielding/jacket/core)
+- `generateStaticParams()` + `generateMetadata()` (same as cable)
+- Full equipment params, capacity ranges, supported cable types
+- Schema.org Product structured data
 - Spec PDF download
 - Manufacturer link
+- Internal links: same-type equipment, same-brand equipment
 
-### 6.6 Match Page `/match` (Core)
+### 6.6 Manufacturer Detail `/manufacturers/[slug]`
+
+- Manufacturer info + logo
+- List of their cables (link to cable detail pages)
+- List of their equipment (link to equipment detail pages)
+- Schema.org Organization structured data
+
+### 6.7 Match Page `/match` (Interactive Tool)
 
 Dual entry:
 - From cable detail: URL `?cable_id=xxx` auto-fills cable params
@@ -496,16 +545,48 @@ Equipment type checkboxes (semi_auto_stripping, fully_auto_cutting_stripping).
 
 Results:
 - Grouped by equipment type (collapsible sections)
-- Each card: rank #, brand, model, score (progress bar), image, per-rule ✓/✗, `[View details]` + `[Download PDF]`
+- Each card: rank #, brand, model, score (progress bar), image, per-rule ✓/✗, link to equipment detail page, `[Download PDF]`
 - Top N fixed (read from backend config, not user-configurable in UI)
 
-### 6.7 Design Decisions
+Note: Match page is the only non-indexable interactive page. `noindex` meta tag applied (it's a tool, not content).
 
-1. **Dual-entry match page** — covers "pick cable then match" and "input params directly" flows
-2. **Transparent results** — score + per-rule pass/fail builds engineer trust
-3. **Top N backend-controlled** — consistency across users; not user-tunable
-4. **Responsive** — Tailwind md/lg breakpoints; mobile collapses sidebar to drawer
-5. **SEO** — cable detail page uses Server Component for pre-rendering (future SEO traffic)
+### 6.8 SEO Infrastructure
+
+**Sitemap (`/sitemap.xml`):**
+- Dynamic route handler querying all cables, equipments, manufacturers
+- Outputs `<urlset>` with lastmod from `updated_at`
+- Cable/equipment detail URLs use pseudo-static slugs
+
+**Robots.txt (`/robots.txt`):**
+- Allow all crawling
+- Point to sitemap: `Sitemap: https://www.unowire.com/sitemap.xml`
+- Disallow `/match` (interactive tool, not content)
+- Disallow `/api/`
+
+**Per-page SEO (`generateMetadata`):**
+- Title: `{spec} | {brand} | Unowire` (or `meta_title` if set)
+- Description: `meta_description` or first 160 chars of `description` or auto-generated from specs
+- canonical URL: `https://www.unowire.com{pathname}`
+- OG tags: title, description, image (equipment image_url or default)
+- robots: `index, follow` for content pages; `noindex` for `/match`
+
+**Structured Data (JSON-LD):**
+- Cable detail: `Product` schema with `additionalProperty` for each spec
+- Equipment detail: `Product` schema with capacity ranges as properties
+- Manufacturer: `Organization` schema
+- Breadcrumbs: `BreadcrumbList` schema on all detail pages
+
+### 6.9 Design Decisions
+
+1. **Yellow pages directory form** — browseable, indexable, content-rich pages for Google
+2. **Pseudo-static URLs** — slug-based (`/cables/hitachi-cable/ul1007-awg24`), not query params
+3. **ISR for detail pages** — pre-rendered at build + revalidated hourly; fast + fresh + indexable
+4. **SEO infrastructure first-class** — sitemap, robots, structured data, meta tags built into MVP
+5. **Internal linking** — cross-links between cables/equipment/manufacturers boost SEO
+6. **Dual-entry match page** — covers "pick cable then match" and "input params directly" flows
+7. **Transparent results** — score + per-rule pass/fail builds engineer trust
+8. **Top N backend-controlled** — consistency across users; not user-tunable
+9. **Responsive** — Tailwind md/lg breakpoints; mobile collapses sidebar to drawer
 
 ---
 
@@ -519,25 +600,37 @@ frontend/
 │   ├── layout.tsx               # Root layout (Nav + Footer)
 │   ├── page.tsx                 # Home /
 │   ├── cables/
-│   │   ├── page.tsx             # /cables
-│   │   └── [id]/page.tsx        # /cables/[id]
+│   │   ├── page.tsx             # /cables (directory list)
+│   │   └── [brand_slug]/
+│   │       └── [slug]/
+│   │           └── page.tsx     # /cables/[brand_slug]/[slug] (ISR)
 │   ├── equipments/
 │   │   ├── page.tsx             # /equipments
-│   │   └── [id]/page.tsx        # /equipments/[id]
-│   ├── manufacturers/page.tsx   # /manufacturers
-│   └── match/page.tsx           # /match
+│   │   └── [brand_slug]/
+│   │       └── [slug]/
+│   │           └── page.tsx     # /equipments/[brand_slug]/[slug] (ISR)
+│   ├── manufacturers/
+│   │   ├── page.tsx             # /manufacturers
+│   │   └── [slug]/
+│   │       └── page.tsx         # /manufacturers/[slug] (ISR)
+│   ├── match/
+│   │   └── page.tsx             # /match (noindex, CSR)
+│   ├── sitemap.ts               # /sitemap.xml route handler
+│   └── robots.ts                # /robots.txt route handler
 ├── components/
 │   ├── ui/                      # shadcn/ui base components
-│   ├── layout/                  # Nav, Footer, Container
+│   ├── layout/                  # Nav, Footer, Container, Breadcrumbs
 │   ├── cable/                   # CableCard, CableFilters, CableSpecs
 │   ├── equipment/               # EquipmentCard, EquipmentSpecs
 │   ├── match/                   # MatchForm, MatchResult, RuleBadge
+│   ├── seo/                     # JsonLd, BreadcrumbJsonLd, ProductJsonLd
 │   └── shared/                  # SearchBox, Pagination, ScoreBar
 ├── lib/
 │   ├── api.ts                   # API client (fetch wrapper)
 │   ├── types.ts                 # TypeScript types
-│   └── utils.ts
-├── public/                      # Static assets (equipment images)
+│   ├── seo.ts                   # SEO helpers (metadata generation, JSON-LD)
+│   └── utils.ts                 # slug helpers, formatters
+├── public/                      # Static assets (equipment images, default OG)
 ├── package.json
 ├── next.config.js
 ├── tailwind.config.ts
