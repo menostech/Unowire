@@ -1,65 +1,141 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Container } from '@/components/layout/Container';
+import { SearchBox } from '@/components/shared/SearchBox';
+import { api } from '@/lib/api';
 
-export default function Home() {
+export default function HomePage() {
+  const cableBrands = api.cables.allBrands();
+  const equipmentBrands = Array.from(new Set(api.equipments.list({ page_size: 1000 }).items.map(e => e.brand_slug)));
+  const totalCables = api.cables.list({ page_size: 1000 }).total;
+  const totalEquipments = api.equipments.list({ page_size: 1000 }).total;
+  const totalManufacturers = api.manufacturers.list().length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div>
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-blue-50 to-white py-20">
+        <Container className="text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+            Wire Harness Industry Directory
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Find cable specifications and matched wire processing equipment from leading manufacturers.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          <div className="flex justify-center mb-4">
+            <SearchBox />
+          </div>
+          <div>
+            <Link href="/match" className="text-blue-600 hover:underline">
+              Or match equipment by cable parameters →
+            </Link>
+          </div>
+        </Container>
+      </section>
+
+      {/* Stats */}
+      <section className="border-y bg-white">
+        <Container className="py-8">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-3xl font-bold text-blue-600">{totalCables}</div>
+              <div className="text-sm text-gray-600">Cables</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-blue-600">{totalEquipments}</div>
+              <div className="text-sm text-gray-600">Equipment</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-blue-600">{totalManufacturers}</div>
+              <div className="text-sm text-gray-600">Manufacturers</div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* Browse categories */}
+      <section className="py-16">
+        <Container>
+          <h2 className="text-2xl font-bold mb-8 text-center">Browse Directory</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link href="/cables" className="border border-gray-200 rounded-lg p-8 hover:shadow-lg hover:border-blue-300 transition">
+              <div className="text-4xl mb-4">🔌</div>
+              <h3 className="text-xl font-semibold mb-2">Cables</h3>
+              <p className="text-gray-600 text-sm">Browse wire and cable specifications by manufacturer and AWG.</p>
+            </Link>
+            <Link href="/equipments" className="border border-gray-200 rounded-lg p-8 hover:shadow-lg hover:border-blue-300 transition">
+              <div className="text-4xl mb-4">⚙️</div>
+              <h3 className="text-xl font-semibold mb-2">Equipment</h3>
+              <p className="text-gray-600 text-sm">Wire processing machines: stripping, cutting, crimping.</p>
+            </Link>
+            <Link href="/manufacturers" className="border border-gray-200 rounded-lg p-8 hover:shadow-lg hover:border-blue-300 transition">
+              <div className="text-4xl mb-4">🏭</div>
+              <h3 className="text-xl font-semibold mb-2">Manufacturers</h3>
+              <p className="text-gray-600 text-sm">Directory of cable and equipment manufacturers.</p>
+            </Link>
+          </div>
+        </Container>
+      </section>
+
+      {/* Popular brands */}
+      <section className="bg-gray-50 py-16">
+        <Container>
+          <h2 className="text-2xl font-bold mb-8 text-center">Popular Brands</h2>
+          <div className="flex flex-wrap justify-center gap-3">
+            {cableBrands.map(brand => (
+              <Link
+                key={brand.slug}
+                href={`/cables?brand=${brand.slug}`}
+                className="px-4 py-2 bg-white border rounded-full text-sm hover:border-blue-300 hover:shadow transition"
+              >
+                {brand.name}
+              </Link>
+            ))}
+            {equipmentBrands.map(slug => {
+              const mfr = api.manufacturers.getBySlug(slug);
+              if (!mfr) return null;
+              return (
+                <Link
+                  key={slug}
+                  href={`/equipments?brand=${slug}`}
+                  className="px-4 py-2 bg-white border rounded-full text-sm hover:border-blue-300 hover:shadow transition"
+                >
+                  {mfr.name}
+                </Link>
+              );
+            })}
+          </div>
+        </Container>
+      </section>
+
+      {/* How it works */}
+      <section className="py-16">
+        <Container>
+          <h2 className="text-2xl font-bold mb-8 text-center">How It Works</h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-bold">
+                1
+              </div>
+              <h3 className="font-semibold mb-2">Search Cable</h3>
+              <p className="text-gray-600 text-sm">Find your cable by brand, model, or AWG.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-bold">
+                2
+              </div>
+              <h3 className="font-semibold mb-2">View Specs</h3>
+              <p className="text-gray-600 text-sm">See full cable specifications and ratings.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-bold">
+                3
+              </div>
+              <h3 className="font-semibold mb-2">Get Matched</h3>
+              <p className="text-gray-600 text-sm">Find equipment that can process your cable.</p>
+            </div>
+          </div>
+        </Container>
+      </section>
     </div>
   );
 }
