@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { EquipmentCard } from '@/components/equipment/EquipmentCard';
@@ -52,15 +53,15 @@ export default async function EquipmentsPage({ searchParams }: { searchParams: P
 
       {/* Quick type filter */}
       <div className="flex gap-2 mb-6">
-        <a href="/equipments" className={`px-4 py-1 rounded-full text-sm border ${!sp.equipment_type ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-100'}`}>
+        <Link href="/equipments" className={`px-4 py-1 rounded-full text-sm border ${!sp.equipment_type ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-100'}`}>
           All Types
-        </a>
-        <a href="/equipments?equipment_type=semi_auto_stripping" className={`px-4 py-1 rounded-full text-sm border ${sp.equipment_type === 'semi_auto_stripping' ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-100'}`}>
+        </Link>
+        <Link href="/equipments?equipment_type=semi_auto_stripping" className={`px-4 py-1 rounded-full text-sm border ${sp.equipment_type === 'semi_auto_stripping' ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-100'}`}>
           Semi-Auto Stripping
-        </a>
-        <a href="/equipments?equipment_type=fully_auto_cutting_stripping" className={`px-4 py-1 rounded-full text-sm border ${sp.equipment_type === 'fully_auto_cutting_stripping' ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-100'}`}>
+        </Link>
+        <Link href="/equipments?equipment_type=fully_auto_cutting_stripping" className={`px-4 py-1 rounded-full text-sm border ${sp.equipment_type === 'fully_auto_cutting_stripping' ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-100'}`}>
           Fully-Auto Cutting & Stripping
-        </a>
+        </Link>
       </div>
 
       {result.items.length === 0 ? (
