@@ -1,36 +1,11 @@
 import type {
-  Brand, Cable, CableListItem, CableListResponse, CableQueryParams,
-  Category, FilterFacets, Manufacturer,
+  Cable, CableListItem, CableListResponse, CableQueryParams,
+  FilterFacets, Industry, IndustryFilterConfig, SizeSystem,
 } from './types';
 import { api } from './api';
 import { getDescendantIds } from './category-tree';
 
-/** 从 cable 的 specs 中查找指定 key 的 SpecItem */
-function findSpecValue(cable: Cable, key: string): string | number | undefined {
-  // 优先从 common_specs 查找，再从各 variant 的 specs 查找
-  for (const s of cable.common_specs) {
-    if (s.key === key) return s.value;
-  }
-  for (const v of cable.variants) {
-    for (const s of v.specs) {
-      if (s.key === key) return s.value;
-    }
-  }
-  return undefined;
-}
-
-/** 从所有变体收集指定 key 的所有值（去重） */
-function collectVariantSpecValues(cable: Cable, key: string): (string | number)[] {
-  const values = new Set<string | number>();
-  for (const v of cable.variants) {
-    for (const s of v.specs) {
-      if (s.key === key) values.add(s.value);
-    }
-  }
-  return Array.from(values);
-}
-
-/** 获取 cable 的所有数值型 spec 值（跨所有变体） */
+/** Collect all numeric values for a spec key across all variants */
 function getAllNumericValues(cable: Cable, key: string): number[] {
   const values: number[] = [];
   for (const v of cable.variants) {
@@ -41,11 +16,58 @@ function getAllNumericValues(cable: Cable, key: string): number[] {
   return values;
 }
 
-/** 主筛选函数 */
+/** Collect all distinct values for a spec key across common_specs + variants */
+function collectSpecValues(cable: Cable, key: string): (string | number)[] {
+  const values = new Set<string | number>();
+  for (const s of cable.common_specs) {
+    if (s.key === key) values.add(s.value);
+  }
+  for (const v of cable.variants) {
+    for (const s of v.specs) {
+      if (s.key === key) values.add(s.value);
+    }
+  }
+  return Array.from(values);
+}
+
+/**
+ * Determine the in-scope filter config for a cable list.
+ * Returns the union of TypeFilterConfig entries for all industries/types
+ * present in the list. If industries are selected in params, restricts to
+ * those industries only.
+ */
+function getInScopeFilterConfig(cableList: Cable[], params: CableQueryParams): {
+  industries: Industry[];
+  typesByIndustry: Map<Industry, string[]>;
+  config: Record<Industry, IndustryFilterConfig>;
+} {
+  const config = api.filterConfig.all();
+  const selectedIndustries = params.industry && params.industry.length > 0
+    ? new Set(params.industry)
+    : null;
+
+  const industries = new Set<Industry>();
+  const typesByIndustry = new Map<Industry, Set<string>>();
+
+  for (const cable of cableList) {
+    if (selectedIndustries && !selectedIndustries.has(cable.industry)) continue;
+    industries.add(cable.industry);
+    if (!typesByIndustry.has(cable.industry)) typesByIndustry.set(cable.industry, new Set());
+    typesByIndustry.get(cable.industry)!.add(cable.type);
+  }
+
+  return {
+    industries: Array.from(industries),
+    typesByIndustry: new Map(Array.from(typesByIndustry.entries()).map(([k, v]) => [k, Array.from(v)])),
+    config,
+  };
+}
+
+/** Main filter function */
 export function filterCables(params: CableQueryParams): CableListResponse {
   let filtered = [...api.cables.all()];
 
-  // 关键字搜索
+  // Keyword search
   if (params.q) {
     const q = params.q.toLowerCase();
     filtered = filtered.filter(c =>
@@ -55,7 +77,7 @@ export function filterCables(params: CableQueryParams): CableListResponse {
     );
   }
 
-  // 生产商筛选
+  // Manufacturer filter
   if (params.manufacturer && params.manufacturer.length > 0) {
     const manufacturerIds = new Set(params.manufacturer);
     filtered = filtered.filter(c => {
@@ -64,13 +86,13 @@ export function filterCables(params: CableQueryParams): CableListResponse {
     });
   }
 
-  // 品牌筛选
+  // Brand filter
   if (params.brand && params.brand.length > 0) {
     const brandIds = new Set(params.brand);
     filtered = filtered.filter(c => brandIds.has(c.brand_id));
   }
 
-  // 分类筛选（含子孙）
+  // Category filter (including descendants)
   if (params.category && params.category.length > 0) {
     const allCatIds = new Set<string>();
     for (const catId of params.category) {
@@ -79,15 +101,21 @@ export function filterCables(params: CableQueryParams): CableListResponse {
     filtered = filtered.filter(c => c.category_ids.some(id => allCatIds.has(id)));
   }
 
-  // AWG 筛选（任一变体匹配）
-  if (params.awg && params.awg.length > 0) {
-    const awgSet = new Set(params.awg);
+  // Industry filter
+  if (params.industry && params.industry.length > 0) {
+    const industrySet = new Set(params.industry);
+    filtered = filtered.filter(c => industrySet.has(c.industry));
+  }
+
+  // Size filter (any variant matches) — replaces awg
+  if (params.size && params.size.length > 0) {
+    const sizeSet = new Set(params.size);
     filtered = filtered.filter(c =>
-      c.variants.some(v => v.specs.some(s => s.key === "awg" && awgSet.has(String(s.value))))
+      c.variants.some(v => v.specs.some(s => s.key === "size" && sizeSet.has(String(s.value))))
     );
   }
 
-  // 数值范围筛选：conductor_area（任一变体在范围内）
+  // Range filter: conductor_area (any variant in range)
   if (params.min_area !== undefined || params.max_area !== undefined) {
     filtered = filtered.filter(c => {
       const values = getAllNumericValues(c, "conductor_area");
@@ -98,7 +126,7 @@ export function filterCables(params: CableQueryParams): CableListResponse {
     });
   }
 
-  // 数值范围筛选：outer_diameter
+  // Range filter: outer_diameter
   if (params.min_od !== undefined || params.max_od !== undefined) {
     filtered = filtered.filter(c => {
       const values = getAllNumericValues(c, "outer_diameter");
@@ -109,28 +137,22 @@ export function filterCables(params: CableQueryParams): CableListResponse {
     });
   }
 
-  // 枚举筛选：shielding
-  if (params.shielding && params.shielding.length > 0) {
-    const set = new Set(params.shielding);
-    filtered = filtered.filter(c => set.has(String(findSpecValue(c, "shielding"))));
+  // Generic config-driven enum spec filters
+  if (params.spec_filters) {
+    for (const [specKey, allowedValues] of Object.entries(params.spec_filters)) {
+      if (!allowedValues || allowedValues.length === 0) continue;
+      const valueSet = new Set(allowedValues);
+      filtered = filtered.filter(c => {
+        const values = collectSpecValues(c, specKey);
+        return values.some(v => valueSet.has(String(v)));
+      });
+    }
   }
 
-  // 枚举筛选：jacket
-  if (params.jacket && params.jacket.length > 0) {
-    const set = new Set(params.jacket);
-    filtered = filtered.filter(c => set.has(String(findSpecValue(c, "jacket"))));
-  }
+  // Build facets based on the filtered list
+  const filters = buildFacets(filtered, params);
 
-  // 枚举筛选：core_structure
-  if (params.core_structure && params.core_structure.length > 0) {
-    const set = new Set(params.core_structure);
-    filtered = filtered.filter(c => set.has(String(findSpecValue(c, "core_structure"))));
-  }
-
-  // 构建 facets（基于筛选后的结果）
-  const filters = buildFacets(filtered);
-
-  // 分页
+  // Pagination
   const total = filtered.length;
   const page = Math.max(1, params.page);
   const page_size = params.page_size;
@@ -146,20 +168,39 @@ export function filterCables(params: CableQueryParams): CableListResponse {
   return { items, total, page, page_size, filters };
 }
 
-/** 构建 facets（基于给定 cable 列表） */
-function buildFacets(cableList: Cable[]): FilterFacets {
+/** Build facets for a cable list, driven by the in-scope filter config */
+function buildFacets(cableList: Cable[], params: CableQueryParams): FilterFacets {
   const manufacturerCounts = new Map<string, number>();
   const brandCounts = new Map<string, number>();
   const categoryCounts = new Map<string, number>();
-  const awgCounts = new Map<string, number>();
-  const shieldingCounts = new Map<string, number>();
-  const jacketCounts = new Map<string, number>();
-  const coreCounts = new Map<string, number>();
+  const industryCounts = new Map<Industry, number>();
+  // size facet grouped by size_system: Map<size_system, Map<value, count>>
+  const sizeCounts = new Map<SizeSystem, Map<string, number>>();
+  // generic enum spec facets: Map<spec_key, Map<value, count>>
+  const specFacetCounts = new Map<string, Map<string, number>>();
   let minArea = Infinity, maxArea = -Infinity;
   let minOd = Infinity, maxOd = -Infinity;
 
+  // Determine which enum spec_keys to compute facets for (from in-scope filter config)
+  const { industries, typesByIndustry, config } = getInScopeFilterConfig(cableList, params);
+  const enumSpecKeys = new Set<string>();
+  for (const industry of industries) {
+    const indCfg = config[industry];
+    if (!indCfg) continue;
+    const types = typesByIndustry.get(industry) ?? [];
+    for (const t of types) {
+      const tCfg = indCfg.types[t];
+      if (!tCfg) continue;
+      for (const f of tCfg.filters) {
+        if (f.control === "enum" && f.spec_key !== "size") {
+          enumSpecKeys.add(f.spec_key);
+        }
+      }
+    }
+  }
+
   for (const cable of cableList) {
-    // manufacturer
+    // manufacturer + brand
     const brand = api.brands.getById(cable.brand_id);
     if (brand) {
       brandCounts.set(cable.brand_id, (brandCounts.get(cable.brand_id) ?? 0) + 1);
@@ -169,10 +210,23 @@ function buildFacets(cableList: Cable[]): FilterFacets {
     for (const catId of cable.category_ids) {
       categoryCounts.set(catId, (categoryCounts.get(catId) ?? 0) + 1);
     }
-    // variant specs
+    // industry
+    industryCounts.set(cable.industry, (industryCounts.get(cable.industry) ?? 0) + 1);
+
+    // size facet (from variant specs, grouped by cable's size_system)
+    if (cable.size_system !== "none") {
+      if (!sizeCounts.has(cable.size_system)) sizeCounts.set(cable.size_system, new Map());
+      const sizeMap = sizeCounts.get(cable.size_system)!;
+      for (const v of cable.variants) {
+        for (const s of v.specs) {
+          if (s.key === "size") sizeMap.set(String(s.value), (sizeMap.get(String(s.value)) ?? 0) + 1);
+        }
+      }
+    }
+
+    // numeric ranges
     for (const v of cable.variants) {
       for (const s of v.specs) {
-        if (s.key === "awg") awgCounts.set(String(s.value), (awgCounts.get(String(s.value)) ?? 0) + 1);
         if (s.key === "conductor_area" && typeof s.value === "number") {
           minArea = Math.min(minArea, s.value);
           maxArea = Math.max(maxArea, s.value);
@@ -183,11 +237,17 @@ function buildFacets(cableList: Cable[]): FilterFacets {
         }
       }
     }
-    // common specs
-    for (const s of cable.common_specs) {
-      if (s.key === "shielding") shieldingCounts.set(String(s.value), (shieldingCounts.get(String(s.value)) ?? 0) + 1);
-      if (s.key === "jacket") jacketCounts.set(String(s.value), (jacketCounts.get(String(s.value)) ?? 0) + 1);
-      if (s.key === "core_structure") coreCounts.set(String(s.value), (coreCounts.get(String(s.value)) ?? 0) + 1);
+
+    // generic enum spec facets (from common_specs + variant specs)
+    if (enumSpecKeys.size > 0) {
+      const allSpecs = [...cable.common_specs, ...cable.variants.flatMap(v => v.specs)];
+      for (const s of allSpecs) {
+        if (enumSpecKeys.has(s.key)) {
+          if (!specFacetCounts.has(s.key)) specFacetCounts.set(s.key, new Map());
+          const m = specFacetCounts.get(s.key)!;
+          m.set(String(s.value), (m.get(String(s.value)) ?? 0) + 1);
+        }
+      }
     }
   }
 
@@ -201,15 +261,38 @@ function buildFacets(cableList: Cable[]): FilterFacets {
     .map(c => ({ id: c.id, name: c.name, level: c.level, count: categoryCounts.get(c.id) ?? 0 }))
     .filter(c => c.count > 0);
 
+  // industries facet (ordered by config definition order)
+  const allIndustries = api.filterConfig.industries();
+  const industriesFacet = allIndustries
+    .map(ind => ({
+      value: ind,
+      label: config[ind]?.label ?? ind,
+      count: industryCounts.get(ind) ?? 0,
+    }))
+    .filter(i => i.count > 0);
+
+  // size facet flattened with size_system tag
+  const sizeFacet: { value: string; count: number; size_system: SizeSystem }[] = [];
+  for (const [sys, m] of sizeCounts.entries()) {
+    for (const [value, count] of m.entries()) {
+      sizeFacet.push({ value, count, size_system: sys });
+    }
+  }
+
+  // generic spec facets
+  const spec_facets: Record<string, { value: string; count: number }[]> = {};
+  for (const [key, m] of specFacetCounts.entries()) {
+    spec_facets[key] = Array.from(m.entries()).map(([value, count]) => ({ value, count }));
+  }
+
   return {
     manufacturers,
     brands: brandsList,
     categories,
-    awg: Array.from(awgCounts.entries()).map(([value, count]) => ({ value, count })),
+    industries: industriesFacet,
+    size: sizeFacet,
+    spec_facets,
     conductor_area: { min: minArea === Infinity ? 0 : minArea, max: maxArea === -Infinity ? 0 : maxArea },
     outer_diameter: { min: minOd === Infinity ? 0 : minOd, max: maxOd === -Infinity ? 0 : maxOd },
-    shielding: Array.from(shieldingCounts.entries()).map(([value, count]) => ({ value, count })),
-    jacket: Array.from(jacketCounts.entries()).map(([value, count]) => ({ value, count })),
-    core_structure: Array.from(coreCounts.entries()).map(([value, count]) => ({ value, count })),
   };
 }
