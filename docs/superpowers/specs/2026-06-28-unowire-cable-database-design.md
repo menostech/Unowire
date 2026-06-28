@@ -1,6 +1,6 @@
 # Unowire 线缆数据库查询网站设计文档
 
-> **日期**: 2026-06-27
+> **日期**: 2026-06-28
 > **状态**: 待实现
 > **项目范围**: 前端 MVP（纯前端 + mock JSON 数据）
 
@@ -56,16 +56,16 @@ frontend/data/
 
 ### 2.2 manufacturers.json
 
-生成商（法律实体），作为引用数据，无独立页面。
+生成商（法律实体），作为引用数据，无独立页面。MVP 阶段预计 3-5 家生成商。
 
 ```json
 [
   {
     "id": "mfr-1",
-    "name": "Prysmian Group",
-    "slug": "prysmian-group",
-    "country": "Italy",
-    "website": "https://www.prysmiangroup.com"
+    "name": "Hitachi Cable",
+    "slug": "hitachi-cable",
+    "country": "Japan",
+    "website": "https://www.hitachi-cable.com"
   },
   {
     "id": "mfr-2",
@@ -76,42 +76,62 @@ frontend/data/
   },
   {
     "id": "mfr-3",
-    "name": "Hitachi Cable",
-    "slug": "hitachi-cable",
-    "country": "Japan",
-    "website": "https://www.hitachi-cable.com"
+    "name": "Prysmian Group",
+    "slug": "prysmian-group",
+    "country": "Italy",
+    "website": "https://www.prysmiangroup.com"
   }
 ]
 ```
 
 **字段**: `id` / `name` / `slug` / `country` / `website`
 
+> 注：以上为示例数据，最终数量以实现时的数据为准。
+
 ### 2.3 brands.json
 
-品牌（市场标识），属于某个生成商。线缆引用品牌 ID。
+品牌（市场标识），属于某个生成商。线缆引用品牌 ID。MVP 阶段预计 4-6 个品牌。
 
 ```json
 [
   {
     "id": "brand-1",
+    "name": "Hitachi",
+    "slug": "hitachi",
+    "manufacturer_id": "mfr-1",
+    "country": "Japan",
+    "website": "https://www.hitachi-cable.com"
+  },
+  {
+    "id": "brand-2",
+    "name": "Sumitomo",
+    "slug": "sumitomo",
+    "manufacturer_id": "mfr-2",
+    "country": "Japan",
+    "website": "https://global-sei.com"
+  },
+  {
+    "id": "brand-3",
     "name": "Draka",
     "slug": "draka",
-    "manufacturer_id": "mfr-1",
+    "manufacturer_id": "mfr-3",
     "country": "Netherlands",
     "website": "https://www.draka.com"
   },
   {
     "id": "brand-4",
-    "name": "Hitachi",
-    "slug": "hitachi",
+    "name": "Prysmian",
+    "slug": "prysmian",
     "manufacturer_id": "mfr-3",
-    "country": "Japan",
-    "website": "https://www.hitachi-cable.com"
+    "country": "Italy",
+    "website": "https://www.prysmiangroup.com"
   }
 ]
 ```
 
 **字段**: `id` / `name` / `slug` / `manufacturer_id` / `country` / `website`
+
+> 注：以上为示例数据，最终数量以实现时的数据为准。
 
 ### 2.4 categories.json
 
@@ -139,7 +159,7 @@ frontend/data/
 [
   {
     "id": "cable-model-1",
-    "brand_id": "brand-4",
+    "brand_id": "brand-1",
     "brand_slug": "hitachi",
     "model": "UL1007",
     "slug": "ul1007",
@@ -250,9 +270,9 @@ frontend/data/
 ### 2.7 生成商/品牌拆分说明
 
 一个生成商（母公司）旗下可能有多个品牌。例如：
-- Prysmian Group（生成商）→ Draka、Prysmian（品牌）
-- Sumitomo Electric（生成商）→ SEI（品牌）
 - Hitachi Cable（生成商）→ Hitachi（品牌）
+- Sumitomo Electric（生成商）→ Sumitomo（品牌）
+- Prysmian Group（生成商）→ Draka、Prysmian（品牌）
 
 线缆引用 `brand_id`（最细粒度），详情页通过 brand → manufacturer join 显示完整层级。
 
@@ -287,7 +307,7 @@ frontend/data/
 │  [ 大搜索框 ........................ ]            │
 │  热门搜索: UL1007 AVSS AWM UL1015               │
 ├─────────────────────────────────────────────────┤
-│  数据统计 (10 cables · 3 brands · 4 categories)   │
+│  数据统计 (N cables · N brands · N categories)    │
 ├─────────────────────────────────────────────────┤
 │  分类导航卡片 (4 列，level 1 分类)                 │
 ├─────────────────────────────────────────────────┤
@@ -301,7 +321,7 @@ frontend/data/
 - 大搜索框：输入关键字 → 跳转 `/cables?q=关键字`
 - 热门搜索标签：快捷跳转
 - 分类导航卡片：level 1 分类，链接到 `/categories/[slug]`
-- 热门线缆：手动标记或取前 N 条，复用 CableCard 组件
+- 热门线缆：手动标记或取前 N 条，复用 CableCard 组件（MVP 阶段展示 6 条）
 - 统计数字：从 JSON 数据动态计算
 
 ### 4.2 列表页 `/cables`
@@ -319,7 +339,7 @@ frontend/data/
 │          │  [Card] [Card] [Card] [Card]          │
 │ Manufac- │                                       │
 │ turer    │  ← Prev  [1] [2]  Next →              │
-│ Brand    │  Showing 1-8 of 10 cables             │
+│ Brand    │  Showing 1-N of N cables              │
 │ Category │                                       │
 │ AWG      │                                       │
 │ Area     │                                       │
@@ -484,8 +504,8 @@ export async function GET(
 ```json
 {
   "cable": { ...完整 cable 对象... },
-  "brand": { "id": "brand-4", "name": "Hitachi", ... },
-  "manufacturer": { "id": "mfr-3", "name": "Hitachi Cable", ... },
+  "brand": { "id": "brand-1", "name": "Hitachi", ... },
+  "manufacturer": { "id": "mfr-1", "name": "Hitachi Cable", ... },
   "categories": [ ...cable 所属的分类对象数组... ],
   "recommended_equipments": [ ...匹配的推荐设备数组... ]
 }
@@ -784,7 +804,7 @@ JSON 数据文件 → lib/api.ts (单一数据访问层)
   "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.unowire.com/" },
     { "@type": "ListItem", "position": 2, "name": "Cables", "item": "https://www.unowire.com/cables" },
-    { "@type": "ListItem", "position": 3, "name": "Hitachi", "item": "https://www.unowire.com/cables?brand=brand-4" },
+    { "@type": "ListItem", "position": 3, "name": "Hitachi", "item": "https://www.unowire.com/cables?brand=brand-1" },
     { "@type": "ListItem", "position": 4, "name": "UL1007", "item": "https://www.unowire.com/cables/hitachi/ul1007" }
   ]
 }
