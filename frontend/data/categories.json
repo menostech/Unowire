@@ -1,0 +1,11 @@
+[
+  { "id": "cat-1", "level": 1, "name": "Automotive", "slug": "automotive", "parent_id": null },
+  { "id": "cat-2", "level": 2, "name": "Wiring Harness", "slug": "wiring-harness", "parent_id": "cat-1" },
+  { "id": "cat-3", "level": 3, "name": "PVC Insulated", "slug": "pvc-insulated", "parent_id": "cat-2" },
+  { "id": "cat-4", "level": 4, "name": "Thin Wall", "slug": "thin-wall", "parent_id": "cat-3" },
+  { "id": "cat-5", "level": 1, "name": "Consumer Electronics", "slug": "consumer-electronics", "parent_id": null },
+  { "id": "cat-6", "level": 2, "name": "Internal Wiring", "slug": "internal-wiring", "parent_id": "cat-5" },
+  { "id": "cat-7", "level": 3, "name": "PVC Insulated", "slug": "pvc-insulated", "parent_id": "cat-6" },
+  { "id": "cat-8", "level": 1, "name": "Industrial", "slug": "industrial", "parent_id": null },
+  { "id": "cat-9", "level": 2, "name": "Power Transmission", "slug": "power-transmission", "parent_id": "cat-8" }
+]
