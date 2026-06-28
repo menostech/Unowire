@@ -1,6 +1,6 @@
 import type {
-  Brand, Cable, CableDetailResponse, Category, Manufacturer,
-  RecommendedEquipment,
+  Brand, Cable, CableDetailResponse, Category, Industry, IndustryFilterConfig,
+  Manufacturer, RecommendedEquipment, TypeFilterConfig,
 } from './types';
 
 import manufacturersData from '@/data/manufacturers.json';
@@ -8,6 +8,7 @@ import brandsData from '@/data/brands.json';
 import categoriesData from '@/data/categories.json';
 import cablesData from '@/data/cables.json';
 import recommendedEquipmentsData from '@/data/recommended-equipments.json';
+import filterConfigData from '@/data/filter-config.json';
 
 // === Type assertions ===
 const manufacturers = manufacturersData as Manufacturer[];
@@ -15,6 +16,9 @@ const brands = brandsData as Brand[];
 const categories = categoriesData as Category[];
 const cables = cablesData as Cable[];
 const recommendedEquipments = recommendedEquipmentsData as RecommendedEquipment[];
+
+// === Filter config ===
+const filterConfig = filterConfigData as Record<Industry, IndustryFilterConfig>;
 
 // === Pre-built indexes (built on first access) ===
 interface CategoryIndex {
@@ -192,6 +196,39 @@ export const api = {
     all(): RecommendedEquipment[] {
       return recommendedEquipments;
     },
+  },
+
+  filterConfig: {
+    all(): Record<Industry, IndustryFilterConfig> {
+      return filterConfig;
+    },
+    /** Get the filter config for a specific industry */
+    byIndustry(industry: Industry): IndustryFilterConfig | null {
+      return filterConfig[industry] ?? null;
+    },
+    /** Get the filter config for a specific type within an industry */
+    byType(industry: Industry, type: string): TypeFilterConfig | null {
+      return filterConfig[industry]?.types[type] ?? null;
+    },
+    /** All known industry values */
+    industries(): Industry[] {
+      return Object.keys(filterConfig) as Industry[];
+    },
+    /** All known type values across all industries */
+    types(): string[] {
+      const all = new Set<string>();
+      for (const ind of Object.values(filterConfig)) {
+        for (const t of Object.keys(ind.types)) all.add(t);
+      }
+      return Array.from(all);
+    },
+  },
+
+  /** All industries that actually appear in the cable data (with counts computed by caller) */
+  industriesInData(): Industry[] {
+    const set = new Set<Industry>();
+    for (const c of cables) set.add(c.industry);
+    return Array.from(set);
   },
 
   /** Detail page aggregated response */
