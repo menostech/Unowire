@@ -35,6 +35,32 @@ export interface SpecItem {
   filterable: boolean;
 }
 
+// === Industry & Size System ===
+export type Industry = "automotive" | "consumer_electronics" | "industrial_power" | "telecom";
+
+export type SizeSystem = "awg" | "mm2" | "kcmil" | "none";
+
+// === Filter Config (data/filter-config.json) ===
+export interface FilterConfigEntry {
+  spec_key: string;
+  label: string;
+  control: "enum" | "range";
+  unit?: string;
+}
+
+export interface TypeFilterConfig {
+  label: string;
+  size_system: SizeSystem;
+  filters: FilterConfigEntry[];
+}
+
+export interface IndustryFilterConfig {
+  label: string;
+  types: Record<string, TypeFilterConfig>;
+}
+
+// data/filter-config.json shape: Record<Industry, IndustryFilterConfig>
+
 export interface CableVariant {
   slug: string;
   specs: SpecItem[];
@@ -46,6 +72,8 @@ export interface Cable {
   model: string;
   slug: string;
   type: string;
+  industry: Industry;
+  size_system: SizeSystem;
   category_ids: string[];
   base_description: string;
   meta_title: string | null;
@@ -84,14 +112,16 @@ export interface CableQueryParams {
   manufacturer?: string[];
   brand?: string[];
   category?: string[];
-  awg?: string[];
+  industry?: Industry[];
+  size?: string[];
+  // Generic config-driven enum spec filters (shielding, jacket, core_structure,
+  // insulation_material, voltage_class, temperature_rating, impedance,
+  // wavelength, rated_voltage, core_type). Keys are spec_keys from filter-config.json.
+  spec_filters?: Record<string, string[]>;
   min_area?: number;
   max_area?: number;
   min_od?: number;
   max_od?: number;
-  shielding?: string[];
-  jacket?: string[];
-  core_structure?: string[];
   page: number;
   page_size: number;
 }
@@ -101,12 +131,12 @@ export interface FilterFacets {
   manufacturers: { id: string; name: string; count: number }[];
   brands: { id: string; name: string; count: number }[];
   categories: { id: string; name: string; level: number; count: number }[];
-  awg: { value: string; count: number }[];
+  industries: { value: Industry; label: string; count: number }[];
+  size: { value: string; count: number; size_system: SizeSystem }[];
+  // Generic enum spec facets keyed by spec_key (only for specs in the in-scope filter config)
+  spec_facets: Record<string, { value: string; count: number }[]>;
   conductor_area: { min: number; max: number };
   outer_diameter: { min: number; max: number };
-  shielding: { value: string; count: number }[];
-  jacket: { value: string; count: number }[];
-  core_structure: { value: string; count: number }[];
 }
 
 // === List Response ===
