@@ -8,7 +8,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.unowire.com';
 
 // === Cable Metadata ===
 export function generateCableMetadata(cable: Cable, brand: Brand | null): Metadata {
-  const title = cable.meta_title || `${cable.model} - ${brand?.name ?? "Unknown"} | Unowire`;
+  const title = cable.meta_title || `${cable.model} - ${brand?.name ?? "Unknown"}`;
   const description = cable.meta_description || cable.base_description.slice(0, 160);
   const brandSlug = brand?.slug ?? "unknown";
   return {
@@ -22,7 +22,7 @@ export function generateCableMetadata(cable: Cable, brand: Brand | null): Metada
 // === Category Metadata ===
 export function generateCategoryMetadata(category: Category): Metadata {
   const pathSlugs = getCategoryPathSlugs(category.id);
-  const title = `${category.name} Cables | Unowire`;
+  const title = `${category.name} Cables`;
   const description = `Browse cables in the ${category.name} category.`;
   return {
     title,
@@ -35,7 +35,7 @@ export function generateCategoryMetadata(category: Category): Metadata {
 // === Home Metadata ===
 export function generateHomeMetadata(): Metadata {
   return {
-    title: 'Unowire - Cable Specs Database',
+    title: { absolute: 'Unowire - Cable Specs Database' },
     description: 'Query cable specifications online. Browse cables by brand, category, and specs.',
     alternates: { canonical: '/' },
     robots: { index: true, follow: true },
@@ -45,7 +45,7 @@ export function generateHomeMetadata(): Metadata {
 // === Cables List Metadata ===
 export function generateCablesListMetadata(): Metadata {
   return {
-    title: 'Cable Directory - Unowire',
+    title: 'Cable Directory',
     description: 'Browse all cables. Filter by manufacturer, brand, AWG, conductor area, outer diameter.',
     alternates: { canonical: '/cables' },
     robots: { index: true, follow: true },

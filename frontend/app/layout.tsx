@@ -3,7 +3,10 @@ import './globals.css';
 import { Nav } from '@/components/layout/Nav';
 import { Footer } from '@/components/layout/Footer';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.unowire.com';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Unowire — Cable Specs Database',
     template: '%s | Unowire',
