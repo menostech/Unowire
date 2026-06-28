@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { Cable, SpecItem, CableVariant } from './types';
+import type { Cable, SpecItem, CableVariant, SizeSystem } from './types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,6 +35,26 @@ export function formatJacket(jacket: string): string {
     lszh: 'LSZH',
   };
   return map[jacket] || jacket.toUpperCase();
+}
+
+/** Human-readable label for a size system, used by filters and spec tables */
+export function formatSizeLabel(size_system: SizeSystem): string {
+  switch (size_system) {
+    case "awg":   return "AWG";
+    case "mm2":   return "Cross-Section";
+    case "kcmil": return "kcmil";
+    case "none":  return "";
+  }
+}
+
+/** Format a size value with its system label, e.g. "AWG 24" or "240 mm²" */
+export function formatSizeValue(size_system: SizeSystem, value: string, unit?: string | null): string {
+  switch (size_system) {
+    case "awg":   return `AWG ${value}`;
+    case "mm2":   return unit ? `${value} ${unit}` : `${value} mm²`;
+    case "kcmil": return `${value} kcmil`;
+    case "none":  return value;
+  }
 }
 
 /** 从 cable 的 common_specs 或 variant specs 查找 SpecItem */
