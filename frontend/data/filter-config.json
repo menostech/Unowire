@@ -28,6 +28,20 @@
           { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
           { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
         ]
+      },
+      "shielded_wire": {
+        "label": "Automotive Shielded Wire",
+        "size_system": "awg",
+        "filters": [
+          { "spec_key": "size", "label": "AWG", "control": "enum" },
+          { "spec_key": "conductor_area", "label": "Conductor Area", "control": "range", "unit": "mm²" },
+          { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+          { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+          { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+          { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+          { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+          { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+        ]
       }
     }
   },
