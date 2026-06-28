@@ -8,6 +8,7 @@ build/
 .vscode/
 .idea/
 __pycache__/
+.superpowers/
 *.pyc
 .next/
 coverage/
