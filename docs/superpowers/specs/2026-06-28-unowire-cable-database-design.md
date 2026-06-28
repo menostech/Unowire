@@ -160,7 +160,6 @@ frontend/data/
   {
     "id": "cable-model-1",
     "brand_id": "brand-1",
-    "brand_slug": "hitachi",
     "model": "UL1007",
     "slug": "ul1007",
     "type": "electronic_wire",
@@ -169,30 +168,30 @@ frontend/data/
     "meta_title": null,
     "meta_description": null,
     "common_specs": [
-      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "filterable": true },
-      { "key": "shielding", "label": "Shielding", "value": "none", "unit": null, "filterable": true },
-      { "key": "jacket", "label": "Jacket", "value": "pvc", "unit": null, "filterable": true },
-      { "key": "core_structure", "label": "Core Structure", "value": "single", "unit": null, "filterable": true }
+      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "type": "enum", "filterable": true },
+      { "key": "shielding", "label": "Shielding", "value": "none", "unit": null, "type": "enum", "filterable": true },
+      { "key": "jacket", "label": "Jacket", "value": "pvc", "unit": null, "type": "enum", "filterable": true },
+      { "key": "core_structure", "label": "Core Structure", "value": "single", "unit": null, "type": "enum", "filterable": true }
     ],
     "variants": [
       {
         "slug": "awg24",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "24", "unit": null, "filterable": true },
-          { "key": "conductor_area", "label": "Conductor Area", "value": 0.205, "unit": "mm²", "filterable": true },
-          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.40, "unit": "mm", "filterable": true },
-          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "filterable": false },
-          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "filterable": false }
+          { "key": "awg", "label": "AWG", "value": "24", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.205, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.40, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
         ]
       },
       {
         "slug": "awg22",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "22", "unit": null, "filterable": true },
-          { "key": "conductor_area", "label": "Conductor Area", "value": 0.326, "unit": "mm²", "filterable": true },
-          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.60, "unit": "mm", "filterable": true },
-          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "filterable": false },
-          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "filterable": false }
+          { "key": "awg", "label": "AWG", "value": "22", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.326, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.60, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
         ]
       }
     ]
@@ -202,8 +201,7 @@ frontend/data/
 
 **字段说明**:
 - `id`: 线缆 model 唯一 ID（格式 `cable-model-N`）
-- `brand_id`: 引用 brands.json
-- `brand_slug`: 冗余字段，用于 URL 路由（不依赖 join）
+- `brand_id`: 引用 brands.json（brand_slug 不冗余存储，URL 构建时通过 `lib/api.ts` 的 `getCableUrl(cable)` 函数 join brands.json 获取）
 - `model`: 型号名（如 UL1007）
 - `slug`: URL slug（如 ul1007）
 - `type`: 线缆类型标识（如 electronic_wire / multi_core / shielded / coaxial）
@@ -218,6 +216,7 @@ frontend/data/
 - `label`: 人读标签（如 Conductor Area）
 - `value`: 值（string 或 number）
 - `unit`: 单位（如 mm²，无单位时为 null）
+- `type`: 值类型，`"string" | "number" | "enum"`。决定筛选控件渲染方式（number → min/max 范围输入，enum → checkbox 列表，string → 不参与筛选）
 - `filterable`: 是否参与侧边栏筛选
 
 **CableVariant 结构**:
@@ -236,7 +235,7 @@ frontend/data/
 
 ### 2.6 recommended-equipments.json
 
-推荐设备数据。每个设备带 `applicable_spec` 范围条件，详情页按线缆规格匹配。
+推荐设备数据。每个设备带 `applicable_specs` 规则数组（通用匹配结构，不硬编码字段名），详情页按线缆变体规格匹配。
 
 ```json
 [
@@ -246,26 +245,27 @@ frontend/data/
     "model": "CS-800",
     "type": "semi_automatic_stripping_machine",
     "description": "Semi-automatic stripping machine for PVC single-core wires.",
-    "applicable_spec": {
-      "min_conductor_area": 0.1,
-      "max_conductor_area": 1.0,
-      "min_outer_diameter": 1.0,
-      "max_outer_diameter": 3.0,
-      "shielding": ["none"],
-      "jacket": ["pvc"],
-      "core_structure": ["single"]
-    },
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.1, "max": 1.0 },
+      { "spec_key": "outer_diameter", "min": 1.0, "max": 3.0 },
+      { "spec_key": "shielding", "allowed_values": ["none"] },
+      { "spec_key": "jacket", "allowed_values": ["pvc"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
     "external_url": "https://www.kmv.co.jp/products/cs-800"
   }
 ]
 ```
 
 **字段说明**:
-- `applicable_spec`: 范围匹配条件
-  - 数值字段：min/max 范围
-  - 枚举字段：允许值数组
+- `applicable_specs`: 匹配规则数组，每条规则通过 `spec_key` 引用 SpecItem.key，支持两种匹配方式：
+  - 数值范围匹配：`{ "spec_key": "...", "min": number, "max": number }`
+  - 枚举匹配：`{ "spec_key": "...", "allowed_values": (string|number)[] }`
+  - 匹配时从 cable.variants[].specs 和 cable.common_specs 中查找对应 spec_key 的值
 - `external_url`: 外链到设备厂商页面（不建独立设备页）
 - 预计 4-6 条推荐设备覆盖常见规格范围
+
+**匹配策略**: 任一变体匹配即推荐（去重）。详情页展示设备卡片 + "为什么推荐"（命中的规则名列表）。具体逻辑见 §5.3。
 
 ### 2.7 生产商/品牌拆分说明
 
@@ -352,12 +352,15 @@ frontend/data/
 └─────────────────────────────────────────────────┘
 ```
 
-**侧边栏筛选器（动态构建）**:
+**侧边栏筛选器（动态构建，基于 SpecItem.type 决定控件类型）**:
 - **Manufacturer**: 从 manufacturers.json 拉取，checkbox + 计数
 - **Brand**: 从 brands.json 拉取，checkbox + 计数
 - **Category**: 从 categories.json 拉 level 1 分类，checkbox（选中后递归包含子分类线缆）
-- **AWG / Conductor Area / Outer Diameter**: 从所有 variants[].specs 中 key=awg/conductor_area/outer_diameter 的 filterable 字段聚合
-- **Shielding / Jacket / Core Structure**: 从 common_specs 中对应 key 的 filterable 字段聚合
+- **动态 Spec 筛选器**: 遍历所有 cable 的 common_specs + variants[].specs，对 `filterable: true` 的字段按 `type` 聚合：
+  - `type: "number"` → 渲染 min/max 数值范围输入框（如 Conductor Area、Outer Diameter）
+  - `type: "enum"` → 渲染 checkbox 列表 + 计数（如 AWG、Shielding、Jacket、Core Structure）
+  - `type: "string"` → 不参与筛选
+- 筛选器分组顺序：common_specs 的 filterable 字段在前，variants 的 filterable 字段在后（去重）
 
 **卡片内容（model 级 + 展开变体表）**:
 ```
@@ -482,12 +485,12 @@ export async function GET(
   { params }: { params: Promise<{ brand_slug: string; slug: string }> }
 ) {
   const { brand_slug, slug } = await params;
-  const cable = api.cables.find(c => c.brand_slug === brand_slug && c.slug === slug);
+  const cable = api.getCableByUrl(brand_slug, slug);  // 内部 join brands.json 查询
   if (!cable) return Response.json({ error: { code: "not_found", message: "Cable not found" } }, { status: 404 });
 
-  const brand = api.brands.find(b => b.id === cable.brand_id);
-  const manufacturer = api.manufacturers.find(m => m.id === brand?.manufacturer_id);
-  const categories = api.categories.filter(c => cable.category_ids.includes(c.id));
+  const brand = api.getBrandById(cable.brand_id);
+  const manufacturer = api.getManufacturerById(brand?.manufacturer_id);
+  const categories = api.getCategoriesByIds(cable.category_ids);
   const recommended = recommendEquipments(cable, api.recommendedEquipments);
 
   return Response.json({
@@ -559,10 +562,11 @@ frontend/
 │       └── SimilarCables.tsx              # 相似线缆 mini card 列表
 ├── lib/
 │   ├── types.ts                            # 全部 TypeScript 接口
-│   ├── api.ts                              # 数据访问层（加载 5 个 JSON）
-│   ├── filter.ts                           # 筛选/搜索/分页逻辑（纯函数）
-│   ├── equipment-recommend.ts             # 推荐设备范围匹配
-│   ├── category-tree.ts                   # 分类树操作（找子孙/路径）
+│   ├── api.ts                              # 数据访问层（加载 5 个 JSON + 预构建分类树索引 + getCableUrl/getCableByUrl 等查询函数）
+│   ├── filter.ts                           # 筛选/搜索/分页逻辑（纯函数，按 SpecItem.type 决定筛选行为）
+│   ├── equipment-recommend.ts             # 推荐设备范围匹配（通用规则匹配 + 任一变体命中即推荐 + explanation）
+│   ├── category-tree.ts                   # 分类树操作（读 api.ts 预构建的索引，找子孙/路径）
+│   ├── validate.ts                         # JSON 数据静态校验（dev/build 期运行，引用完整性 + key 唯一性 + slug 唯一性）
 │   ├── seo.ts                              # metadata + JSON-LD 生成器
 │   └── utils.ts                            # cn + 格式化函数
 ├── data/
@@ -616,6 +620,7 @@ export interface SpecItem {
   label: string;
   value: string | number;
   unit: string | null;
+  type: "string" | "number" | "enum";  // 决定筛选控件渲染方式
   filterable: boolean;
 }
 
@@ -627,7 +632,6 @@ export interface CableVariant {
 export interface Cable {
   id: string;
   brand_id: string;
-  brand_slug: string;
   model: string;
   slug: string;
   type: string;
@@ -639,14 +643,12 @@ export interface Cable {
   variants: CableVariant[];
 }
 
-export interface ApplicableSpec {
-  min_conductor_area: number;
-  max_conductor_area: number;
-  min_outer_diameter: number;
-  max_outer_diameter: number;
-  shielding: string[];
-  jacket: string[];
-  core_structure: string[];
+// === 推荐设备 ===
+export interface ApplicableSpecRule {
+  spec_key: string;                              // 引用 SpecItem.key
+  min?: number;                                  // 数值范围匹配（type: "number" 时使用）
+  max?: number;
+  allowed_values?: (string | number)[];          // 枚举匹配（type: "enum" 时使用）
 }
 
 export interface RecommendedEquipment {
@@ -655,8 +657,14 @@ export interface RecommendedEquipment {
   model: string;
   type: string;
   description: string;
-  applicable_spec: ApplicableSpec;
+  applicable_specs: ApplicableSpecRule[];        // 通用规则数组，不硬编码字段名
   external_url: string;
+}
+
+export interface RecommendedEquipmentResult {
+  equipment: RecommendedEquipment;
+  matched_variants: CableVariant[];              // 所有命中的变体（去重后的设备对应多个命中变体）
+  explanation: { spec_key: string; label: string; matched_value: string | number }[];  // 命中规则的可读说明
 }
 
 // === API 响应 ===
@@ -665,7 +673,7 @@ export interface CableDetailResponse {
   brand: Brand | null;
   manufacturer: Manufacturer | null;
   categories: Category[];
-  recommended_equipments: RecommendedEquipment[];
+  recommended_equipments: RecommendedEquipmentResult[];
 }
 
 // === 筛选/查询参数 ===
@@ -719,26 +727,101 @@ export interface FilterFacets {
 ```
 JSON 数据文件 → lib/api.ts (单一数据访问层)
                     ↓
-    ┌───────────────┼───────────────┬──────────────┐
-    ▼               ▼               ▼              ▼
-  首页          列表页           详情页         JSON 端点
-                    │               │              │
-                    ▼               ▼              ▼
-            lib/filter.ts    关联数据 join    关联数据 join
-            (纯函数)              │              │
-                                ▼              ▼
-                    lib/category-tree.ts (分类树操作)
-                    lib/equipment-recommend.ts (范围匹配)
+         ┌──────────┴──────────┐
+         ▼                     ▼
+  预构建索引                lib/validate.ts
+  (首次调用时构建)          (dev/build 期校验)
+         │                     │
+         ▼                     ▼
+  CategoryIndex            ValidationError[]
+  (descendants/ancestors/
+   pathSlugs/root)
+         │
+         ▼
+    ┌────┴────┬──────────┬─────────────┐
+    ▼         ▼          ▼             ▼
+  首页     列表页       详情页        JSON 端点
+              │           │             │
+              ▼           ▼             ▼
+      lib/filter.ts   关联数据 join   关联数据 join
+      (纯函数)             │             │
+                          ▼             ▼
+              lib/category-tree.ts (读索引)
+              lib/equipment-recommend.ts (通用规则匹配)
 ```
 
 **关键原则**:
-- `lib/api.ts` 是唯一数据源（后端接入后只改此文件）
-- `lib/filter.ts` 是纯函数模块（输入 cables + params，输出过滤结果 + facets）
-- `lib/category-tree.ts` 处理分类树操作（递归找子孙、构建路径）
-- `lib/equipment-recommend.ts` 独立匹配逻辑
+- `lib/api.ts` 是唯一数据源（后端接入后只改此文件）。首次访问时预构建以下索引：
+  - `CategoryIndex`：分类树的 byId / children / descendants / ancestors / pathSlugs / rootCategories
+  - brand/manufacturer/cable 的 byId Map（O(1) 查询）
+  - brand_slug + cable_slug → cable 的 URL 查询 Map（供 `getCableByUrl()` 使用）
+- `lib/validate.ts` 在 dev 模式启动时和 build 前运行，校验：
+  - 引用完整性：cable.brand_id / category_ids / brand.manufacturer_id 指向的实体必须存在
+  - key 唯一性：同一 cable 内 common_specs 与 variant specs 无同名 key
+  - type 一致性：同一 spec_key 在所有 cable 中的 type 字段必须一致
+  - slug 唯一性：(brand_slug, cable_slug) 组合全局唯一
+  - 推荐设备覆盖：每条 recommended-equipment 至少能被一个 cable 命中（warning，不阻断）
+- `lib/filter.ts` 是纯函数模块（输入 cables + params，输出过滤结果 + facets）。按 SpecItem.type 决定筛选行为，零硬编码字段名
+- `lib/category-tree.ts` 读 api.ts 预构建的索引（不重复遍历分类树）
+- `lib/equipment-recommend.ts` 独立匹配逻辑，通用规则匹配（不硬编码字段名），任一变体命中即推荐（去重）
 - 页面组件只做渲染，不直接操作 JSON
 
-### 5.4 客户端 vs 服务端边界
+### 5.4 推荐设备匹配逻辑（lib/equipment-recommend.ts）
+
+```typescript
+import type { Cable, RecommendedEquipment, RecommendedEquipmentResult, CableVariant, SpecItem } from "./types";
+
+// 从 variant.specs + common_specs 中查找指定 key 的 SpecItem
+function findSpec(variant: CableVariant, commonSpecs: SpecItem[], key: string): SpecItem | undefined {
+  return [...variant.specs, ...commonSpecs].find(s => s.key === key);
+}
+
+// 判断单个变体是否满足单条规则
+function variantMatchesRule(variant: CableVariant, commonSpecs: SpecItem[], rule: ApplicableSpecRule): boolean {
+  const spec = findSpec(variant, commonSpecs, rule.spec_key);
+  if (!spec) return false;
+  if (rule.min !== undefined && typeof spec.value === "number" && spec.value < rule.min) return false;
+  if (rule.max !== undefined && typeof spec.value === "number" && spec.value > rule.max) return false;
+  if (rule.allowed_values && !rule.allowed_values.includes(spec.value)) return false;
+  return true;
+}
+
+// 判断单个变体是否满足所有规则
+function variantMatchesAllRules(variant, commonSpecs, rules): boolean {
+  return rules.every(rule => variantMatchesRule(variant, commonSpecs, rule));
+}
+
+// 主函数：任一变体匹配即推荐，去重，附 explanation
+export function recommendEquipments(
+  cable: Cable,
+  equipments: RecommendedEquipment[]
+): RecommendedEquipmentResult[] {
+  const results: RecommendedEquipmentResult[] = [];
+  for (const eq of equipments) {
+    const matchedVariants: CableVariant[] = [];
+    for (const variant of cable.variants) {
+      if (variantMatchesAllRules(variant, cable.common_specs, eq.applicable_specs)) {
+        matchedVariants.push(variant);
+      }
+    }
+    if (matchedVariants.length === 0) continue;
+
+    // 构造 explanation：取主变体（第一个命中变体）命中的所有规则
+    const primaryVariant = matchedVariants[0];
+    const explanation = eq.applicable_specs.map(rule => {
+      const spec = findSpec(primaryVariant, cable.common_specs, rule.spec_key);
+      return { spec_key: rule.spec_key, label: spec?.label ?? rule.spec_key, matched_value: spec?.value ?? "N/A" };
+    });
+
+    results.push({ equipment: eq, matched_variants: matchedVariants, explanation });
+  }
+  return results;
+}
+```
+
+**匹配策略**：任一变体命中即推荐该设备（去重，每个设备只出现一次）。`matched_variants` 记录所有命中的变体，`explanation` 取主变体命中的规则列表用于详情页"为什么推荐"展示。
+
+### 5.5 客户端 vs 服务端边界
 
 **服务端组件（默认）**:
 - 所有页面（首页/列表/详情/分类）—— RSC，直接调 lib 层
@@ -902,9 +985,11 @@ MVP 英文优先（project_memory 硬约束）。所有 UI 文案、JSON 字段�
 - 4 个页面路由（首页/列表/详情/分类）
 - 1 个 JSON 端点
 - 完整 SEO 基础设施
-- 动态 specs 数组渲染
-- 动态筛选器
-- 推荐设备范围匹配
+- 动态 specs 数组渲染（含 SpecItem.type 字段类型精细化）
+- 动态筛选器（按 type 决定控件类型，零硬编码）
+- 推荐设备通用规则匹配（任一变体命中 + 去重 + explanation 可解释性）
+- 数据预构建索引（分类树 + byId Map + URL 查询 Map）
+- JSON 数据静态校验（dev/build 期引用完整性 + key 唯一性 + slug 唯一性）
 - 删除旧功能代码
 
 ### 10.2 不包含（YAGNI）
@@ -930,7 +1015,7 @@ MVP 英文优先（project_memory 硬约束）。所有 UI 文案、JSON 字段�
 |---|---|
 | `id` | `id`（改为 cable-model-N） |
 | `manufacturer_id` | `brand_id`（引用 brands.json） |
-| `brand_slug` | `brand_slug`（保留） |
+| `brand_slug` | 移除（冗余字段，URL 构建时通过 brand_id join brands.json 获取） |
 | `model` | `model` |
 | `slug` | `slug`（去掉 AWG 后缀） |
 | `spec` | 移除（由 model + 变体 awg 组合显示） |
