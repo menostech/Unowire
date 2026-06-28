@@ -1,160 +1,179 @@
 'use client';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
 
-export function CableFilters({ brands }: { brands: { name: string; slug: string }[] }) {
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback } from 'react';
+import type { FilterFacets } from '@/lib/types';
+
+interface CableFiltersProps {
+  facets: FilterFacets;
+}
+
+function CableFiltersInner({ facets }: CableFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [areaMin, setAreaMin] = useState(searchParams.get('conductor_area_min') || '');
-  const [areaMax, setAreaMax] = useState(searchParams.get('conductor_area_max') || '');
-  const [odMin, setOdMin] = useState(searchParams.get('outer_diameter_min') || '');
-  const [odMax, setOdMax] = useState(searchParams.get('outer_diameter_max') || '');
-
-  function updateParam(key: string, value: string) {
+  const toggleParam = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value) params.set(key, value);
-    else params.delete(key);
-    params.set('page', '1');
+    const current = params.getAll(key);
+    if (current.includes(value)) {
+      // 移除
+      params.delete(key);
+      current.filter(v => v !== value).forEach(v => params.append(key, v));
+    } else {
+      params.append(key, value);
+    }
+    params.delete('page');
     router.push(`/cables?${params.toString()}`);
-  }
+  }, [router, searchParams]);
 
-  function applyRange() {
+  const setNumericParam = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (areaMin) params.set('conductor_area_min', areaMin); else params.delete('conductor_area_min');
-    if (areaMax) params.set('conductor_area_max', areaMax); else params.delete('conductor_area_max');
-    if (odMin) params.set('outer_diameter_min', odMin); else params.delete('outer_diameter_min');
-    if (odMax) params.set('outer_diameter_max', odMax); else params.delete('outer_diameter_max');
-    params.set('page', '1');
+    if (value === '') {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+    params.delete('page');
     router.push(`/cables?${params.toString()}`);
-  }
+  }, [router, searchParams]);
+
+  const isChecked = (key: string, value: string): boolean => {
+    return searchParams.getAll(key).includes(value);
+  };
+
+  const renderCheckboxGroup = (paramKey: string, options: { value: string; label: string; count: number }[]) => {
+    if (options.length === 0) return null;
+    return (
+      <div className="space-y-1">
+        {options.map(opt => (
+          <label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 px-1 py-0.5 rounded">
+            <input
+              type="checkbox"
+              checked={isChecked(paramKey, opt.value)}
+              onChange={() => toggleParam(paramKey, opt.value)}
+              className="rounded border-gray-300"
+            />
+            <span className="flex-1 text-gray-700">{opt.label}</span>
+            <span className="text-gray-400 text-xs">({opt.count})</span>
+          </label>
+        ))}
+      </div>
+    );
+  };
 
   return (
-    <aside className="w-full md:w-64 space-y-6">
-      <div>
-        <h3 className="font-semibold mb-2 text-gray-900">Brand</h3>
-        <select
-          onChange={e => updateParam('brand', e.target.value)}
-          defaultValue={searchParams.get('brand') || ''}
-          className="w-full border border-gray-300 rounded p-2 text-sm"
-        >
-          <option value="">All Brands</option>
-          {brands.map(b => (
-            <option key={b.slug} value={b.slug}>{b.name}</option>
-          ))}
-        </select>
-      </div>
+    <aside className="w-52 shrink-0 space-y-5">
+      {/* Manufacturer */}
+      {facets.manufacturers.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Manufacturer</h3>
+          {renderCheckboxGroup('manufacturer', facets.manufacturers.map(m => ({ value: m.id, label: m.name, count: m.count })))}
+        </div>
+      )}
 
-      <div>
-        <h3 className="font-semibold mb-2 text-gray-900">AWG</h3>
-        <select
-          onChange={e => updateParam('awg', e.target.value)}
-          defaultValue={searchParams.get('awg') || ''}
-          className="w-full border border-gray-300 rounded p-2 text-sm"
-        >
-          <option value="">All AWG</option>
-          {['26', '24', '22', '20', '18', '16', '14'].map(a => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
-      </div>
+      {/* Brand */}
+      {facets.brands.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Brand</h3>
+          {renderCheckboxGroup('brand', facets.brands.map(b => ({ value: b.id, label: b.name, count: b.count })))}
+        </div>
+      )}
 
+      {/* Category (level 1 only) */}
+      {facets.categories.filter(c => c.level === 1).length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Category</h3>
+          {renderCheckboxGroup('category', facets.categories.filter(c => c.level === 1).map(c => ({ value: c.id, label: c.name, count: c.count })))}
+        </div>
+      )}
+
+      {/* AWG */}
+      {facets.awg.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">AWG</h3>
+          {renderCheckboxGroup('awg', facets.awg.map(a => ({ value: a.value, label: a.value, count: a.count })))}
+        </div>
+      )}
+
+      {/* Conductor Area (range) */}
       <div>
-        <h3 className="font-semibold mb-2 text-gray-900">Cross-section (mm²)</h3>
-        <div className="flex gap-2">
+        <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Conductor Area (mm²)</h3>
+        <div className="flex items-center gap-2">
           <input
             type="number"
             step="0.01"
-            placeholder="Min"
-            value={areaMin}
-            onChange={e => setAreaMin(e.target.value)}
-            className="w-1/2 border border-gray-300 rounded p-2 text-sm"
+            placeholder={`min ${facets.conductor_area.min}`}
+            value={searchParams.get('min_area') ?? ''}
+            onChange={e => setNumericParam('min_area', e.target.value)}
+            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
           />
+          <span className="text-gray-400">—</span>
           <input
             type="number"
             step="0.01"
-            placeholder="Max"
-            value={areaMax}
-            onChange={e => setAreaMax(e.target.value)}
-            className="w-1/2 border border-gray-300 rounded p-2 text-sm"
+            placeholder={`max ${facets.conductor_area.max}`}
+            value={searchParams.get('max_area') ?? ''}
+            onChange={e => setNumericParam('max_area', e.target.value)}
+            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
           />
         </div>
       </div>
 
+      {/* Outer Diameter (range) */}
       <div>
-        <h3 className="font-semibold mb-2 text-gray-900">OD (mm)</h3>
-        <div className="flex gap-2">
+        <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Outer Diameter (mm)</h3>
+        <div className="flex items-center gap-2">
           <input
             type="number"
             step="0.01"
-            placeholder="Min"
-            value={odMin}
-            onChange={e => setOdMin(e.target.value)}
-            className="w-1/2 border border-gray-300 rounded p-2 text-sm"
+            placeholder={`min ${facets.outer_diameter.min}`}
+            value={searchParams.get('min_od') ?? ''}
+            onChange={e => setNumericParam('min_od', e.target.value)}
+            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
           />
+          <span className="text-gray-400">—</span>
           <input
             type="number"
             step="0.01"
-            placeholder="Max"
-            value={odMax}
-            onChange={e => setOdMax(e.target.value)}
-            className="w-1/2 border border-gray-300 rounded p-2 text-sm"
+            placeholder={`max ${facets.outer_diameter.max}`}
+            value={searchParams.get('max_od') ?? ''}
+            onChange={e => setNumericParam('max_od', e.target.value)}
+            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
           />
         </div>
       </div>
 
-      <button
-        onClick={applyRange}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-      >
-        Apply Range
-      </button>
+      {/* Shielding */}
+      {facets.shielding.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Shielding</h3>
+          {renderCheckboxGroup('shielding', facets.shielding.map(s => ({ value: s.value, label: s.value, count: s.count })))}
+        </div>
+      )}
 
-      <div>
-        <h3 className="font-semibold mb-2 text-gray-900">Shielding</h3>
-        <select
-          onChange={e => updateParam('shielding', e.target.value)}
-          defaultValue={searchParams.get('shielding') || ''}
-          className="w-full border border-gray-300 rounded p-2 text-sm"
-        >
-          <option value="">All</option>
-          <option value="none">None</option>
-          <option value="braided">Braided</option>
-          <option value="spiral">Spiral</option>
-          <option value="foil">Foil</option>
-        </select>
-      </div>
+      {/* Jacket */}
+      {facets.jacket.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Jacket</h3>
+          {renderCheckboxGroup('jacket', facets.jacket.map(j => ({ value: j.value, label: j.value.toUpperCase(), count: j.count })))}
+        </div>
+      )}
 
-      <div>
-        <h3 className="font-semibold mb-2 text-gray-900">Jacket</h3>
-        <select
-          onChange={e => updateParam('jacket', e.target.value)}
-          defaultValue={searchParams.get('jacket') || ''}
-          className="w-full border border-gray-300 rounded p-2 text-sm"
-        >
-          <option value="">All</option>
-          <option value="none">None</option>
-          <option value="pvc">PVC</option>
-          <option value="pu">PU</option>
-          <option value="lszh">LSZH</option>
-        </select>
-      </div>
-
-      <div>
-        <h3 className="font-semibold mb-2 text-gray-900">Core Structure</h3>
-        <select
-          onChange={e => updateParam('core_structure', e.target.value)}
-          defaultValue={searchParams.get('core_structure') || ''}
-          className="w-full border border-gray-300 rounded p-2 text-sm"
-        >
-          <option value="">All</option>
-          <option value="single">Single Core</option>
-          <option value="2_core">2 Core</option>
-          <option value="3_core">3 Core</option>
-          <option value="4_core">4 Core</option>
-          <option value="multi_core">Multi Core</option>
-        </select>
-      </div>
+      {/* Core Structure */}
+      {facets.core_structure.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Core Structure</h3>
+          {renderCheckboxGroup('core_structure', facets.core_structure.map(c => ({ value: c.value, label: c.value.replace(/_/g, ' '), count: c.count })))}
+        </div>
+      )}
     </aside>
+  );
+}
+
+export function CableFilters(props: CableFiltersProps) {
+  return (
+    <Suspense fallback={<div className="w-52" />}>
+      <CableFiltersInner {...props} />
+    </Suspense>
   );
 }
