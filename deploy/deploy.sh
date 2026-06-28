@@ -14,7 +14,7 @@
 #   1. Pull latest code from the given branch
 #   2. Install npm dependencies (npm ci)
 #   3. Build Next.js (npm run build, includes prebuild data validation)
-#   4. Reload PM2 process (zero-downtime reload)
+#   4. Reload PM2 process (graceful restart)
 #   5. Reload Nginx (config may have changed)
 
 set -euo pipefail
@@ -36,7 +36,7 @@ npm ci
 echo "==> [3/5] Building Next.js (with prebuild data validation)"
 npm run build
 
-echo "==> [4/5] Reloading PM2 process (zero-downtime)"
+echo "==> [4/5] Reloading PM2 process (graceful restart)"
 pm2 reload ecosystem.config.cjs --update-env
 pm2 save
 

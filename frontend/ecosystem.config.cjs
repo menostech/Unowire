@@ -29,7 +29,7 @@ module.exports = {
       // Auto-restart policy
       min_uptime: '10s',
       max_restarts: 10,
-      max_restarts_delay: 3000,
+      restart_delay: 3000,
     },
   ],
 };

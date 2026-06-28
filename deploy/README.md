@@ -86,6 +86,11 @@ sudo systemctl reload nginx
 
 Verify: `curl http://localhost/` should return the same HTML (via Nginx proxy).
 
+```bash
+curl http://localhost/
+# Should return HTML with <title>Unowire — Cable Specs Database</title> (HTTP 200)
+```
+
 ### Step 6: Configure DNS
 
 At your domain registrar, create an A record:
@@ -118,7 +123,7 @@ cd /var/www/unowire
 
 The script does: `git pull` → `npm ci` → `npm run build` → `pm2 reload` → `nginx reload`.
 
-`pm2 reload` is zero-downtime (graceful restart of workers).
+`pm2 reload` triggers a graceful restart (in fork mode, this is equivalent to `restart` — brief downtime may occur). Acceptable for MVP.
 
 ## Rollback
 
