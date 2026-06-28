@@ -16,15 +16,10 @@ interface SearchParams {
   manufacturer?: string;
   brand?: string;
   category?: string;
-  awg?: string;
-  shielding?: string;
-  jacket?: string;
-  core_structure?: string;
-  min_area?: string;
-  max_area?: string;
-  min_od?: string;
-  max_od?: string;
-  page?: string;
+  industry?: string;
+  size?: string;
+  // config-driven enum spec filters (shielding, jacket, core_structure, insulation_material, ...)
+  [key: string]: string | undefined;
 }
 
 function parseArrayParam(sp: SearchParams, key: keyof SearchParams): string[] | undefined {
@@ -36,15 +31,25 @@ function parseArrayParam(sp: SearchParams, key: keyof SearchParams): string[] | 
 export default async function CablesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const page = parseInt(sp.page || '1');
+
+  // Pack config-driven enum spec filters from search params.
+  // Known non-spec keys are excluded; everything else that appears in filter-config
+  // as an enum filter (except size, which stays explicit) is packed into spec_filters.
+  const specFilters: Record<string, string[]> = {};
+  const knownKeys = new Set(['q', 'manufacturer', 'brand', 'category', 'industry', 'size', 'page']);
+  for (const [key, value] of Object.entries(sp)) {
+    if (knownKeys.has(key) || value === undefined) continue;
+    specFilters[key] = Array.isArray(value) ? value : [value];
+  }
+
   const result = filterCables({
     q: sp.q,
     manufacturer: parseArrayParam(sp, 'manufacturer'),
     brand: parseArrayParam(sp, 'brand'),
     category: parseArrayParam(sp, 'category'),
-    awg: parseArrayParam(sp, 'awg'),
-    shielding: parseArrayParam(sp, 'shielding'),
-    jacket: parseArrayParam(sp, 'jacket'),
-    core_structure: parseArrayParam(sp, 'core_structure'),
+    industry: parseArrayParam(sp, 'industry') as any,
+    size: parseArrayParam(sp, 'size'),
+    spec_filters: Object.keys(specFilters).length > 0 ? specFilters : undefined,
     min_area: sp.min_area ? parseFloat(sp.min_area) : undefined,
     max_area: sp.max_area ? parseFloat(sp.max_area) : undefined,
     min_od: sp.min_od ? parseFloat(sp.min_od) : undefined,

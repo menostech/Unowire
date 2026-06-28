@@ -14,15 +14,10 @@ import type { CableQueryParams } from '@/lib/types';
 interface SearchParams {
   manufacturer?: string;
   brand?: string;
-  awg?: string;
-  shielding?: string;
-  jacket?: string;
-  core_structure?: string;
-  min_area?: string;
-  max_area?: string;
-  min_od?: string;
-  max_od?: string;
-  page?: string;
+  industry?: string;
+  size?: string;
+  // config-driven enum spec filters
+  [key: string]: string | undefined;
 }
 
 function parseArrayParam(sp: SearchParams, key: keyof SearchParams): string[] | undefined {
@@ -55,16 +50,22 @@ export default async function CategoryPage({
   const category = found.category;
   const descendantIds = getDescendantIds(category.id);
 
-  // 在标准筛选基础上强制限定该分类
+  // Pack config-driven enum spec filters from search params.
+  const specFilters: Record<string, string[]> = {};
+  const knownKeys = new Set(['manufacturer', 'brand', 'industry', 'size', 'page', 'min_area', 'max_area', 'min_od', 'max_od']);
+  for (const [key, value] of Object.entries(sp)) {
+    if (knownKeys.has(key) || value === undefined) continue;
+    specFilters[key] = Array.isArray(value) ? value : [value];
+  }
+
   const page = parseInt(sp.page || '1');
   const queryParams: CableQueryParams = {
     manufacturer: parseArrayParam(sp, 'manufacturer'),
     brand: parseArrayParam(sp, 'brand'),
     category: [category.id],
-    awg: parseArrayParam(sp, 'awg'),
-    shielding: parseArrayParam(sp, 'shielding'),
-    jacket: parseArrayParam(sp, 'jacket'),
-    core_structure: parseArrayParam(sp, 'core_structure'),
+    industry: parseArrayParam(sp, 'industry') as any,
+    size: parseArrayParam(sp, 'size'),
+    spec_filters: Object.keys(specFilters).length > 0 ? specFilters : undefined,
     min_area: sp.min_area ? parseFloat(sp.min_area) : undefined,
     max_area: sp.max_area ? parseFloat(sp.max_area) : undefined,
     min_od: sp.min_od ? parseFloat(sp.min_od) : undefined,
