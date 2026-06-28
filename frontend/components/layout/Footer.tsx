@@ -14,19 +14,14 @@ export function Footer() {
             <h3 className="font-semibold mb-2">Directory</h3>
             <ul className="space-y-1 text-sm">
               <li><Link href="/cables" className="text-gray-600 hover:text-blue-600">Cables</Link></li>
-              <li><Link href="/equipments" className="text-gray-600 hover:text-blue-600">Equipment</Link></li>
-              <li><Link href="/manufacturers" className="text-gray-600 hover:text-blue-600">Manufacturers</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">Tools</h3>
-            <ul className="space-y-1 text-sm">
-              <li><Link href="/match" className="text-gray-600 hover:text-blue-600">Equipment Match Tool</Link></li>
+              <li><Link href="/categories/automotive" className="text-gray-600 hover:text-blue-600">Automotive</Link></li>
+              <li><Link href="/categories/consumer-electronics" className="text-gray-600 hover:text-blue-600">Consumer Electronics</Link></li>
+              <li><Link href="/categories/industrial" className="text-gray-600 hover:text-blue-600">Industrial</Link></li>
             </ul>
           </div>
         </div>
         <div className="border-t pt-4 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Unowire. Wire Harness Industry Directory.
+          © {new Date().getFullYear()} Unowire. Cable Specs Database.
         </div>
       </Container>
     </footer>
