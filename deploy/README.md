@@ -78,7 +78,7 @@ curl http://127.0.0.1:3000/
 
 ```bash
 sudo cp /var/www/unowire/deploy/nginx-unowire.conf /etc/nginx/sites-available/unowire
-sudo ln -s /etc/nginx/sites-available/unowire /etc/nginx/sites-enabled/unowire
+sudo ln -sf /etc/nginx/sites-available/unowire /etc/nginx/sites-enabled/unowire
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl reload nginx
@@ -106,8 +106,10 @@ sudo certbot --nginx -d www.unowire.com -d unowire.com \
   --non-interactive --agree-tos --email <YOUR_EMAIL> --redirect
 ```
 
-Certbot will:
-- Auto-edit `/etc/nginx/sites-enabled/unowire` to inject SSL cert paths
+Certbot will automatically configure SSL end-to-end — no manual nginx editing is required:
+- Add `listen 443 ssl` + SSL certificate paths to the existing server block in `/etc/nginx/sites-enabled/unowire`
+- Create a separate port-80 server block that redirects HTTP to HTTPS
+- The security headers already in the config (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy) then apply to HTTPS traffic automatically
 - Set up auto-renewal via systemd timer (`certbot.timer`)
 
 Verify HTTPS: `curl -I https://www.unowire.com/` should return `HTTP/2 200`.
@@ -146,7 +148,7 @@ pm2 reload ecosystem.config.cjs --update-env
 | View PM2 logs (live) | `pm2 logs unowire-frontend` |
 | View last 100 log lines | `pm2 logs unowire-frontend --lines 100` |
 | Restart PM2 (hard) | `pm2 restart unowire-frontend` |
-| Reload PM2 (zero-downtime) | `pm2 reload unowire-frontend` |
+| Reload PM2 (graceful restart) | `pm2 reload unowire-frontend` |
 | Restart Nginx | `sudo systemctl restart nginx` |
 | Reload Nginx | `sudo systemctl reload nginx` |
 | Test Nginx config | `sudo nginx -t` |
@@ -188,6 +190,6 @@ Re-run `pm2 startup` and follow the printed `sudo env ...` command.
 |---|---|
 | `frontend/.env.production` | Production env vars (NEXT_PUBLIC_SITE_URL etc.) |
 | `frontend/ecosystem.config.cjs` | PM2 process definition |
-| `deploy/nginx-unowire.conf` | Nginx site config (HTTP redirect + HTTPS proxy) |
+| `deploy/nginx-unowire.conf` | Nginx site config — single server block, HTTP proxy to Next.js, certbot-friendly (certbot adds 443 ssl + redirect automatically) |
 | `deploy/deploy.sh` | One-command deploy script |
 | `deploy/README.md` | This document |
