@@ -1,0 +1,60 @@
+[
+  {
+    "id": "rec-eq-1",
+    "brand": "KMV",
+    "model": "CS-800",
+    "type": "semi_automatic_stripping_machine",
+    "description": "Semi-automatic stripping machine for PVC single-core wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.1, "max": 1.0 },
+      { "spec_key": "outer_diameter", "min": 1.0, "max": 3.0 },
+      { "spec_key": "shielding", "allowed_values": ["none"] },
+      { "spec_key": "jacket", "allowed_values": ["pvc"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.kmv.co.jp/products/cs-800"
+  },
+  {
+    "id": "rec-eq-2",
+    "brand": "Komax",
+    "model": "Alpha 488",
+    "type": "fully_automatic_cutting_stripping_machine",
+    "description": "Fully automatic wire cutting and stripping machine for single-core wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.08, "max": 2.5 },
+      { "spec_key": "outer_diameter", "min": 0.8, "max": 5.5 },
+      { "spec_key": "shielding", "allowed_values": ["none"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.komaxgroup.com/en/products/alpha-488"
+  },
+  {
+    "id": "rec-eq-3",
+    "brand": "KMV",
+    "model": "CS-1500",
+    "type": "semi_automatic_stripping_machine",
+    "description": "Semi-automatic stripping machine for larger diameter wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 1.0, "max": 3.0 },
+      { "spec_key": "outer_diameter", "min": 3.0, "max": 6.0 },
+      { "spec_key": "shielding", "allowed_values": ["none"] },
+      { "spec_key": "jacket", "allowed_values": ["pvc"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.kmv.co.jp/products/cs-1500"
+  },
+  {
+    "id": "rec-eq-4",
+    "brand": "Komax",
+    "model": "Gamma 333",
+    "type": "fully_automatic_cutting_stripping_machine",
+    "description": "Fully automatic cutting and stripping machine for shielded and multi-core cables.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.5, "max": 2.5 },
+      { "spec_key": "outer_diameter", "min": 2.0, "max": 6.0 },
+      { "spec_key": "shielding", "allowed_values": ["braided", "foil"] },
+      { "spec_key": "core_structure", "allowed_values": ["2_core", "3_core", "4_core"] }
+    ],
+    "external_url": "https://www.komaxgroup.com/en/products/gamma-333"
+  }
+]
