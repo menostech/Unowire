@@ -1,24 +1,9 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { Cable, SpecItem, CableVariant } from './types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-export function formatCableUrl(brandSlug: string, slug: string): string {
-  return `/cables/${brandSlug}/${slug}`;
-}
-
-export function formatEquipmentUrl(brandSlug: string, slug: string): string {
-  return `/equipments/${brandSlug}/${slug}`;
-}
-
-export function formatManufacturerUrl(slug: string): string {
-  return `/manufacturers/${slug}`;
-}
-
-export function formatEquipmentType(type: string): string {
-  return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 export function formatCoreStructure(core: string): string {
@@ -51,8 +36,6 @@ export function formatJacket(jacket: string): string {
   };
   return map[jacket] || jacket.toUpperCase();
 }
-
-import type { Cable, SpecItem, CableVariant } from './types';
 
 /** 从 cable 的 common_specs 或 variant specs 查找 SpecItem */
 export function findSpecItem(cable: Cable, key: string): SpecItem | undefined {
