@@ -5,6 +5,8 @@
     "model": "UL1007",
     "slug": "ul1007",
     "type": "electronic_wire",
+    "industry": "consumer_electronics",
+    "size_system": "awg",
     "category_ids": ["cat-4", "cat-7"],
     "base_description": "UL1007 PVC insulated single-core wire for internal wiring of electronic equipment. Rated for 300V and 80°C.",
     "meta_title": null,
@@ -19,7 +21,7 @@
       {
         "slug": "awg24",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "24", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "24", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.205, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.40, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
@@ -29,7 +31,7 @@
       {
         "slug": "awg22",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "22", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "22", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.326, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.60, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
@@ -39,7 +41,7 @@
       {
         "slug": "awg26",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "26", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "26", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.128, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.20, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
@@ -54,6 +56,8 @@
     "model": "UL1015",
     "slug": "ul1015",
     "type": "electronic_wire",
+    "industry": "consumer_electronics",
+    "size_system": "awg",
     "category_ids": ["cat-7"],
     "base_description": "UL1015 PVC insulated wire with higher temperature rating. Rated for 600V and 105°C. Suitable for internal wiring of electrical equipment.",
     "meta_title": null,
@@ -68,7 +72,7 @@
       {
         "slug": "awg20",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "20", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "20", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.519, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.80, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "600V", "unit": null, "type": "enum", "filterable": false },
@@ -83,6 +87,8 @@
     "model": "AVSS",
     "slug": "avss",
     "type": "automotive_wire",
+    "industry": "automotive",
+    "size_system": "awg",
     "category_ids": ["cat-4"],
     "base_description": "AVSS thin-wall PVC insulated automotive wire. Designed for automotive wiring harness applications. Rated for 60V and 80°C.",
     "meta_title": null,
@@ -97,7 +103,7 @@
       {
         "slug": "0.5f",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "20", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "20", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.5, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.0, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
@@ -107,7 +113,7 @@
       {
         "slug": "0.75f",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "18", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "18", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.75, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.3, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
@@ -117,7 +123,7 @@
       {
         "slug": "1.25f",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "16", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "16", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 1.25, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.6, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
@@ -132,6 +138,8 @@
     "model": "UL2468",
     "slug": "ul2468",
     "type": "multi_core_wire",
+    "industry": "consumer_electronics",
+    "size_system": "awg",
     "category_ids": ["cat-7"],
     "base_description": "UL2468 PVC insulated flat ribbon cable for internal power connections. Rated for 300V and 80°C.",
     "meta_title": null,
@@ -146,7 +154,7 @@
       {
         "slug": "24awg-2c",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "24", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "24", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.205, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.8, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
@@ -161,6 +169,8 @@
     "model": "UL2517",
     "slug": "ul2517",
     "type": "electronic_wire",
+    "industry": "consumer_electronics",
+    "size_system": "awg",
     "category_ids": ["cat-7"],
     "base_description": "UL2517 PU jacketed wire for applications requiring flexibility and abrasion resistance. Rated for 300V and 80°C.",
     "meta_title": null,
@@ -175,7 +185,7 @@
       {
         "slug": "22awg",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "22", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "22", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 0.326, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.90, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
@@ -190,6 +200,8 @@
     "model": "AVSS Shielded",
     "slug": "avss-shielded",
     "type": "shielded_wire",
+    "industry": "automotive",
+    "size_system": "awg",
     "category_ids": ["cat-4", "cat-9"],
     "base_description": "AVSS 2.0 shielded 2-conductor automotive wire for higher current circuits requiring EMI protection. Rated for 60V and 80°C.",
     "meta_title": null,
@@ -204,7 +216,7 @@
       {
         "slug": "2.0-2c",
         "specs": [
-          { "key": "awg", "label": "AWG", "value": "14", "unit": null, "type": "enum", "filterable": true },
+          { "key": "size", "label": "AWG", "value": "14", "unit": null, "type": "enum", "filterable": true },
           { "key": "conductor_area", "label": "Conductor Area", "value": 2.0, "unit": "mm²", "type": "number", "filterable": true },
           { "key": "outer_diameter", "label": "Outer Diameter", "value": 5.2, "unit": "mm", "type": "number", "filterable": true },
           { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
