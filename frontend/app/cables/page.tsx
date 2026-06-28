@@ -36,7 +36,7 @@ export default async function CablesPage({ searchParams }: { searchParams: Promi
   // Known non-spec keys are excluded; everything else that appears in filter-config
   // as an enum filter (except size, which stays explicit) is packed into spec_filters.
   const specFilters: Record<string, string[]> = {};
-  const knownKeys = new Set(['q', 'manufacturer', 'brand', 'category', 'industry', 'size', 'page']);
+  const knownKeys = new Set(['q', 'manufacturer', 'brand', 'category', 'industry', 'size', 'page', 'min_area', 'max_area', 'min_od', 'max_od']);
   for (const [key, value] of Object.entries(sp)) {
     if (knownKeys.has(key) || value === undefined) continue;
     specFilters[key] = Array.isArray(value) ? value : [value];
