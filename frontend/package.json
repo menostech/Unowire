@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "tsx scripts/validate-data.ts && next dev",
+    "prebuild": "tsx scripts/validate-data.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
