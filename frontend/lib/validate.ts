@@ -80,6 +80,80 @@ export function validateAllData(): ValidationError[] {
         });
       }
     }
+
+    // 5b. industry + size_system presence and validity
+    const validIndustries = new Set(api.filterConfig.industries());
+    const validSizeSystems = new Set(["awg", "mm2", "kcmil", "none"]);
+    if (!cable.industry) {
+      errors.push({
+        file: "cables.json",
+        cable_id: cable.id,
+        message: `Cable ${cable.id} missing required field: industry`,
+        severity: "error",
+      });
+    } else if (!validIndustries.has(cable.industry)) {
+      errors.push({
+        file: "cables.json",
+        cable_id: cable.id,
+        message: `Cable ${cable.id} has invalid industry "${cable.industry}". Valid: ${Array.from(validIndustries).join(", ")}`,
+        severity: "error",
+      });
+    }
+    if (!cable.size_system) {
+      errors.push({
+        file: "cables.json",
+        cable_id: cable.id,
+        message: `Cable ${cable.id} missing required field: size_system`,
+        severity: "error",
+      });
+    } else if (!validSizeSystems.has(cable.size_system)) {
+      errors.push({
+        file: "cables.json",
+        cable_id: cable.id,
+        message: `Cable ${cable.id} has invalid size_system "${cable.size_system}". Valid: awg, mm2, kcmil, none`,
+        severity: "error",
+      });
+    }
+
+    // 5c. size spec presence consistency with size_system
+    if (cable.size_system && cable.size_system !== "none") {
+      for (const variant of cable.variants) {
+        const hasSize = variant.specs.some(s => s.key === "size");
+        if (!hasSize) {
+          errors.push({
+            file: "cables.json",
+            cable_id: cable.id,
+            message: `Cable ${cable.id} variant ${variant.slug}: missing "size" spec but size_system is "${cable.size_system}"`,
+            severity: "error",
+          });
+        }
+      }
+    } else if (cable.size_system === "none") {
+      for (const variant of cable.variants) {
+        const hasSize = variant.specs.some(s => s.key === "size");
+        if (hasSize) {
+          errors.push({
+            file: "cables.json",
+            cable_id: cable.id,
+            message: `Cable ${cable.id} variant ${variant.slug}: has "size" spec but size_system is "none"`,
+            severity: "error",
+          });
+        }
+      }
+    }
+
+    // 5d. type must exist in filter-config.json
+    if (cable.industry && validIndustries.has(cable.industry)) {
+      const indCfg = api.filterConfig.byIndustry(cable.industry);
+      if (indCfg && !indCfg.types[cable.type]) {
+        errors.push({
+          file: "cables.json",
+          cable_id: cable.id,
+          message: `Cable ${cable.id} type "${cable.type}" not found in filter-config.json under industry "${cable.industry}"`,
+          severity: "error",
+        });
+      }
+    }
   }
 
   // 6. (brand_slug, cable_slug) 组合唯一
