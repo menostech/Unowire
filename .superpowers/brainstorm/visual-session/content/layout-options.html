@@ -1,0 +1,211 @@
+<h2>列表页布局方向</h2>
+<p class="subtitle">参考 mcmaster.com，全屏宽度 + 卡片网格 + 图片。选一个方向深入。</p>
+
+<div class="cards">
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #f8fafc;">
+      <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">A · 经典 3 列（mcmaster 风格）</div>
+      <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; height: 100%;">
+        <!-- 侧边栏 -->
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px; font-size: 9px;">
+          <div style="font-weight: 600; margin-bottom: 4px;">Filters</div>
+          <div style="color: #94a3b8; line-height: 1.6;">Brand<br/>AWG<br/>Shielding<br/>Jacket</div>
+        </div>
+        <!-- 卡片网格 -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 40px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #64748b;">📷</div>
+            <div style="padding: 4px; font-size: 7px;">
+              <div style="font-weight: 600;">UL1007 AWG24</div>
+              <div style="color: #64748b;">0.205mm² · 1.4mm</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 40px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #64748b;">📷</div>
+            <div style="padding: 4px; font-size: 7px;">
+              <div style="font-weight: 600;">UL1007 AWG22</div>
+              <div style="color: #64748b;">0.326mm² · 1.6mm</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 40px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #64748b;">📷</div>
+            <div style="padding: 4px; font-size: 7px;">
+              <div style="font-weight: 600;">UL1015 AWG20</div>
+              <div style="color: #64748b;">0.519mm² · 1.8mm</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 40px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #64748b;">📷</div>
+            <div style="padding: 4px; font-size: 7px;">
+              <div style="font-weight: 600;">AVSS 0.5f</div>
+              <div style="color: #64748b;">0.5mm² · 2.0mm</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 40px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #64748b;">📷</div>
+            <div style="padding: 4px; font-size: 7px;">
+              <div style="font-weight: 600;">AVSS 0.75f</div>
+              <div style="color: #64748b;">0.75mm² · 2.3mm</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 40px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #64748b;">📷</div>
+            <div style="padding: 4px; font-size: 7px;">
+              <div style="font-weight: 600;">AVSS 1.25f</div>
+              <div style="color: #64748b;">1.25mm² · 2.6mm</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 经典 3 列网格</h3>
+      <p>最贴近 mcmaster：左侧筛选栏 + 3 列卡片，图片正方形占比大，信息简洁。适合产品数量多、视觉浏览为主的场景。</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #f8fafc;">
+      <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">B · 紧凑 4 列（高密度）</div>
+      <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; height: 100%;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px; font-size: 9px;">
+          <div style="font-weight: 600; margin-bottom: 4px;">Filters</div>
+          <div style="color: #94a3b8; line-height: 1.6;">Brand<br/>AWG<br/>Shielding<br/>Jacket</div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">UL1007/24</div>
+              <div style="color: #64748b;">0.205mm²</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">UL1007/22</div>
+              <div style="color: #64748b;">0.326mm²</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">UL1015/20</div>
+              <div style="color: #64748b;">0.519mm²</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">AVSS 0.5f</div>
+              <div style="color: #64748b;">0.5mm²</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">AVSS 0.75f</div>
+              <div style="color: #64748b;">0.75mm²</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">AVSS 1.25f</div>
+              <div style="color: #64748b;">1.25mm²</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">AWM 1007</div>
+              <div style="color: #64748b;">0.128mm²</div>
+            </div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="padding: 3px; font-size: 6px;">
+              <div style="font-weight: 600;">UL2468 2C</div>
+              <div style="color: #64748b;">0.205mm²</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 紧凑 4 列网格</h3>
+      <p>更高密度：4 列卡片，图片更小，信息更精简。单屏可见更多产品，适合工程人员快速比对规格。但视觉冲击力弱于 A。</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #f8fafc;">
+      <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">C · 水平卡片（图片左 + 信息右）</div>
+      <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; height: 100%;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px; font-size: 9px;">
+          <div style="font-weight: 600; margin-bottom: 4px;">Filters</div>
+          <div style="color: #94a3b8; line-height: 1.6;">Brand<br/>AWG<br/>Shielding<br/>Jacket</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 4px;">
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px; display: grid; grid-template-columns: 50px 1fr auto; gap: 6px; align-items: center;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="font-size: 7px;">
+              <div style="font-weight: 600;">UL1007 AWG24</div>
+              <div style="color: #64748b;">0.205mm² · 1.4mm OD · PVC · Single</div>
+            </div>
+            <div style="font-size: 6px; color: #2563eb;">View →</div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px; display: grid; grid-template-columns: 50px 1fr auto; gap: 6px; align-items: center;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="font-size: 7px;">
+              <div style="font-weight: 600;">UL1007 AWG22</div>
+              <div style="color: #64748b;">0.326mm² · 1.6mm OD · PVC · Single</div>
+            </div>
+            <div style="font-size: 6px; color: #2563eb;">View →</div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px; display: grid; grid-template-columns: 50px 1fr auto; gap: 6px; align-items: center;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="font-size: 7px;">
+              <div style="font-weight: 600;">UL1015 AWG20</div>
+              <div style="color: #64748b;">0.519mm² · 1.8mm OD · PVC · Single</div>
+            </div>
+            <div style="font-size: 6px; color: #2563eb;">View →</div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px; display: grid; grid-template-columns: 50px 1fr auto; gap: 6px; align-items: center;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="font-size: 7px;">
+              <div style="font-weight: 600;">AVSS 0.5f</div>
+              <div style="color: #64748b;">0.5mm² · 2.0mm OD · PVC · Single</div>
+            </div>
+            <div style="font-size: 6px; color: #2563eb;">View →</div>
+          </div>
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px; display: grid; grid-template-columns: 50px 1fr auto; gap: 6px; align-items: center;">
+            <div style="height: 30px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #64748b;">📷</div>
+            <div style="font-size: 7px;">
+              <div style="font-weight: 600;">AVSS 1.25f</div>
+              <div style="color: #64748b;">1.25mm² · 2.6mm OD · PVC · Single</div>
+            </div>
+            <div style="font-size: 6px; color: #2563eb;">View →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 水平卡片（图左信息右）</h3>
+      <p>每行一张卡片：左侧小图 + 右侧完整规格。信息密度最高，适合工程人员精确比对。但视觉吸引力弱，不像黄页目录。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>说明</h3>
+  <ul style="font-size: 14px; color: #64748b; line-height: 1.8;">
+    <li>三种方案均为<strong>全屏宽度</strong>（去掉当前 Container 的 max-width 限制）</li>
+    <li>左侧筛选栏统一保留（可折叠）</li>
+    <li>图片来源待定：mockup 先用占位图，后续可接 Unsplash 真实图或 AI 生成</li>
+    <li>点击卡片选择你倾向的方向，或在终端告诉我想法</li>
+  </ul>
+</div>

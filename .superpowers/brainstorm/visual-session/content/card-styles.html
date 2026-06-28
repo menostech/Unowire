@@ -1,0 +1,131 @@
+<h2>B 方案卡片细节：4 种样式</h2>
+<p class="subtitle">4 列网格已定，现在确定单张卡片的视觉风格。都按真实数据（UL1007 AWG24）画。</p>
+
+<div class="cards">
+  <!-- Style 1: 图+标题+核心规格 -->
+  <div class="card" data-choice="style1" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 24px; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
+      <div style="width: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <!-- 图片区 -->
+        <div style="height: 120px; background: linear-gradient(135deg, #f1f5f9, #cbd5e1); display: flex; align-items: center; justify-content: center; position: relative;">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <rect x="10" y="25" width="40" height="10" rx="2" fill="#64748b"/>
+            <circle cx="15" cy="30" r="3" fill="#94a3b8"/>
+            <circle cx="45" cy="30" r="3" fill="#94a3b8"/>
+          </svg>
+          <span style="position: absolute; top: 6px; right: 6px; background: #fff; color: #64748b; font-size: 9px; padding: 2px 6px; border-radius: 3px; border: 1px solid #e2e8f0;">AWG 24</span>
+        </div>
+        <!-- 信息区 -->
+        <div style="padding: 10px;">
+          <div style="font-weight: 600; font-size: 13px; color: #0f172a; margin-bottom: 2px;">UL1007 AWG24</div>
+          <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Hitachi Cable</div>
+          <div style="display: flex; gap: 8px; font-size: 10px; color: #475569;">
+            <span><strong>0.205</strong>mm²</span>
+            <span>·</span>
+            <span><strong>1.4</strong>mm OD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>样式 1 · 极简（图+标题+核心规格）</h3>
+      <p>图片占主体，下方仅显示规格型号 + 品牌 + 2 个核心参数。最简洁，视觉冲击最强。其他规格留到详情页。</p>
+    </div>
+  </div>
+
+  <!-- Style 2: 图+标题+规格标签 -->
+  <div class="card" data-choice="style2" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 24px; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
+      <div style="width: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="height: 120px; background: linear-gradient(135deg, #f1f5f9, #cbd5e1); display: flex; align-items: center; justify-content: center; position: relative;">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <rect x="10" y="25" width="40" height="10" rx="2" fill="#64748b"/>
+            <circle cx="15" cy="30" r="3" fill="#94a3b8"/>
+            <circle cx="45" cy="30" r="3" fill="#94a3b8"/>
+          </svg>
+          <span style="position: absolute; top: 6px; right: 6px; background: #fff; color: #64748b; font-size: 9px; padding: 2px 6px; border-radius: 3px; border: 1px solid #e2e8f0;">AWG 24</span>
+        </div>
+        <div style="padding: 10px;">
+          <div style="font-weight: 600; font-size: 13px; color: #0f172a; margin-bottom: 2px;">UL1007 AWG24</div>
+          <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">Hitachi Cable</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 3px;">
+            <span style="font-size: 9px; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 3px;">0.205mm²</span>
+            <span style="font-size: 9px; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 3px;">1.4mm OD</span>
+            <span style="font-size: 9px; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 3px;">PVC</span>
+            <span style="font-size: 9px; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 3px;">Single</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>样式 2 · 标签化（图+标题+多标签）</h3>
+      <p>图片下方用 pill 标签展示 4 个关键参数（截面/外径/护套/芯数）。信息密度适中，标签可快速扫读。</p>
+    </div>
+  </div>
+
+  <!-- Style 3: 图+标题+迷你规格表 -->
+  <div class="card" data-choice="style3" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 24px; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
+      <div style="width: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="height: 100px; background: linear-gradient(135deg, #f1f5f9, #cbd5e1); display: flex; align-items: center; justify-content: center; position: relative;">
+          <svg width="50" height="50" viewBox="0 0 60 60" fill="none">
+            <rect x="10" y="25" width="40" height="10" rx="2" fill="#64748b"/>
+            <circle cx="15" cy="30" r="3" fill="#94a3b8"/>
+            <circle cx="45" cy="30" r="3" fill="#94a3b8"/>
+          </svg>
+          <span style="position: absolute; top: 6px; right: 6px; background: #fff; color: #64748b; font-size: 9px; padding: 2px 6px; border-radius: 3px; border: 1px solid #e2e8f0;">AWG 24</span>
+        </div>
+        <div style="padding: 8px 10px;">
+          <div style="font-weight: 600; font-size: 12px; color: #0f172a; margin-bottom: 4px;">UL1007 AWG24</div>
+          <div style="font-size: 10px; color: #64748b; margin-bottom: 6px;">Hitachi Cable</div>
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 4px; font-size: 9px; color: #475569; line-height: 1.6;">
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Area</span><span>0.205 mm²</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">OD</span><span>1.40 mm</span></div>
+            <div style="display: flex; justify-content: space-between;"><span style="color: #94a3b8;">Jacket</span><span>PVC</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>样式 3 · 迷你规格表（图+标题+键值对）</h3>
+      <p>图片稍小，下方用键值对表格展示 3 项规格。信息最全，工程人员直接比对。但卡片高度不一致（字段数不同时）。</p>
+    </div>
+  </div>
+
+  <!-- Style 4: 图占满+悬浮信息 -->
+  <div class="card" data-choice="style4" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 24px; background: #f8fafc; display: flex; justify-content: center; align-items: center;">
+      <div style="width: 180px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative;">
+        <div style="height: 160px; background: linear-gradient(135deg, #f1f5f9, #cbd5e1); display: flex; align-items: center; justify-content: center; position: relative;">
+          <svg width="70" height="70" viewBox="0 0 60 60" fill="none">
+            <rect x="10" y="25" width="40" height="10" rx="2" fill="#64748b"/>
+            <circle cx="15" cy="30" r="3" fill="#94a3b8"/>
+            <circle cx="45" cy="30" r="3" fill="#94a3b8"/>
+          </svg>
+          <span style="position: absolute; top: 6px; right: 6px; background: #fff; color: #64748b; font-size: 9px; padding: 2px 6px; border-radius: 3px; border: 1px solid #e2e8f0;">AWG 24</span>
+          <!-- 底部渐变叠加 -->
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 8px;">
+            <div style="font-weight: 600; font-size: 13px; color: #fff;">UL1007 AWG24</div>
+            <div style="font-size: 10px; color: rgba(255,255,255,0.8);">Hitachi Cable</div>
+          </div>
+        </div>
+        <div style="padding: 6px 10px; display: flex; justify-content: space-between; font-size: 10px; color: #475569;">
+          <span><strong>0.205</strong>mm²</span>
+          <span><strong>1.4</strong>mm</span>
+          <span>PVC</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>样式 4 · 图片占满+悬浮标题</h3>
+      <p>图片占据卡片主体，标题和品牌悬浮在图片底部（渐变遮罩）。底部窄条显示核心参数。视觉冲击最强，但图片质量要求高。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 20px;">
+  <h3>图片来源说明</h3>
+  <p style="font-size: 14px; color: #64748b; line-height: 1.7;">
+    mockup 里用了线缆截面 SVG 占位图。实际实现时图片来源待定——你之前取消了这个问题，我先用占位图实现布局，图片后续再加。如果现在就想定图片来源，告诉我。
+  </p>
+</div>
