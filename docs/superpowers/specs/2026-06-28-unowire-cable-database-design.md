@@ -47,7 +47,7 @@ Unowire 是一个**线缆规格数据库查询网站**，提供线缆型号的�
 
 ```
 frontend/data/
-├── manufacturers.json            # 生成商（母公司）
+├── manufacturers.json            # 生产商（母公司）
 ├── brands.json                   # 品牌（子品牌，引用 manufacturer_id）
 ├── categories.json               # 4 级分类树（扁平 + parent_id）
 ├── cables.json                   # 线缆 model 聚合（引用 brand_id + category_ids，含 variants + 动态 specs）
@@ -56,7 +56,7 @@ frontend/data/
 
 ### 2.2 manufacturers.json
 
-生成商（法律实体），作为引用数据，无独立页面。MVP 阶段预计 3-5 家生成商。
+生产商（法律实体），作为引用数据，无独立页面。MVP 阶段预计 3-5 家生产商。
 
 ```json
 [
@@ -90,7 +90,7 @@ frontend/data/
 
 ### 2.3 brands.json
 
-品牌（市场标识），属于某个生成商。线缆引用品牌 ID。MVP 阶段预计 4-6 个品牌。
+品牌（市场标识），属于某个生产商。线缆引用品牌 ID。MVP 阶段预计 4-6 个品牌。
 
 ```json
 [
@@ -267,12 +267,12 @@ frontend/data/
 - `external_url`: 外链到设备厂商页面（不建独立设备页）
 - 预计 4-6 条推荐设备覆盖常见规格范围
 
-### 2.7 生成商/品牌拆分说明
+### 2.7 生产商/品牌拆分说明
 
-一个生成商（母公司）旗下可能有多个品牌。例如：
-- Hitachi Cable（生成商）→ Hitachi（品牌）
-- Sumitomo Electric（生成商）→ Sumitomo（品牌）
-- Prysmian Group（生成商）→ Draka、Prysmian（品牌）
+一个生产商（母公司）旗下可能有多个品牌。例如：
+- Hitachi Cable（生产商）→ Hitachi（品牌）
+- Sumitomo Electric（生产商）→ Sumitomo（品牌）
+- Prysmian Group（生产商）→ Draka、Prysmian（品牌）
 
 线缆引用 `brand_id`（最细粒度），详情页通过 brand → manufacturer join 显示完整层级。
 
