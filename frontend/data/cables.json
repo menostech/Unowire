@@ -1,212 +1,216 @@
 [
   {
-    "id": "cable-1",
-    "manufacturer_id": "mfr-1",
-    "brand": "Hitachi Cable",
-    "brand_slug": "hitachi-cable",
+    "id": "cable-model-1",
+    "brand_id": "brand-1",
     "model": "UL1007",
-    "slug": "ul1007-awg24",
-    "spec": "UL1007 AWG24",
-    "awg": "24",
-    "conductor_area": 0.205,
-    "outer_diameter": 1.40,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "single",
-    "rated_voltage": "300V",
-    "temperature_rating": "80°C",
-    "description": "UL1007 AWG24 PVC insulated single-core wire, widely used in internal wiring of electronic equipment. Conductor cross-section 0.205 mm², outer diameter 1.40 mm. Rated for 300V and 80°C.",
+    "slug": "ul1007",
+    "type": "electronic_wire",
+    "category_ids": ["cat-4", "cat-7"],
+    "base_description": "UL1007 PVC insulated single-core wire for internal wiring of electronic equipment. Rated for 300V and 80°C.",
     "meta_title": null,
-    "meta_description": null
+    "meta_description": null,
+    "common_specs": [
+      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "type": "enum", "filterable": true },
+      { "key": "shielding", "label": "Shielding", "value": "none", "unit": null, "type": "enum", "filterable": true },
+      { "key": "jacket", "label": "Jacket", "value": "pvc", "unit": null, "type": "enum", "filterable": true },
+      { "key": "core_structure", "label": "Core Structure", "value": "single", "unit": null, "type": "enum", "filterable": true }
+    ],
+    "variants": [
+      {
+        "slug": "awg24",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "24", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.205, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.40, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      },
+      {
+        "slug": "awg22",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "22", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.326, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.60, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      },
+      {
+        "slug": "awg26",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "26", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.128, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.20, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      }
+    ]
   },
   {
-    "id": "cable-2",
-    "manufacturer_id": "mfr-1",
-    "brand": "Hitachi Cable",
-    "brand_slug": "hitachi-cable",
-    "model": "UL1007",
-    "slug": "ul1007-awg22",
-    "spec": "UL1007 AWG22",
-    "awg": "22",
-    "conductor_area": 0.326,
-    "outer_diameter": 1.60,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "single",
-    "rated_voltage": "300V",
-    "temperature_rating": "80°C",
-    "description": "UL1007 AWG22 PVC insulated single-core wire for internal electronic wiring. 0.326 mm² conductor, 1.60 mm OD. Common in appliance and consumer electronics.",
-    "meta_title": null,
-    "meta_description": null
-  },
-  {
-    "id": "cable-3",
-    "manufacturer_id": "mfr-1",
-    "brand": "Hitachi Cable",
-    "brand_slug": "hitachi-cable",
+    "id": "cable-model-2",
+    "brand_id": "brand-1",
     "model": "UL1015",
-    "slug": "ul1015-awg20",
-    "spec": "UL1015 AWG20",
-    "awg": "20",
-    "conductor_area": 0.519,
-    "outer_diameter": 1.80,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "single",
-    "rated_voltage": "600V",
-    "temperature_rating": "105°C",
-    "description": "UL1015 AWG20 PVC insulated wire with higher temperature rating. 0.519 mm² conductor, 1.80 mm OD, 600V rated. Suitable for internal wiring of electrical equipment.",
+    "slug": "ul1015",
+    "type": "electronic_wire",
+    "category_ids": ["cat-7"],
+    "base_description": "UL1015 PVC insulated wire with higher temperature rating. Rated for 600V and 105°C. Suitable for internal wiring of electrical equipment.",
     "meta_title": null,
-    "meta_description": null
+    "meta_description": null,
+    "common_specs": [
+      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "type": "enum", "filterable": true },
+      { "key": "shielding", "label": "Shielding", "value": "none", "unit": null, "type": "enum", "filterable": true },
+      { "key": "jacket", "label": "Jacket", "value": "pvc", "unit": null, "type": "enum", "filterable": true },
+      { "key": "core_structure", "label": "Core Structure", "value": "single", "unit": null, "type": "enum", "filterable": true }
+    ],
+    "variants": [
+      {
+        "slug": "awg20",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "20", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.519, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.80, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "600V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "105°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      }
+    ]
   },
   {
-    "id": "cable-4",
-    "manufacturer_id": "mfr-2",
-    "brand": "Sumitomo Electric",
-    "brand_slug": "sumitomo-electric",
+    "id": "cable-model-3",
+    "brand_id": "brand-2",
     "model": "AVSS",
-    "slug": "avss-0.5f",
-    "spec": "AVSS 0.5f",
-    "awg": "20",
-    "conductor_area": 0.5,
-    "outer_diameter": 2.0,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "single",
-    "rated_voltage": "60V",
-    "temperature_rating": "80°C",
-    "description": "AVSS 0.5f thin-wall PVC insulated automotive wire. 0.5 mm² conductor, 2.0 mm OD. Designed for automotive wiring harness applications.",
+    "slug": "avss",
+    "type": "automotive_wire",
+    "category_ids": ["cat-4"],
+    "base_description": "AVSS thin-wall PVC insulated automotive wire. Designed for automotive wiring harness applications. Rated for 60V and 80°C.",
     "meta_title": null,
-    "meta_description": null
+    "meta_description": null,
+    "common_specs": [
+      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "type": "enum", "filterable": true },
+      { "key": "shielding", "label": "Shielding", "value": "none", "unit": null, "type": "enum", "filterable": true },
+      { "key": "jacket", "label": "Jacket", "value": "pvc", "unit": null, "type": "enum", "filterable": true },
+      { "key": "core_structure", "label": "Core Structure", "value": "single", "unit": null, "type": "enum", "filterable": true }
+    ],
+    "variants": [
+      {
+        "slug": "0.5f",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "20", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.5, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.0, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      },
+      {
+        "slug": "0.75f",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "18", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.75, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.3, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      },
+      {
+        "slug": "1.25f",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "16", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 1.25, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.6, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      }
+    ]
   },
   {
-    "id": "cable-5",
-    "manufacturer_id": "mfr-2",
-    "brand": "Sumitomo Electric",
-    "brand_slug": "sumitomo-electric",
-    "model": "AVSS",
-    "slug": "avss-0.75f",
-    "spec": "AVSS 0.75f",
-    "awg": "18",
-    "conductor_area": 0.75,
-    "outer_diameter": 2.3,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "single",
-    "rated_voltage": "60V",
-    "temperature_rating": "80°C",
-    "description": "AVSS 0.75f thin-wall automotive wire. 0.75 mm² conductor, 2.3 mm OD. Used in automotive harnesses for power distribution.",
-    "meta_title": null,
-    "meta_description": null
-  },
-  {
-    "id": "cable-6",
-    "manufacturer_id": "mfr-2",
-    "brand": "Sumitomo Electric",
-    "brand_slug": "sumitomo-electric",
-    "model": "AVSS",
-    "slug": "avss-1.25f",
-    "spec": "AVSS 1.25f",
-    "awg": "16",
-    "conductor_area": 1.25,
-    "outer_diameter": 2.6,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "single",
-    "rated_voltage": "60V",
-    "temperature_rating": "80°C",
-    "description": "AVSS 1.25f thin-wall automotive wire. 1.25 mm² conductor, 2.6 mm OD. Common in automotive harnesses for higher current circuits.",
-    "meta_title": null,
-    "meta_description": null
-  },
-  {
-    "id": "cable-7",
-    "manufacturer_id": "mfr-1",
-    "brand": "Hitachi Cable",
-    "brand_slug": "hitachi-cable",
-    "model": "AWM",
-    "slug": "awm-1007-26",
-    "spec": "AWM 1007 AWG26",
-    "awg": "26",
-    "conductor_area": 0.128,
-    "outer_diameter": 1.20,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "single",
-    "rated_voltage": "300V",
-    "temperature_rating": "80°C",
-    "description": "AWM 1007 AWG26 thin PVC wire for compact electronic devices. 0.128 mm² conductor, 1.20 mm OD. Ideal for space-constrained applications.",
-    "meta_title": null,
-    "meta_description": null
-  },
-  {
-    "id": "cable-8",
-    "manufacturer_id": "mfr-1",
-    "brand": "Hitachi Cable",
-    "brand_slug": "hitachi-cable",
+    "id": "cable-model-4",
+    "brand_id": "brand-1",
     "model": "UL2468",
-    "slug": "ul2468-24awg-2c",
-    "spec": "UL2468 24AWG 2C",
-    "awg": "24",
-    "conductor_area": 0.205,
-    "outer_diameter": 2.8,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pvc",
-    "core_structure": "2_core",
-    "rated_voltage": "300V",
-    "temperature_rating": "80°C",
-    "description": "UL2468 24AWG 2-conductor flat ribbon cable for internal power connections. 0.205 mm² per conductor, 2.8 mm total OD.",
+    "slug": "ul2468",
+    "type": "multi_core_wire",
+    "category_ids": ["cat-7"],
+    "base_description": "UL2468 PVC insulated flat ribbon cable for internal power connections. Rated for 300V and 80°C.",
     "meta_title": null,
-    "meta_description": null
+    "meta_description": null,
+    "common_specs": [
+      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "type": "enum", "filterable": true },
+      { "key": "shielding", "label": "Shielding", "value": "none", "unit": null, "type": "enum", "filterable": true },
+      { "key": "jacket", "label": "Jacket", "value": "pvc", "unit": null, "type": "enum", "filterable": true },
+      { "key": "core_structure", "label": "Core Structure", "value": "2_core", "unit": null, "type": "enum", "filterable": true }
+    ],
+    "variants": [
+      {
+        "slug": "24awg-2c",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "24", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.205, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 2.8, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      }
+    ]
   },
   {
-    "id": "cable-9",
-    "manufacturer_id": "mfr-1",
-    "brand": "Hitachi Cable",
-    "brand_slug": "hitachi-cable",
+    "id": "cable-model-5",
+    "brand_id": "brand-1",
     "model": "UL2517",
-    "slug": "ul2517-22awg",
-    "spec": "UL2517 AWG22",
-    "awg": "22",
-    "conductor_area": 0.326,
-    "outer_diameter": 1.90,
-    "insulation_material": "PVC",
-    "shielding": "none",
-    "jacket": "pu",
-    "core_structure": "single",
-    "rated_voltage": "300V",
-    "temperature_rating": "80°C",
-    "description": "UL2517 AWG22 PU jacketed wire for applications requiring flexibility and abrasion resistance. 0.326 mm² conductor, 1.90 mm OD.",
+    "slug": "ul2517",
+    "type": "electronic_wire",
+    "category_ids": ["cat-7"],
+    "base_description": "UL2517 PU jacketed wire for applications requiring flexibility and abrasion resistance. Rated for 300V and 80°C.",
     "meta_title": null,
-    "meta_description": null
+    "meta_description": null,
+    "common_specs": [
+      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "type": "enum", "filterable": true },
+      { "key": "shielding", "label": "Shielding", "value": "none", "unit": null, "type": "enum", "filterable": true },
+      { "key": "jacket", "label": "Jacket", "value": "pu", "unit": null, "type": "enum", "filterable": true },
+      { "key": "core_structure", "label": "Core Structure", "value": "single", "unit": null, "type": "enum", "filterable": true }
+    ],
+    "variants": [
+      {
+        "slug": "22awg",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "22", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 0.326, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 1.90, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "300V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      }
+    ]
   },
   {
-    "id": "cable-10",
-    "manufacturer_id": "mfr-2",
-    "brand": "Sumitomo Electric",
-    "brand_slug": "sumitomo-electric",
-    "model": "AVSS",
-    "slug": "avss-2-2c-shielded",
-    "spec": "AVSS 2.0 2C Shielded",
-    "awg": "14",
-    "conductor_area": 2.0,
-    "outer_diameter": 5.2,
-    "insulation_material": "PVC",
-    "shielding": "braided",
-    "jacket": "pvc",
-    "core_structure": "2_core",
-    "rated_voltage": "60V",
-    "temperature_rating": "80°C",
-    "description": "AVSS 2.0mm² 2-conductor shielded cable for automotive signal applications requiring EMI protection. Braided shielding, 5.2 mm OD.",
+    "id": "cable-model-6",
+    "brand_id": "brand-2",
+    "model": "AVSS Shielded",
+    "slug": "avss-shielded",
+    "type": "shielded_wire",
+    "category_ids": ["cat-4", "cat-9"],
+    "base_description": "AVSS 2.0 shielded 2-conductor automotive wire for higher current circuits requiring EMI protection. Rated for 60V and 80°C.",
     "meta_title": null,
-    "meta_description": null
+    "meta_description": null,
+    "common_specs": [
+      { "key": "insulation_material", "label": "Insulation Material", "value": "PVC", "unit": null, "type": "enum", "filterable": true },
+      { "key": "shielding", "label": "Shielding", "value": "braided", "unit": null, "type": "enum", "filterable": true },
+      { "key": "jacket", "label": "Jacket", "value": "pvc", "unit": null, "type": "enum", "filterable": true },
+      { "key": "core_structure", "label": "Core Structure", "value": "2_core", "unit": null, "type": "enum", "filterable": true }
+    ],
+    "variants": [
+      {
+        "slug": "2.0-2c",
+        "specs": [
+          { "key": "awg", "label": "AWG", "value": "14", "unit": null, "type": "enum", "filterable": true },
+          { "key": "conductor_area", "label": "Conductor Area", "value": 2.0, "unit": "mm²", "type": "number", "filterable": true },
+          { "key": "outer_diameter", "label": "Outer Diameter", "value": 5.2, "unit": "mm", "type": "number", "filterable": true },
+          { "key": "rated_voltage", "label": "Rated Voltage", "value": "60V", "unit": null, "type": "enum", "filterable": false },
+          { "key": "temperature_rating", "label": "Temperature Rating", "value": "80°C", "unit": null, "type": "enum", "filterable": false }
+        ]
+      }
+    ]
   }
 ]
