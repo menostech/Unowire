@@ -46,7 +46,7 @@ export function generateHomeMetadata(): Metadata {
 export function generateCablesListMetadata(): Metadata {
   return {
     title: 'Cable Directory',
-    description: 'Browse all cables. Filter by manufacturer, brand, AWG, conductor area, outer diameter.',
+    description: 'Browse all cables. Filter by industry, manufacturer, brand, size, conductor area, and outer diameter.',
     alternates: { canonical: '/cables' },
     robots: { index: true, follow: true },
   };
