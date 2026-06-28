@@ -1,0 +1,34 @@
+[
+  {
+    "id": "brand-1",
+    "name": "Hitachi",
+    "slug": "hitachi",
+    "manufacturer_id": "mfr-1",
+    "country": "Japan",
+    "website": "https://www.hitachi-cable.com"
+  },
+  {
+    "id": "brand-2",
+    "name": "Sumitomo",
+    "slug": "sumitomo",
+    "manufacturer_id": "mfr-2",
+    "country": "Japan",
+    "website": "https://global-sei.com"
+  },
+  {
+    "id": "brand-3",
+    "name": "Draka",
+    "slug": "draka",
+    "manufacturer_id": "mfr-3",
+    "country": "Netherlands",
+    "website": "https://www.draka.com"
+  },
+  {
+    "id": "brand-4",
+    "name": "Prysmian",
+    "slug": "prysmian",
+    "manufacturer_id": "mfr-3",
+    "country": "Italy",
+    "website": "https://www.prysmiangroup.com"
+  }
+]
