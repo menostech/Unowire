@@ -17,16 +17,16 @@ module.exports = {
         PORT: 3000,
       },
       env_file: '.env.production',
-      // 日志路径（PM2 默认在 ~/.pm2/logs/）
+      // Log file paths (PM2 defaults to ~/.pm2/logs/)
       out_file: './logs/out.log',
       error_file: './logs/err.log',
       merge_logs: true,
       time: true,
-      // 优雅重启：reload 而非 restart，避免连接中断
+      // Graceful restart: reload instead of restart to avoid dropped connections
       wait_ready: false,
       kill_timeout: 5000,
       listen_timeout: 10000,
-      // 自动重启策略
+      // Auto-restart policy
       min_uptime: '10s',
       max_restarts: 10,
       max_restarts_delay: 3000,
