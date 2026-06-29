@@ -1,9 +1,8 @@
 import type {
   Cable, CableListItem, CableListResponse, CableQueryParams,
-  FilterFacets, Industry, IndustryFilterConfig, SizeSystem,
+  FilterFacets, SizeSystem, TextSearchParams,
 } from './types';
 import { api } from './api';
-import { getDescendantIds } from './category-tree';
 
 /** Collect all numeric values for a spec key across all variants */
 function getAllNumericValues(cable: Cable, key: string): number[] {
@@ -30,46 +29,70 @@ function collectSpecValues(cable: Cable, key: string): (string | number)[] {
   return Array.from(values);
 }
 
-/**
- * Determine the in-scope filter config for a cable list.
- * Returns the union of TypeFilterConfig entries for all industries/types
- * present in the list. If industries are selected in params, restricts to
- * those industries only.
- */
-function getInScopeFilterConfig(cableList: Cable[], params: CableQueryParams): {
-  industries: Industry[];
-  typesByIndustry: Map<Industry, string[]>;
-  config: Record<Industry, IndustryFilterConfig>;
-} {
-  const config = api.filterConfig.all();
-  const selectedIndustries = params.industry && params.industry.length > 0
-    ? new Set(params.industry)
-    : null;
-
-  const industries = new Set<Industry>();
-  const typesByIndustry = new Map<Industry, Set<string>>();
-
-  for (const cable of cableList) {
-    if (selectedIndustries && !selectedIndustries.has(cable.industry)) continue;
-    industries.add(cable.industry);
-    if (!typesByIndustry.has(cable.industry)) typesByIndustry.set(cable.industry, new Set());
-    typesByIndustry.get(cable.industry)!.add(cable.type);
-  }
-
-  return {
-    industries: Array.from(industries),
-    typesByIndustry: new Map(Array.from(typesByIndustry.entries()).map(([k, v]) => [k, Array.from(v)])),
-    config,
-  };
+/** Parse a size value string to a number for range comparison (mm2/kcmil systems). */
+function parseSizeValue(value: string): number | null {
+  const n = parseFloat(value);
+  return isNaN(n) ? null : n;
 }
 
-/** Main filter function */
-export function filterCables(params: CableQueryParams): CableListResponse {
-  let filtered = [...api.cables.all()];
+/** Apply size filter: enum match OR range match (union for mm2/kcmil; enum only for awg). */
+function applySizeFilter(
+  cables: Cable[],
+  sizeEnum: string[] | undefined,
+  minSize: number | undefined,
+  maxSize: number | undefined,
+  sizeSystem: SizeSystem
+): Cable[] {
+  if (sizeSystem === "none") return cables;
+  const hasEnum = sizeEnum && sizeEnum.length > 0;
+  const hasRange = minSize !== undefined || maxSize !== undefined;
+  if (!hasEnum && !hasRange) return cables;
 
-  // Keyword search
-  if (params.q) {
-    const q = params.q.toLowerCase();
+  const sizeSet = hasEnum ? new Set(sizeEnum!) : null;
+
+  return cables.filter(c => {
+    // Gather all size values from this cable's variants
+    const sizeValues: string[] = [];
+    for (const v of c.variants) {
+      for (const s of v.specs) {
+        if (s.key === "size") sizeValues.push(String(s.value));
+      }
+    }
+
+    // Enum match: any variant's size value is in sizeSet
+    if (sizeSet) {
+      if (sizeValues.some(v => sizeSet.has(v))) return true;
+    }
+
+    // Range match (mm2/kcmil only): any variant's numeric size is in [minSize, maxSize]
+    if (hasRange && sizeSystem !== "awg") {
+      for (const v of sizeValues) {
+        const n = parseSizeValue(v);
+        if (n === null) continue;
+        if ((minSize === undefined || n >= minSize) && (maxSize === undefined || n <= maxSize)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  });
+}
+
+/** Main filter function — route-scoped (industry+category+product_type required). */
+export function filterCables(params: CableQueryParams): CableListResponse {
+  const { industry, category, product_type, ...filterParams } = params;
+
+  // 1. Hard filter by route identity
+  let filtered = api.cables.all().filter(c =>
+    c.industry === industry &&
+    c.category === category &&
+    c.product_type === product_type
+  );
+
+  // 2. Keyword search
+  if (filterParams.q) {
+    const q = filterParams.q.toLowerCase();
     filtered = filtered.filter(c =>
       c.model.toLowerCase().includes(q) ||
       c.base_description.toLowerCase().includes(q) ||
@@ -77,69 +100,35 @@ export function filterCables(params: CableQueryParams): CableListResponse {
     );
   }
 
-  // Manufacturer filter
-  if (params.manufacturer && params.manufacturer.length > 0) {
-    const manufacturerIds = new Set(params.manufacturer);
+  // 3. Manufacturer filter
+  if (filterParams.manufacturer && filterParams.manufacturer.length > 0) {
+    const manufacturerIds = new Set(filterParams.manufacturer);
     filtered = filtered.filter(c => {
       const brand = api.brands.getById(c.brand_id);
       return brand && manufacturerIds.has(brand.manufacturer_id);
     });
   }
 
-  // Brand filter
-  if (params.brand && params.brand.length > 0) {
-    const brandIds = new Set(params.brand);
+  // 4. Brand filter
+  if (filterParams.brand && filterParams.brand.length > 0) {
+    const brandIds = new Set(filterParams.brand);
     filtered = filtered.filter(c => brandIds.has(c.brand_id));
   }
 
-  // Category filter (including descendants)
-  if (params.category && params.category.length > 0) {
-    const allCatIds = new Set<string>();
-    for (const catId of params.category) {
-      for (const d of getDescendantIds(catId)) allCatIds.add(d);
-    }
-    filtered = filtered.filter(c => c.category_ids.some(id => allCatIds.has(id)));
-  }
+  // 5. Size filter (enum + range union)
+  const ptConfig = api.taxonomy.productType(industry, category, product_type);
+  const sizeSystem = ptConfig?.size_system ?? "none";
+  filtered = applySizeFilter(
+    filtered,
+    filterParams.size,
+    filterParams.min_size,
+    filterParams.max_size,
+    sizeSystem
+  );
 
-  // Industry filter
-  if (params.industry && params.industry.length > 0) {
-    const industrySet = new Set(params.industry);
-    filtered = filtered.filter(c => industrySet.has(c.industry));
-  }
-
-  // Size filter (any variant matches) — replaces awg
-  if (params.size && params.size.length > 0) {
-    const sizeSet = new Set(params.size);
-    filtered = filtered.filter(c =>
-      c.variants.some(v => v.specs.some(s => s.key === "size" && sizeSet.has(String(s.value))))
-    );
-  }
-
-  // Range filter: conductor_area (any variant in range)
-  if (params.min_area !== undefined || params.max_area !== undefined) {
-    filtered = filtered.filter(c => {
-      const values = getAllNumericValues(c, "conductor_area");
-      return values.some(v =>
-        (params.min_area === undefined || v >= params.min_area) &&
-        (params.max_area === undefined || v <= params.max_area)
-      );
-    });
-  }
-
-  // Range filter: outer_diameter
-  if (params.min_od !== undefined || params.max_od !== undefined) {
-    filtered = filtered.filter(c => {
-      const values = getAllNumericValues(c, "outer_diameter");
-      return values.some(v =>
-        (params.min_od === undefined || v >= params.min_od) &&
-        (params.max_od === undefined || v <= params.max_od)
-      );
-    });
-  }
-
-  // Generic config-driven enum spec filters
-  if (params.spec_filters) {
-    for (const [specKey, allowedValues] of Object.entries(params.spec_filters)) {
+  // 6. Generic config-driven enum spec filters
+  if (filterParams.spec_filters) {
+    for (const [specKey, allowedValues] of Object.entries(filterParams.spec_filters)) {
       if (!allowedValues || allowedValues.length === 0) continue;
       const valueSet = new Set(allowedValues);
       filtered = filtered.filter(c => {
@@ -149,10 +138,21 @@ export function filterCables(params: CableQueryParams): CableListResponse {
     }
   }
 
-  // Build facets based on the filtered list
-  const filters = buildFacets(filtered, params);
+  // 7. Range filter: outer_diameter
+  if (filterParams.min_od !== undefined || filterParams.max_od !== undefined) {
+    filtered = filtered.filter(c => {
+      const values = getAllNumericValues(c, "outer_diameter");
+      return values.some(v =>
+        (filterParams.min_od === undefined || v >= filterParams.min_od) &&
+        (filterParams.max_od === undefined || v <= filterParams.max_od)
+      );
+    });
+  }
 
-  // Pagination
+  // 8. Build facets
+  const filters = buildFacets(filtered, sizeSystem);
+
+  // 9. Pagination
   const total = filtered.length;
   const page = Math.max(1, params.page);
   const page_size = params.page_size;
@@ -168,33 +168,59 @@ export function filterCables(params: CableQueryParams): CableListResponse {
   return { items, total, page, page_size, filters };
 }
 
-/** Build facets for a cable list, driven by the in-scope filter config */
-function buildFacets(cableList: Cable[], params: CableQueryParams): FilterFacets {
+/** Cross-industry text search (for /cables overview). No facet filters applied. */
+export function filterCablesByText(params: TextSearchParams): CableListResponse {
+  const q = params.q.toLowerCase();
+  let filtered = api.cables.all().filter(c =>
+    c.model.toLowerCase().includes(q) ||
+    c.base_description.toLowerCase().includes(q) ||
+    c.variants.some(v => v.specs.some(s => String(s.value).toLowerCase().includes(q)))
+  );
+
+  const total = filtered.length;
+  const page = Math.max(1, params.page);
+  const page_size = params.page_size;
+  const start = (page - 1) * page_size;
+  const paged = filtered.slice(start, start + page_size);
+
+  const items: CableListItem[] = paged.map(cable => {
+    const brand = api.brands.getById(cable.brand_id);
+    const manufacturer = brand ? api.manufacturers.getById(brand.manufacturer_id) : null;
+    return { cable, brand, manufacturer };
+  });
+
+  // Empty facets — overview search has no sidebar
+  const filters: FilterFacets = {
+    manufacturers: [],
+    brands: [],
+    size: [],
+    size_range: null,
+    spec_facets: {},
+    outer_diameter: null,
+  };
+
+  return { items, total, page, page_size, filters };
+}
+
+/** Build facets for a route-scoped cable list. */
+function buildFacets(cableList: Cable[], sizeSystem: SizeSystem): FilterFacets {
   const manufacturerCounts = new Map<string, number>();
   const brandCounts = new Map<string, number>();
-  const categoryCounts = new Map<string, number>();
-  const industryCounts = new Map<Industry, number>();
-  // size facet grouped by size_system: Map<size_system, Map<value, count>>
-  const sizeCounts = new Map<SizeSystem, Map<string, number>>();
-  // generic enum spec facets: Map<spec_key, Map<value, count>>
+  const sizeCounts = new Map<string, number>();
   const specFacetCounts = new Map<string, Map<string, number>>();
-  let minArea = Infinity, maxArea = -Infinity;
+  let minSize = Infinity, maxSize = -Infinity;
   let minOd = Infinity, maxOd = -Infinity;
 
-  // Determine which enum spec_keys to compute facets for (from in-scope filter config)
-  const { industries, typesByIndustry, config } = getInScopeFilterConfig(cableList, params);
+  // Determine which enum spec_keys to compute facets for (from the fixed product type config)
+  // The caller passes sizeSystem; the product type config is looked up by the caller's route.
+  // We compute facets for all enum spec_keys that appear in any cable's specs (common + variant)
+  // AND is not size/outer_diameter (those have dedicated facet slots).
   const enumSpecKeys = new Set<string>();
-  for (const industry of industries) {
-    const indCfg = config[industry];
-    if (!indCfg) continue;
-    const types = typesByIndustry.get(industry) ?? [];
-    for (const t of types) {
-      const tCfg = indCfg.types[t];
-      if (!tCfg) continue;
-      for (const f of tCfg.filters) {
-        if (f.control === "enum" && f.spec_key !== "size") {
-          enumSpecKeys.add(f.spec_key);
-        }
+  for (const cable of cableList) {
+    const allSpecs = [...cable.common_specs, ...cable.variants.flatMap(v => v.specs)];
+    for (const s of allSpecs) {
+      if (s.key !== "size" && s.key !== "outer_diameter") {
+        enumSpecKeys.add(s.key);
       }
     }
   }
@@ -206,31 +232,27 @@ function buildFacets(cableList: Cable[], params: CableQueryParams): FilterFacets
       brandCounts.set(cable.brand_id, (brandCounts.get(cable.brand_id) ?? 0) + 1);
       manufacturerCounts.set(brand.manufacturer_id, (manufacturerCounts.get(brand.manufacturer_id) ?? 0) + 1);
     }
-    // categories
-    for (const catId of cable.category_ids) {
-      categoryCounts.set(catId, (categoryCounts.get(catId) ?? 0) + 1);
-    }
-    // industry
-    industryCounts.set(cable.industry, (industryCounts.get(cable.industry) ?? 0) + 1);
 
-    // size facet (from variant specs, grouped by cable's size_system)
-    if (cable.size_system !== "none") {
-      if (!sizeCounts.has(cable.size_system)) sizeCounts.set(cable.size_system, new Map());
-      const sizeMap = sizeCounts.get(cable.size_system)!;
+    // size facet + size_range (from variant specs)
+    if (sizeSystem !== "none") {
       for (const v of cable.variants) {
         for (const s of v.specs) {
-          if (s.key === "size") sizeMap.set(String(s.value), (sizeMap.get(String(s.value)) ?? 0) + 1);
+          if (s.key === "size") {
+            const valStr = String(s.value);
+            sizeCounts.set(valStr, (sizeCounts.get(valStr) ?? 0) + 1);
+            const n = parseSizeValue(valStr);
+            if (n !== null) {
+              minSize = Math.min(minSize, n);
+              maxSize = Math.max(maxSize, n);
+            }
+          }
         }
       }
     }
 
-    // numeric ranges
+    // outer_diameter range
     for (const v of cable.variants) {
       for (const s of v.specs) {
-        if (s.key === "conductor_area" && typeof s.value === "number") {
-          minArea = Math.min(minArea, s.value);
-          maxArea = Math.max(maxArea, s.value);
-        }
         if (s.key === "outer_diameter" && typeof s.value === "number") {
           minOd = Math.min(minOd, s.value);
           maxOd = Math.max(maxOd, s.value);
@@ -257,29 +279,16 @@ function buildFacets(cableList: Cable[], params: CableQueryParams): FilterFacets
   const brandsList = api.brands.all()
     .map(b => ({ id: b.id, name: b.name, count: brandCounts.get(b.id) ?? 0 }))
     .filter(b => b.count > 0);
-  const categories = api.categories.all()
-    .map(c => ({ id: c.id, name: c.name, level: c.level, count: categoryCounts.get(c.id) ?? 0 }))
-    .filter(c => c.count > 0);
 
-  // industries facet (ordered by config definition order)
-  const allIndustries = api.filterConfig.industries();
-  const industriesFacet = allIndustries
-    .map(ind => ({
-      value: ind,
-      label: config[ind]?.label ?? ind,
-      count: industryCounts.get(ind) ?? 0,
-    }))
-    .filter(i => i.count > 0);
+  const sizeFacet: { value: string; count: number }[] = Array.from(sizeCounts.entries())
+    .map(([value, count]) => ({ value, count }));
 
-  // size facet flattened with size_system tag
-  const sizeFacet: { value: string; count: number; size_system: SizeSystem }[] = [];
-  for (const [sys, m] of sizeCounts.entries()) {
-    for (const [value, count] of m.entries()) {
-      sizeFacet.push({ value, count, size_system: sys });
-    }
-  }
+  const size_range = (sizeSystem !== "none" && minSize !== Infinity)
+    ? { min: minSize, max: maxSize }
+    : null;
 
-  // generic spec facets
+  const outer_diameter = (minOd !== Infinity) ? { min: minOd, max: maxOd } : null;
+
   const spec_facets: Record<string, { value: string; count: number }[]> = {};
   for (const [key, m] of specFacetCounts.entries()) {
     spec_facets[key] = Array.from(m.entries()).map(([value, count]) => ({ value, count }));
@@ -288,11 +297,9 @@ function buildFacets(cableList: Cable[], params: CableQueryParams): FilterFacets
   return {
     manufacturers,
     brands: brandsList,
-    categories,
-    industries: industriesFacet,
     size: sizeFacet,
+    size_range,
     spec_facets,
-    conductor_area: { min: minArea === Infinity ? 0 : minArea, max: maxArea === -Infinity ? 0 : maxArea },
-    outer_diameter: { min: minOd === Infinity ? 0 : minOd, max: maxOd === -Infinity ? 0 : maxOd },
+    outer_diameter,
   };
 }
