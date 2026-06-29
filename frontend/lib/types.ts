@@ -36,9 +36,47 @@ export interface SpecItem {
 }
 
 // === Industry & Size System ===
-export type Industry = "automotive" | "consumer_electronics" | "industrial_power" | "telecom";
+export type Industry =
+  | "consumer_electronics"
+  | "automotive_ev"
+  | "data_centers"
+  | "renewables"
+  | "telecom_power"
+  | "utility";
 
 export type SizeSystem = "awg" | "mm2" | "kcmil" | "none";
+
+// === Taxonomy (data/taxonomy.json) ===
+export type FilterControl = "enum" | "range" | "enum_range";
+
+export interface TaxonomyFilter {
+  spec_key: string;
+  label: string;
+  control: FilterControl;
+  unit?: string;
+}
+
+export interface ProductTypeConfig {
+  label: string;
+  slug: string;
+  size_system: SizeSystem;
+  filters: TaxonomyFilter[];
+}
+
+export interface TaxonomyCategory {
+  label: string;
+  slug: string;
+  product_types: Record<string, ProductTypeConfig>;
+}
+
+export interface TaxonomyIndustry {
+  label: string;
+  slug: string;
+  description: string;
+  categories: Record<string, TaxonomyCategory>;
+}
+
+export type Taxonomy = Record<string, TaxonomyIndustry>;
 
 // === Filter Config (data/filter-config.json) ===
 export interface FilterConfigEntry {
@@ -71,8 +109,10 @@ export interface Cable {
   brand_id: string;
   model: string;
   slug: string;
-  type: string;
+  type: string;              // legacy, retained for migration; same value as product_type
   industry: Industry;
+  category: string;          // NEW: category key in taxonomy.json
+  product_type: string;      // NEW: product type key in taxonomy.json
   size_system: SizeSystem;
   category_ids: string[];
   base_description: string;
@@ -107,21 +147,33 @@ export interface RecommendedEquipmentResult {
 }
 
 // === Filter / Query Params ===
+// NOTE: industry/category/product_type are REQUIRED route params (not query string).
+// They are part of this interface so filterCables receives a single params object.
 export interface CableQueryParams {
+  // Route identity (required)
+  industry: string;
+  category: string;
+  product_type: string;
+
+  // Filter params (query string)
   q?: string;
   manufacturer?: string[];
   brand?: string[];
-  category?: string[];
-  industry?: Industry[];
-  size?: string[];
-  // Generic config-driven enum spec filters (shielding, jacket, core_structure,
-  // insulation_material, voltage_class, temperature_rating, impedance,
-  // wavelength, rated_voltage, core_type). Keys are spec_keys from filter-config.json.
+  size?: string[];              // enum values (for awg) or discrete selections (for mm2/kcmil)
+  min_size?: number;            // range lower bound (mm2/kcmil only)
+  max_size?: number;            // range upper bound (mm2/kcmil only)
   spec_filters?: Record<string, string[]>;
-  min_area?: number;
-  max_area?: number;
   min_od?: number;
   max_od?: number;
+
+  // Pagination
+  page: number;
+  page_size: number;
+}
+
+// === Cross-industry text search params (for /cables overview) ===
+export interface TextSearchParams {
+  q: string;
   page: number;
   page_size: number;
 }
@@ -130,13 +182,10 @@ export interface CableQueryParams {
 export interface FilterFacets {
   manufacturers: { id: string; name: string; count: number }[];
   brands: { id: string; name: string; count: number }[];
-  categories: { id: string; name: string; level: number; count: number }[];
-  industries: { value: Industry; label: string; count: number }[];
-  size: { value: string; count: number; size_system: SizeSystem }[];
-  // Generic enum spec facets keyed by spec_key (only for specs in the in-scope filter config)
+  size: { value: string; count: number }[];                  // no size_system grouping (route fixes it)
+  size_range: { min: number; max: number } | null;           // null when size_system=none or no cables
   spec_facets: Record<string, { value: string; count: number }[]>;
-  conductor_area: { min: number; max: number };
-  outer_diameter: { min: number; max: number };
+  outer_diameter: { min: number; max: number } | null;       // null when no cables in scope
 }
 
 // === List Response ===
