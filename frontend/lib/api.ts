@@ -108,7 +108,7 @@ for (const cable of cables) {
 export function getCableUrl(cable: Cable): string {
   const brand = brandById.get(cable.brand_id);
   const brandSlug = brand?.slug ?? "unknown";
-  return `/cables/${brandSlug}/${cable.slug}`;
+  return `/cable/${brandSlug}/${cable.slug}`;
 }
 
 // === API object ===
