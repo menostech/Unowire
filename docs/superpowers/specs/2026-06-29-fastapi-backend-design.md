@@ -412,7 +412,7 @@ Base path: `/api/` (Nginx reverse proxy to FastAPI)
 | page | int | Page number (default 1) |
 | page_size | int | Page size (default 20) |
 
-Note: industry/category/product_type are **optional** — when omitted, returns all cables (supports cross-industry search on /cables overview).
+Note: industry/category/product_type are **optional in the API** — when omitted, returns all cables (supports cross-industry search on /cables overview). This differs from the frontend CableQueryParams where they are required (route-scoped), because the API also serves the cross-industry /cables overview page which has no fixed taxonomy context.
 
 **GET /api/cables response**:
 
