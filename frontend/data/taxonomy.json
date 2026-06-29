@@ -1,0 +1,483 @@
+{
+  "consumer_electronics": {
+    "label": "Consumer Electronics",
+    "slug": "consumer-electronics",
+    "description": "Cables for consumer electronic devices, internal wiring, and accessories.",
+    "categories": {
+      "internal_wiring": {
+        "label": "Internal Wiring",
+        "slug": "internal-wiring",
+        "product_types": {
+          "electronic_wire": {
+            "label": "Electronic Wire",
+            "slug": "electronic-wire",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "rated_voltage", "label": "Rated Voltage", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          },
+          "multi_core_wire": {
+            "label": "Multi-Core Wire",
+            "slug": "multi-core-wire",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "rated_voltage", "label": "Rated Voltage", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          },
+          "shielded_wire": {
+            "label": "Shielded Wire",
+            "slug": "shielded-wire",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "rated_voltage", "label": "Rated Voltage", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "automotive_ev": {
+    "label": "Automotive & Electric Vehicles",
+    "slug": "automotive-ev",
+    "description": "Cables for vehicles, wiring harnesses, and electric vehicle charging systems.",
+    "categories": {
+      "automotive": {
+        "label": "Automotive",
+        "slug": "automotive",
+        "product_types": {
+          "automotive_wire": {
+            "label": "Automotive Wire",
+            "slug": "automotive-wire",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          },
+          "automotive_cable": {
+            "label": "Automotive Cable",
+            "slug": "automotive-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          },
+          "shielded_wire": {
+            "label": "Automotive Shielded Wire",
+            "slug": "shielded-wire",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          }
+        }
+      },
+      "e_mobility": {
+        "label": "E-Mobility",
+        "slug": "e-mobility",
+        "product_types": {
+          "ev_charging_cable": {
+            "label": "EV Charging Cable",
+            "slug": "ev-charging-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "charging_level", "label": "Charging Level", "control": "enum" }
+            ]
+          },
+          "ev_high_voltage_cable": {
+            "label": "EV High Voltage Cable",
+            "slug": "ev-high-voltage-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "data_centers": {
+    "label": "Data Centers",
+    "slug": "data-centers",
+    "description": "Cables for data center infrastructure, including power distribution, networking, and server racks.",
+    "categories": {
+      "data_centres": {
+        "label": "Data Centres",
+        "slug": "data-centres",
+        "product_types": {
+          "fiber_optic": {
+            "label": "Fiber Optic Cable",
+            "slug": "fiber-optic-cable",
+            "size_system": "none",
+            "filters": [
+              { "spec_key": "core_type", "label": "Core Type", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "wavelength", "label": "Wavelength", "control": "enum" },
+              { "spec_key": "connector_type", "label": "Connector Type", "control": "enum" },
+              { "spec_key": "fire_rating", "label": "Fire Rating", "control": "enum" }
+            ]
+          },
+          "patch_cable": {
+            "label": "Patch Cable",
+            "slug": "patch-cable",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "category_rating", "label": "Category Rating", "control": "enum" }
+            ]
+          },
+          "power_cable_metric": {
+            "label": "Power Cable (Metric)",
+            "slug": "power-cable-metric",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "fire_rating", "label": "Fire Rating", "control": "enum" }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "renewables": {
+    "label": "Renewables",
+    "slug": "renewables",
+    "description": "Cables for renewable energy systems, including solar, wind, and battery energy storage.",
+    "categories": {
+      "solar": {
+        "label": "Solar",
+        "slug": "solar",
+        "product_types": {
+          "solar_dc_cable": {
+            "label": "Solar DC Cable",
+            "slug": "solar-dc-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "uv_resistance", "label": "UV Resistance", "control": "enum" }
+            ]
+          },
+          "solar_ac_cable": {
+            "label": "Solar AC Cable",
+            "slug": "solar-ac-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "uv_resistance", "label": "UV Resistance", "control": "enum" }
+            ]
+          }
+        }
+      },
+      "wind_farms": {
+        "label": "Wind Farms",
+        "slug": "wind-farms",
+        "product_types": {
+          "wind_power_cable": {
+            "label": "Wind Power Cable",
+            "slug": "wind-power-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "torsion_resistance", "label": "Torsion Resistance", "control": "enum" }
+            ]
+          },
+          "wind_control_cable": {
+            "label": "Wind Control Cable",
+            "slug": "wind-control-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "torsion_resistance", "label": "Torsion Resistance", "control": "enum" }
+            ]
+          }
+        }
+      },
+      "bess": {
+        "label": "BESS",
+        "slug": "bess",
+        "product_types": {
+          "bess_power_cable": {
+            "label": "BESS Power Cable",
+            "slug": "bess-power-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "fire_rating", "label": "Fire Rating", "control": "enum" }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "telecom_power": {
+    "label": "Telecom Power",
+    "slug": "telecom-power",
+    "description": "Cables for telecommunications networks, including fiber optics, copper communication, and base station power.",
+    "categories": {
+      "communications": {
+        "label": "Communications",
+        "slug": "communications",
+        "product_types": {
+          "fiber_optic": {
+            "label": "Fiber Optic Cable",
+            "slug": "fiber-optic-cable",
+            "size_system": "none",
+            "filters": [
+              { "spec_key": "core_type", "label": "Core Type", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "wavelength", "label": "Wavelength", "control": "enum" },
+              { "spec_key": "connector_type", "label": "Connector Type", "control": "enum" }
+            ]
+          },
+          "coaxial_cable": {
+            "label": "Coaxial Cable",
+            "slug": "coaxial-cable",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "impedance", "label": "Impedance", "control": "enum" }
+            ]
+          },
+          "communication_wire": {
+            "label": "Communication Wire",
+            "slug": "communication-wire",
+            "size_system": "awg",
+            "filters": [
+              { "spec_key": "size", "label": "AWG", "control": "enum" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "impedance", "label": "Impedance", "control": "enum" }
+            ]
+          },
+          "base_station_power_cable": {
+            "label": "Base Station Power Cable",
+            "slug": "base-station-power-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "fire_rating", "label": "Fire Rating", "control": "enum" }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "utility": {
+    "label": "Utility",
+    "slug": "utility",
+    "description": "Cables for public utility infrastructure, including power transmission, switchboards, and water treatment.",
+    "categories": {
+      "power_transmission": {
+        "label": "Power Transmission",
+        "slug": "power-transmission",
+        "product_types": {
+          "power_cable_metric": {
+            "label": "Power Cable (Metric)",
+            "slug": "power-cable-metric",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          },
+          "power_cable_kcmil": {
+            "label": "Power Cable (kcmil)",
+            "slug": "power-cable-kcmil",
+            "size_system": "kcmil",
+            "filters": [
+              { "spec_key": "size", "label": "kcmil", "control": "enum_range", "unit": "kcmil" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          },
+          "overhead_conductor": {
+            "label": "Overhead Conductor",
+            "slug": "overhead-conductor",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "conductor_material", "label": "Conductor Material", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "tensile_strength", "label": "Tensile Strength", "control": "enum" }
+            ]
+          }
+        }
+      },
+      "switchboards": {
+        "label": "Switchboards",
+        "slug": "switchboards",
+        "product_types": {
+          "switchboard_cable": {
+            "label": "Switchboard Cable",
+            "slug": "switchboard-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "fire_rating", "label": "Fire Rating", "control": "enum" }
+            ]
+          }
+        }
+      },
+      "utilities": {
+        "label": "Utilities",
+        "slug": "utilities",
+        "product_types": {
+          "utility_power_cable": {
+            "label": "Utility Power Cable",
+            "slug": "utility-power-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "core_structure", "label": "Core Structure", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "shielding", "label": "Shielding", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" }
+            ]
+          }
+        }
+      },
+      "water_treatment": {
+        "label": "Water Treatment",
+        "slug": "water-treatment",
+        "product_types": {
+          "water_treatment_cable": {
+            "label": "Water Treatment Cable",
+            "slug": "water-treatment-cable",
+            "size_system": "mm2",
+            "filters": [
+              { "spec_key": "size", "label": "Cross-Section", "control": "enum_range", "unit": "mm²" },
+              { "spec_key": "outer_diameter", "label": "Outer Diameter", "control": "range", "unit": "mm" },
+              { "spec_key": "voltage_class", "label": "Voltage Class", "control": "enum" },
+              { "spec_key": "insulation_material", "label": "Insulation", "control": "enum" },
+              { "spec_key": "jacket", "label": "Jacket", "control": "enum" },
+              { "spec_key": "temperature_rating", "label": "Temperature", "control": "enum" },
+              { "spec_key": "water_resistance", "label": "Water Resistance", "control": "enum" },
+              { "spec_key": "corrosion_resistance", "label": "Corrosion Resistance", "control": "enum" }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
