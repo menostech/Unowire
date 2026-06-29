@@ -2,9 +2,11 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { CableCard } from '@/components/cable/CableCard';
-import { CableFilters } from '@/components/cable/CableFilters';
+import { IndustryCard } from '@/components/taxonomy/IndustryCard';
 import { Pagination } from '@/components/shared/Pagination';
-import { filterCables } from '@/lib/filter';
+import { SearchBox } from '@/components/shared/SearchBox';
+import { api } from '@/lib/api';
+import { filterCablesByText } from '@/lib/filter';
 import { generateCablesListMetadata } from '@/lib/seo';
 
 export function generateMetadata(): Metadata {
@@ -13,52 +15,74 @@ export function generateMetadata(): Metadata {
 
 interface SearchParams {
   q?: string;
-  manufacturer?: string;
-  brand?: string;
-  category?: string;
-  industry?: string;
-  size?: string;
-  // config-driven enum spec filters (shielding, jacket, core_structure, insulation_material, ...)
+  page?: string;
   [key: string]: string | undefined;
 }
 
-function parseArrayParam(sp: SearchParams, key: keyof SearchParams): string[] | undefined {
-  const val = sp[key];
-  if (val === undefined) return undefined;
-  return Array.isArray(val) ? val : [val];
-}
-
-export default async function CablesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+export default async function CablesOverviewPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
-  const page = parseInt(sp.page || '1');
 
-  // Pack config-driven enum spec filters from search params.
-  // Known non-spec keys are excluded; everything else that appears in filter-config
-  // as an enum filter (except size, which stays explicit) is packed into spec_filters.
-  const specFilters: Record<string, string[]> = {};
-  const knownKeys = new Set(['q', 'manufacturer', 'brand', 'category', 'industry', 'size', 'page', 'min_area', 'max_area', 'min_od', 'max_od']);
-  for (const [key, value] of Object.entries(sp)) {
-    if (knownKeys.has(key) || value === undefined) continue;
-    specFilters[key] = Array.isArray(value) ? value : [value];
+  // Cross-industry text search mode
+  if (sp.q) {
+    const page = parseInt(sp.page || '1');
+    const result = filterCablesByText({ q: sp.q, page, page_size: 16 });
+    const totalPages = Math.ceil(result.total / result.page_size);
+    return (
+      <Container className="py-6">
+        <Breadcrumbs items={[
+          { name: 'Home', url: '/' },
+          { name: 'Cables', url: '/cables' },
+          { name: `Search: ${sp.q}` },
+        ]} />
+        <h1 className="text-2xl font-bold mb-1">Search Results</h1>
+        <p className="text-sm text-gray-600 mb-4">
+          {result.total} cable{result.total !== 1 ? 's' : ''} matching &ldquo;{sp.q}&rdquo;
+        </p>
+        <div className="mb-6">
+          <SearchBox />
+        </div>
+        {result.items.length === 0 ? (
+          <div className="text-center py-16 text-gray-500">
+            <p className="mb-4">No cables found. Try a different search term.</p>
+            <a href="/cables" className="text-blue-600 hover:underline text-sm">Back to Cable Directory</a>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {result.items.map(item => (
+                <CableCard
+                  key={item.cable.id}
+                  cable={item.cable}
+                  brand={item.brand}
+                  manufacturer={item.manufacturer}
+                />
+              ))}
+            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              basePath="/cables"
+              searchParams={{ q: sp.q }}
+            />
+          </>
+        )}
+      </Container>
+    );
   }
 
-  const result = filterCables({
-    q: sp.q,
-    manufacturer: parseArrayParam(sp, 'manufacturer'),
-    brand: parseArrayParam(sp, 'brand'),
-    category: parseArrayParam(sp, 'category'),
-    industry: parseArrayParam(sp, 'industry') as any,
-    size: parseArrayParam(sp, 'size'),
-    spec_filters: Object.keys(specFilters).length > 0 ? specFilters : undefined,
-    min_area: sp.min_area ? parseFloat(sp.min_area) : undefined,
-    max_area: sp.max_area ? parseFloat(sp.max_area) : undefined,
-    min_od: sp.min_od ? parseFloat(sp.min_od) : undefined,
-    max_od: sp.max_od ? parseFloat(sp.max_od) : undefined,
-    page,
-    page_size: 16,
+  // Default: industry cards
+  const industries = api.taxonomy.industries();
+  const allCables = api.cables.all();
+  const stats = industries.map(ind => {
+    // Find the industry key by slug match
+    let industryKey = "";
+    for (const [k, v] of Object.entries(api.taxonomy.all())) {
+      if (v === ind) { industryKey = k; break; }
+    }
+    const cableCount = allCables.filter(c => c.industry === industryKey).length;
+    const categoryCount = Object.keys(ind.categories).length;
+    return { industry: ind, categoryCount, cableCount };
   });
-  const totalPages = Math.ceil(result.total / result.page_size);
-  const hasFilters = result.total !== filterCables({ page: 1, page_size: 1 }).total;
 
   return (
     <Container className="py-6">
@@ -67,46 +91,23 @@ export default async function CablesPage({ searchParams }: { searchParams: Promi
         { name: 'Cables' },
       ]} />
 
-      <div className="flex items-baseline justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold">Cable Directory</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Browse {result.total} cable{result.total !== 1 ? 's' : ''} from {result.filters.brands.length} brand{result.filters.brands.length !== 1 ? 's' : ''}.
-          </p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-1">Cable Directory</h1>
+        <p className="text-sm text-gray-600 mb-4">
+          Browse cables by industry. Select an industry to explore its categories and product types.
+        </p>
+        <SearchBox />
       </div>
 
-      <div className="flex gap-6">
-        <CableFilters facets={result.filters} />
-        <div className="flex-1 min-w-0">
-          {result.items.length === 0 ? (
-            <div className="text-center py-16 text-gray-500">
-              <p className="mb-4">No cables found. Try adjusting your filters.</p>
-              <a href="/cables" className="text-blue-600 hover:underline text-sm">Clear all filters</a>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {result.items.map(item => (
-                  <CableCard
-                    key={item.cable.id}
-                    cable={item.cable}
-                    brand={item.brand}
-                    manufacturer={item.manufacturer}
-                  />
-                ))}
-              </div>
-              <div className="mt-6">
-                <Pagination
-                  page={page}
-                  totalPages={totalPages}
-                  basePath="/cables"
-                  searchParams={sp as Record<string, string | undefined>}
-                />
-              </div>
-            </>
-          )}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {stats.map(s => (
+          <IndustryCard
+            key={s.industry.slug}
+            industry={s.industry}
+            categoryCount={s.categoryCount}
+            cableCount={s.cableCount}
+          />
+        ))}
       </div>
     </Container>
   );
