@@ -13,7 +13,6 @@ export function CableCard({ cable, brand, manufacturer }: CableCardProps) {
   const primaryVariant = getPrimaryVariant(cable);
   const url = getCableUrl(cable);
   const sizeSpec = primaryVariant ? findVariantSpec(primaryVariant, "size") : null;
-  const areaSpec = primaryVariant ? findVariantSpec(primaryVariant, "conductor_area") : null;
   const odSpec = primaryVariant ? findVariantSpec(primaryVariant, "outer_diameter") : null;
   const jacketSpec = cable.common_specs.find(s => s.key === "jacket");
   const variantCount = cable.variants.length;
@@ -44,12 +43,6 @@ export function CableCard({ cable, brand, manufacturer }: CableCardProps) {
               <span className="text-gray-900">{formatSizeValue(cable.size_system, String(sizeSpec.value), sizeSpec.unit)}</span>
             </div>
           )}
-          {areaSpec && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Area</span>
-              <span className="text-gray-900">{formatSpecValue(areaSpec)}</span>
-            </div>
-          )}
           {odSpec && (
             <div className="flex justify-between">
               <span className="text-gray-500">OD</span>
@@ -71,13 +64,12 @@ export function CableCard({ cable, brand, manufacturer }: CableCardProps) {
             <div className="space-y-0.5">
               {cable.variants.slice(0, 3).map(v => {
                 const vSize = findVariantSpec(v, "size");
-                const vArea = findVariantSpec(v, "conductor_area");
                 return (
                   <div key={v.slug} className="flex justify-between text-xs">
                     <span className="text-gray-600">
                       {vSize ? formatSizeValue(cable.size_system, String(vSize.value), vSize.unit) : "—"}
                     </span>
-                    <span className="text-gray-600">{vArea ? `${vArea.value} ${vArea.unit ?? ""}` : "—"}</span>
+                    <span className="text-gray-400">·</span>
                   </div>
                 );
               })}
