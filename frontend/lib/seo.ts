@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
-import type { Cable, Category, Manufacturer, Brand } from './types';
+import type {
+  Cable, Category, Manufacturer, Brand,
+  TaxonomyIndustry, TaxonomyCategory, ProductTypeConfig,
+} from './types';
 import { api } from './api';
 import { findSpecItem, getPrimaryVariant } from './utils';
 import { getCategoryPathSlugs } from './category-tree';
@@ -19,15 +22,38 @@ export function generateCableMetadata(cable: Cable, brand: Brand | null): Metada
   };
 }
 
-// === Category Metadata ===
-export function generateCategoryMetadata(category: Category): Metadata {
-  const pathSlugs = getCategoryPathSlugs(category.id);
-  const title = `${category.name} Cables`;
-  const description = `Browse cables in the ${category.name} category.`;
+// === Taxonomy Metadata ===
+export function generateIndustryMetadata(industry: TaxonomyIndustry): Metadata {
   return {
-    title,
-    description,
-    alternates: { canonical: `/categories/${pathSlugs.join('/')}` },
+    title: `${industry.label} Cables`,
+    description: industry.description,
+    alternates: { canonical: `/cables/${industry.slug}` },
+    robots: { index: true, follow: true },
+  };
+}
+
+export function generateCategoryMetadata(
+  industry: TaxonomyIndustry,
+  category: TaxonomyCategory
+): Metadata {
+  return {
+    title: `${category.label} | ${industry.label} Cables`,
+    description: `Browse ${category.label.toLowerCase()} cables for ${industry.label.toLowerCase()} applications.`,
+    alternates: { canonical: `/cables/${industry.slug}/${category.slug}` },
+    robots: { index: true, follow: true },
+  };
+}
+
+export function generateProductTypeMetadata(
+  industry: TaxonomyIndustry,
+  category: TaxonomyCategory,
+  productType: ProductTypeConfig
+): Metadata {
+  const filterLabels = productType.filters.map(f => f.label.toLowerCase()).join(', ');
+  return {
+    title: `${productType.label} | ${category.label} | ${industry.label}`,
+    description: `Browse ${productType.label.toLowerCase()} cables. Filter by ${filterLabels}.`,
+    alternates: { canonical: `/cables/${industry.slug}/${category.slug}/${productType.slug}` },
     robots: { index: true, follow: true },
   };
 }
@@ -42,11 +68,11 @@ export function generateHomeMetadata(): Metadata {
   };
 }
 
-// === Cables List Metadata ===
+// === Cables Overview Metadata ===
 export function generateCablesListMetadata(): Metadata {
   return {
     title: 'Cable Directory',
-    description: 'Browse all cables. Filter by industry, manufacturer, brand, size, conductor area, and outer diameter.',
+    description: 'Browse cables by industry. Select an industry to explore its categories and product types.',
     alternates: { canonical: '/cables' },
     robots: { index: true, follow: true },
   };
