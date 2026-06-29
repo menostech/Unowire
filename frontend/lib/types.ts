@@ -78,27 +78,6 @@ export interface TaxonomyIndustry {
 
 export type Taxonomy = Record<string, TaxonomyIndustry>;
 
-// === Filter Config (data/filter-config.json) ===
-export interface FilterConfigEntry {
-  spec_key: string;
-  label: string;
-  control: "enum" | "range";
-  unit?: string;
-}
-
-export interface TypeFilterConfig {
-  label: string;
-  size_system: SizeSystem;
-  filters: FilterConfigEntry[];
-}
-
-export interface IndustryFilterConfig {
-  label: string;
-  types: Record<string, TypeFilterConfig>;
-}
-
-// data/filter-config.json shape: Record<Industry, IndustryFilterConfig>
-
 export interface CableVariant {
   slug: string;
   specs: SpecItem[];
