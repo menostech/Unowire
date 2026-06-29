@@ -1,6 +1,7 @@
 import type {
-  Brand, Cable, CableDetailResponse, Category, Industry, IndustryFilterConfig,
-  Manufacturer, RecommendedEquipment, TypeFilterConfig,
+  Brand, Cable, CableDetailResponse, Category,
+  Manufacturer, ProductTypeConfig, RecommendedEquipment,
+  Taxonomy, TaxonomyCategory, TaxonomyIndustry,
 } from './types';
 
 import manufacturersData from '@/data/manufacturers.json';
@@ -8,7 +9,7 @@ import brandsData from '@/data/brands.json';
 import categoriesData from '@/data/categories.json';
 import cablesData from '@/data/cables.json';
 import recommendedEquipmentsData from '@/data/recommended-equipments.json';
-import filterConfigData from '@/data/filter-config.json';
+import taxonomyData from '@/data/taxonomy.json';
 
 // === Type assertions ===
 const manufacturers = manufacturersData as Manufacturer[];
@@ -17,8 +18,8 @@ const categories = categoriesData as Category[];
 const cables = cablesData as Cable[];
 const recommendedEquipments = recommendedEquipmentsData as RecommendedEquipment[];
 
-// === Filter config ===
-const filterConfig = filterConfigData as Record<Industry, IndustryFilterConfig>;
+// === Taxonomy ===
+const taxonomy = taxonomyData as Taxonomy;
 
 // === Pre-built indexes (built on first access) ===
 interface CategoryIndex {
@@ -198,37 +199,71 @@ export const api = {
     },
   },
 
-  filterConfig: {
-    all(): Record<Industry, IndustryFilterConfig> {
-      return filterConfig;
+  taxonomy: {
+    all(): Taxonomy {
+      return taxonomy;
     },
-    /** Get the filter config for a specific industry */
-    byIndustry(industry: Industry): IndustryFilterConfig | null {
-      return filterConfig[industry] ?? null;
+    industries(): TaxonomyIndustry[] {
+      return Object.values(taxonomy);
     },
-    /** Get the filter config for a specific type within an industry */
-    byType(industry: Industry, type: string): TypeFilterConfig | null {
-      return filterConfig[industry]?.types[type] ?? null;
+    industry(industryKey: string): TaxonomyIndustry | null {
+      return taxonomy[industryKey] ?? null;
     },
-    /** All known industry values */
-    industries(): Industry[] {
-      return Object.keys(filterConfig) as Industry[];
+    category(industryKey: string, categoryKey: string): TaxonomyCategory | null {
+      return this.industry(industryKey)?.categories[categoryKey] ?? null;
     },
-    /** All known type values across all industries */
-    types(): string[] {
-      const all = new Set<string>();
-      for (const ind of Object.values(filterConfig)) {
-        for (const t of Object.keys(ind.types)) all.add(t);
+    productType(industryKey: string, categoryKey: string, ptKey: string): ProductTypeConfig | null {
+      return this.category(industryKey, categoryKey)?.product_types[ptKey] ?? null;
+    },
+    /** Find industry key by slug */
+    industryKeyBySlug(industrySlug: string): string | null {
+      for (const [key, ind] of Object.entries(taxonomy)) {
+        if (ind.slug === industrySlug) return key;
       }
-      return Array.from(all);
+      return null;
     },
-  },
-
-  /** All industries that actually appear in the cable data (with counts computed by caller) */
-  industriesInData(): Industry[] {
-    const set = new Set<Industry>();
-    for (const c of cables) set.add(c.industry);
-    return Array.from(set);
+    /** Find category key by slug within an industry */
+    categoryKeyBySlug(industryKey: string, categorySlug: string): string | null {
+      const ind = taxonomy[industryKey];
+      if (!ind) return null;
+      for (const [key, cat] of Object.entries(ind.categories)) {
+        if (cat.slug === categorySlug) return key;
+      }
+      return null;
+    },
+    /** Find product type key by slug within a category */
+    productTypeKeyBySlug(industryKey: string, categoryKey: string, ptSlug: string): string | null {
+      const cat = this.category(industryKey, categoryKey);
+      if (!cat) return null;
+      for (const [key, pt] of Object.entries(cat.product_types)) {
+        if (pt.slug === ptSlug) return key;
+      }
+      return null;
+    },
+    /** Route resolution: lookup by slugs (URL → config + keys) */
+    findBySlug(
+      industrySlug: string,
+      categorySlug: string,
+      productTypeSlug: string
+    ): {
+      industry: TaxonomyIndustry;
+      category: TaxonomyCategory;
+      productType: ProductTypeConfig;
+      industryKey: string;
+      categoryKey: string;
+      productTypeKey: string;
+    } | null {
+      const industryKey = this.industryKeyBySlug(industrySlug);
+      if (!industryKey) return null;
+      const categoryKey = this.categoryKeyBySlug(industryKey, categorySlug);
+      if (!categoryKey) return null;
+      const productTypeKey = this.productTypeKeyBySlug(industryKey, categoryKey, productTypeSlug);
+      if (!productTypeKey) return null;
+      const industry = taxonomy[industryKey];
+      const category = industry.categories[categoryKey];
+      const productType = category.product_types[productTypeKey];
+      return { industry, category, productType, industryKey, categoryKey, productTypeKey };
+    },
   },
 
   /** Detail page aggregated response */
