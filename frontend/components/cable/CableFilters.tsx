@@ -1,19 +1,29 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback } from 'react';
-import type { FilterFacets, Industry, SizeSystem } from '@/lib/types';
+import type { FilterFacets } from '@/lib/types';
 import { api } from '@/lib/api';
 import { formatSizeLabel } from '@/lib/utils';
 
 interface CableFiltersProps {
   facets: FilterFacets;
+  industry: string;
+  category: string;
+  productType: string;
 }
 
-function CableFiltersInner({ facets }: CableFiltersProps) {
+function CableFiltersInner({ facets, industry, category, productType }: CableFiltersProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const filterConfig = api.filterConfig.all();
+
+  const ptConfig = api.taxonomy.productType(industry, category, productType);
+  if (!ptConfig) return null;
+
+  const sizeFilter = ptConfig.filters.find(f => f.spec_key === "size");
+  const sizeSystem = ptConfig.size_system;
+  const sizeControl = sizeFilter?.control; // "enum" | "enum_range" | undefined (none)
 
   const toggleParam = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -25,8 +35,8 @@ function CableFiltersInner({ facets }: CableFiltersProps) {
       params.append(key, value);
     }
     params.delete('page');
-    router.push(`/cables?${params.toString()}`);
-  }, [router, searchParams]);
+    router.push(`${pathname}?${params.toString()}`);
+  }, [router, searchParams, pathname]);
 
   const setNumericParam = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -36,8 +46,8 @@ function CableFiltersInner({ facets }: CableFiltersProps) {
       params.set(key, value);
     }
     params.delete('page');
-    router.push(`/cables?${params.toString()}`);
-  }, [router, searchParams]);
+    router.push(`${pathname}?${params.toString()}`);
+  }, [router, searchParams, pathname]);
 
   const isChecked = (key: string, value: string): boolean => {
     return searchParams.getAll(key).includes(value);
@@ -63,37 +73,17 @@ function CableFiltersInner({ facets }: CableFiltersProps) {
     );
   };
 
-  // Group size facet by size_system for multi-label rendering
-  const sizeBySystem = new Map<SizeSystem, { value: string; count: number }[]>();
-  for (const s of facets.size) {
-    if (!sizeBySystem.has(s.size_system)) sizeBySystem.set(s.size_system, []);
-    sizeBySystem.get(s.size_system)!.push({ value: s.value, count: s.count });
-  }
+  // Enum spec keys from product type config (exclude size + outer_diameter which have dedicated UI)
+  const enumSpecKeys: string[] = ptConfig.filters
+    .filter(f => f.control === "enum" && f.spec_key !== "size" && f.spec_key !== "outer_diameter")
+    .map(f => f.spec_key);
 
-  // Determine which enum spec facets to render (from spec_facets keys, ordered by config)
-  // We render specs that appear in the in-scope types' filter config. Since facets.spec_facets
-  // already only contains in-scope keys, we render them in config definition order.
-  const enumSpecKeys: string[] = [];
-  for (const ind of Object.values(filterConfig)) {
-    for (const t of Object.values(ind.types)) {
-      for (const f of t.filters) {
-        if (f.control === "enum" && f.spec_key !== "size" && facets.spec_facets[f.spec_key] && !enumSpecKeys.includes(f.spec_key)) {
-          enumSpecKeys.push(f.spec_key);
-        }
-      }
-    }
-  }
+  // Build a lookup for filter labels
+  const filterLabelByKey = new Map<string, string>();
+  for (const f of ptConfig.filters) filterLabelByKey.set(f.spec_key, f.label);
 
   return (
     <aside className="w-52 shrink-0 space-y-5">
-      {/* Industry (top-level) */}
-      {facets.industries.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Industry</h3>
-          {renderCheckboxGroup('industry', facets.industries.map(i => ({ value: i.value, label: i.label, count: i.count })))}
-        </div>
-      )}
-
       {/* Manufacturer */}
       {facets.manufacturers.length > 0 && (
         <div>
@@ -110,86 +100,78 @@ function CableFiltersInner({ facets }: CableFiltersProps) {
         </div>
       )}
 
-      {/* Category (level 1 only) */}
-      {facets.categories.filter(c => c.level === 1).length > 0 && (
+      {/* Size (enum only for awg; enum + range for mm2/kcmil; hidden for none) */}
+      {sizeControl === "enum" && facets.size.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Category</h3>
-          {renderCheckboxGroup('category', facets.categories.filter(c => c.level === 1).map(c => ({ value: c.id, label: c.name, count: c.count })))}
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">{sizeFilter!.label}</h3>
+          {renderCheckboxGroup('size', facets.size.map(e => ({ value: e.value, label: e.value, count: e.count })))}
         </div>
       )}
-
-      {/* Size (grouped by size_system, each group labeled dynamically) */}
-      {sizeBySystem.size > 0 && (
+      {sizeControl === "enum_range" && (
         <div>
-          {Array.from(sizeBySystem.entries()).map(([sys, entries]) => (
-            <div key={sys} className="mb-3">
-              <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">{formatSizeLabel(sys)}</h3>
-              {renderCheckboxGroup('size', entries.map(e => ({ value: e.value, label: e.value, count: e.count })))}
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">
+            {sizeFilter!.label}{sizeFilter!.unit ? ` (${sizeFilter!.unit})` : ''}
+          </h3>
+          {facets.size.length > 0 && (
+            <div className="mb-2">
+              {renderCheckboxGroup('size', facets.size.map(e => ({ value: e.value, label: e.value, count: e.count })))}
             </div>
-          ))}
+          )}
+          {facets.size_range && (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                step="0.01"
+                placeholder={`min ${facets.size_range.min}`}
+                value={searchParams.get('min_size') ?? ''}
+                onChange={e => setNumericParam('min_size', e.target.value)}
+                className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
+              />
+              <span className="text-gray-400">—</span>
+              <input
+                type="number"
+                step="0.01"
+                placeholder={`max ${facets.size_range.max}`}
+                value={searchParams.get('max_size') ?? ''}
+                onChange={e => setNumericParam('max_size', e.target.value)}
+                className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
+              />
+            </div>
+          )}
         </div>
       )}
-
-      {/* Conductor Area (range) */}
-      <div>
-        <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Conductor Area (mm²)</h3>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            step="0.01"
-            placeholder={`min ${facets.conductor_area.min}`}
-            value={searchParams.get('min_area') ?? ''}
-            onChange={e => setNumericParam('min_area', e.target.value)}
-            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
-          />
-          <span className="text-gray-400">—</span>
-          <input
-            type="number"
-            step="0.01"
-            placeholder={`max ${facets.conductor_area.max}`}
-            value={searchParams.get('max_area') ?? ''}
-            onChange={e => setNumericParam('max_area', e.target.value)}
-            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
-          />
-        </div>
-      </div>
 
       {/* Outer Diameter (range) */}
-      <div>
-        <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Outer Diameter (mm)</h3>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            step="0.01"
-            placeholder={`min ${facets.outer_diameter.min}`}
-            value={searchParams.get('min_od') ?? ''}
-            onChange={e => setNumericParam('min_od', e.target.value)}
-            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
-          />
-          <span className="text-gray-400">—</span>
-          <input
-            type="number"
-            step="0.01"
-            placeholder={`max ${facets.outer_diameter.max}`}
-            value={searchParams.get('max_od') ?? ''}
-            onChange={e => setNumericParam('max_od', e.target.value)}
-            className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
-          />
+      {facets.outer_diameter && (
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Outer Diameter (mm)</h3>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              step="0.01"
+              placeholder={`min ${facets.outer_diameter.min}`}
+              value={searchParams.get('min_od') ?? ''}
+              onChange={e => setNumericParam('min_od', e.target.value)}
+              className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
+            />
+            <span className="text-gray-400">—</span>
+            <input
+              type="number"
+              step="0.01"
+              placeholder={`max ${facets.outer_diameter.max}`}
+              value={searchParams.get('max_od') ?? ''}
+              onChange={e => setNumericParam('max_od', e.target.value)}
+              className="w-20 h-8 px-2 text-xs border border-gray-300 rounded"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Config-driven enum spec filters (shielding, jacket, core_structure, insulation, etc.) */}
+      {/* Config-driven enum spec filters (shielding, jacket, core_structure, etc.) */}
       {enumSpecKeys.map(specKey => {
         const facetEntries = facets.spec_facets[specKey];
         if (!facetEntries || facetEntries.length === 0) return null;
-        // Find the label from the filter config
-        let label = specKey;
-        for (const ind of Object.values(filterConfig)) {
-          for (const t of Object.values(ind.types)) {
-            const f = t.filters.find(f => f.spec_key === specKey);
-            if (f) { label = f.label; break; }
-          }
-        }
+        const label = filterLabelByKey.get(specKey) ?? specKey;
         return (
           <div key={specKey}>
             <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">{label}</h3>
