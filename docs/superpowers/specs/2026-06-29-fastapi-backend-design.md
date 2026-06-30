@@ -746,103 +746,30 @@ uvicorn app.main:app --reload --port 8000
 
 ## 7. Deployment Integration
 
-### 7.1 PM2 Configuration
+### 7.1 Docker Compose
 
-**File**: `deploy/ecosystem.config.cjs`
+> **Note:** Deployment uses Docker Compose. See `docs/superpowers/specs/2026-06-30-docker-deployment-design.md` for the full Docker deployment spec. This section summarizes the key points.
 
-Add `unowire-backend` process:
+4 services: nginx (internal reverse proxy), frontend (Next.js), backend (FastAPI), db (PostgreSQL).
 
-```javascript
-module.exports = {
-  apps: [
-    {
-      name: 'unowire-frontend',
-      script: 'node_modules/.bin/next',
-      args: 'start',
-      cwd: '/var/www/unowire/frontend',
-      env: { NODE_ENV: 'production', PORT: 3000 },
-    },
-    {
-      name: 'unowire-backend',
-      script: 'venv/bin/gunicorn',
-      args: 'app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 127.0.0.1:8000',
-      cwd: '/var/www/unowire/backend',
-      env: { DATABASE_URL: 'postgresql://unowire:xxx@127.0.0.1:5432/unowire' },
-    },
-  ],
-};
-```
+All services run on a single Docker bridge network (`unowire-net`). Host Nginx handles SSL termination, proxying to Docker Nginx on port 8080.
 
-### 7.2 Nginx Configuration
+Key files:
+- `docker-compose.yml` — production service definitions
+- `docker-compose.override.yml` — dev overrides (hot reload, port exposure)
+- `frontend/Dockerfile`, `backend/Dockerfile`, `deploy/nginx/Dockerfile`
+- `deploy/nginx/nginx.conf` — internal reverse proxy config
+- `deploy/host-nginx.conf` — host SSL termination config
 
-**File**: `deploy/nginx-unowire.conf`
 
-Add `/api/` location block:
+### 7.2 Backend Container
 
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name www.unowire.com;
+- Multi-stage Dockerfile (builder → production / development)
+- Production: Gunicorn + Uvicorn workers, bind `0.0.0.0:8000`
+- Development: `uvicorn --reload`, source mounted
+- `DATABASE_URL` set via Docker environment variable: `postgresql+asyncpg://unowire:${DB_PASSWORD}@db:5432/unowire`
 
-    # ... existing SSL/security headers ...
-
-    # Next.js frontend
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # FastAPI backend (new)
-    location /api/ {
-        proxy_pass http://127.0.0.1:8000/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 30s;
-    }
-}
-```
-
-### 7.3 deploy.sh
-
-**File**: `deploy/deploy.sh`
-
-Add backend deployment steps:
-
-```bash
-#!/bin/bash
-set -e
-BRANCH=${1:-master}
-cd /var/www/unowire
-git fetch origin
-git checkout $BRANCH
-git pull origin $BRANCH
-
-# Frontend
-cd /var/www/unowire/frontend
-npm install
-npm run build
-pm2 reload unowire-frontend
-
-# Backend
-cd /var/www/unowire/backend
-source venv/bin/activate
-pip install -r requirements.txt
-alembic upgrade head
-pm2 reload unowire-backend
-
-pm2 save
-```
-
-### 7.4 Backend Dependencies
+### 7.3 Backend Dependencies
 
 **File**: `backend/requirements.txt`
 
@@ -857,12 +784,26 @@ pydantic==2.*
 pydantic-settings==2.*
 ```
 
-### 7.5 Environment Variables
+### 7.4 Environment Variables
 
-| Variable | Frontend | Backend | Description |
+| Variable | Set by | Used by | Description |
 |---|---|---|---|
-| `DATABASE_URL` | - | Yes | `postgresql+asyncpg://unowire:pw@127.0.0.1:5432/unowire` |
-| `NEXT_PUBLIC_API_BASE` | Yes | - | Local: `http://localhost:8000`; Production: empty (Nginx) |
+| `DATABASE_URL` | docker-compose.yml env | Backend container | `postgresql+asyncpg://unowire:${DB_PASSWORD}@db:5432/unowire` |
+| `DB_PASSWORD` | .env.docker | PostgreSQL + Backend | Shared password |
+| `NEXT_PUBLIC_API_BASE` | — | Frontend | Not needed in Docker (same-origin via Nginx) |
+
+### 7.5 deploy.sh
+
+```bash
+#!/bin/bash
+set -euo pipefail
+BRANCH="${1:-master}"
+cd /var/www/unowire
+git pull origin "$BRANCH"
+docker compose build
+docker compose up -d --remove-orphans
+docker compose exec backend alembic upgrade head
+```
 
 ## 8. Scope Boundaries
 
@@ -875,9 +816,11 @@ pydantic-settings==2.*
 - Seed scripts (JSON → PostgreSQL)
 - lib/api.ts migration (sync JSON → async fetch)
 - Page-level async/await additions
-- Nginx /api/ reverse proxy config
-- PM2 backend process config
-- deploy.sh update
+- Docker Compose configuration (4 services)
+- Dockerfiles for frontend, backend, Nginx
+- Internal Nginx reverse proxy config
+- Host Nginx SSL termination config
+- deploy.sh rewrite for Docker flow
 - `npm run build` + smoke test verification
 
 ### Out of Scope
@@ -886,9 +829,10 @@ pydantic-settings==2.*
 - JWT authentication middleware (Step 3)
 - Rate limiting
 - API versioning
-- Docker/CI/CD (project memory: not in MVP)
+- CI/CD pipeline or Docker registry
 - Automated API tests (project memory: no automated tests for MVP)
 - lib/filter.ts migration to backend (future optimization)
 - lib/validate.ts changes (build-time, still reads JSON)
 - categories.json removal (legacy redirect, stays as file)
-- Frontend data/*.json removal (archive after backend is live, not a code change)
+- Container monitoring / observability
+- Automated database backup
