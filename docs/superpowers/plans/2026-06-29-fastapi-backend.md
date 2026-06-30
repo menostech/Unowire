@@ -3336,22 +3336,227 @@ git commit -m "refactor(frontend): add async/await to all pages for API migratio
 
 ---
 
-### Task 10: Deployment config updates
+### Task 10: Docker deployment configuration
+
+> **Reference:** `docs/superpowers/specs/2026-06-30-docker-deployment-design.md` for full Docker deployment spec.
 
 **Files:**
-- Modify: `deploy/nginx-unowire.conf`
-- Modify: `deploy/deploy.sh`
-- Move: `frontend/ecosystem.config.cjs` → `deploy/ecosystem.config.cjs`
-- Modify: `deploy/ecosystem.config.cjs` (add backend process)
+- Create: `docker-compose.yml`
+- Create: `docker-compose.override.yml`
+- Create: `frontend/Dockerfile`
+- Create: `backend/Dockerfile`
+- Create: `deploy/nginx/Dockerfile`
+- Create: `deploy/nginx/nginx.conf`
+- Create: `deploy/host-nginx.conf`
+- Create: `.env.docker`
+- Modify: `frontend/next.config.ts` (add `output: "standalone"`)
+- Modify: `deploy/deploy.sh` (rewrite for Docker)
+- Delete: `frontend/ecosystem.config.cjs` (PM2 no longer used)
+- Delete: `deploy/nginx-unowire.conf` (replaced by split configs)
 
-- [ ] **Step 1: Update nginx config — add /api/ reverse proxy**
+- [ ] **Step 1: Create docker-compose.yml**
 
-In `deploy/nginx-unowire.conf`, add before the `location /` block (after the robots.txt block):
+Write `docker-compose.yml`:
+
+```yaml
+services:
+  nginx:
+    build:
+      context: ./deploy/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - unowire-net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./frontend/.env.production
+    networks:
+      - unowire-net
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://unowire:${DB_PASSWORD}@db:5432/unowire
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - unowire-net
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=unowire
+      - POSTGRES_USER=unowire
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - unowire-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unowire"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+
+networks:
+  unowire-net:
+    driver: bridge
+```
+
+- [ ] **Step 2: Create docker-compose.override.yml**
+
+Write `docker-compose.override.yml`:
+
+```yaml
+services:
+  frontend:
+    build:
+      target: development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  backend:
+    build:
+      target: development
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://unowire:unowire_dev@db:5432/unowire
+      - DEBUG=true
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=unowire_dev
+```
+
+- [ ] **Step 3: Create frontend/Dockerfile**
+
+Write `frontend/Dockerfile`:
+
+```dockerfile
+# Stage 1: Build
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Production
+FROM node:20-alpine AS production
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+EXPOSE 3000
+CMD ["node", "server.js"]
+
+# Stage 3: Development
+FROM node:20-alpine AS development
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+EXPOSE 3000
+CMD ["npm", "run", "dev"]
+```
+
+- [ ] **Step 4: Add standalone output to next.config.ts**
+
+In `frontend/next.config.ts`, add `output: "standalone"` to the nextConfig object.
+
+- [ ] **Step 5: Create backend/Dockerfile**
+
+Write `backend/Dockerfile`:
+
+```dockerfile
+# Stage 1: Builder
+FROM python:3.12-slim AS builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+
+# Stage 2: Production
+FROM python:3.12-slim AS production
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /app .
+EXPOSE 8000
+CMD ["gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]
+
+# Stage 3: Development
+FROM python:3.12-slim AS development
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+```
+
+- [ ] **Step 6: Create deploy/nginx/Dockerfile**
+
+Write `deploy/nginx/Dockerfile`:
+
+```dockerfile
+FROM nginx:alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+```
+
+- [ ] **Step 7: Create deploy/nginx/nginx.conf (internal reverse proxy)**
+
+Write `deploy/nginx/nginx.conf`:
 
 ```nginx
-    # FastAPI backend reverse proxy
+server {
+    listen 80;
+    server_name _;
+
+    location /_next/static/ {
+        proxy_pass http://frontend:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
     location /api/ {
-        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_pass http://backend:8000/api/;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -3359,217 +3564,231 @@ In `deploy/nginx-unowire.conf`, add before the `location /` block (after the rob
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 30s;
     }
+
+    location / {
+        proxy_pass http://frontend:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_min_length 1000;
+    gzip_proxied any;
+
+    client_max_body_size 10m;
+}
 ```
 
-- [ ] **Step 2: Move ecosystem.config.cjs to deploy/ and add backend process**
+- [ ] **Step 8: Create deploy/host-nginx.conf (host SSL termination)**
 
-Move `frontend/ecosystem.config.cjs` to `deploy/ecosystem.config.cjs`, then rewrite it:
+Write `deploy/host-nginx.conf`:
 
-```javascript
-// PM2 process manager configuration for Unowire production
-// Usage: pm2 start deploy/ecosystem.config.cjs
-// Docs: https://pm2.keymetrics.io/docs/usage/application-declaration/
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.unowire.com unowire.com;
 
-module.exports = {
-  apps: [
-    {
-      name: 'unowire-frontend',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start',
-      cwd: '/var/www/unowire/frontend',
-      instances: 1,
-      exec_mode: 'fork',
-      max_memory_restart: '512M',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000,
-      },
-      env_file: '/var/www/unowire/frontend/.env.production',
-      out_file: '/var/www/unowire/frontend/logs/out.log',
-      error_file: '/var/www/unowire/frontend/logs/err.log',
-      merge_logs: true,
-      time: true,
-      wait_ready: false,
-      kill_timeout: 5000,
-      listen_timeout: 10000,
-      min_uptime: '10s',
-      max_restarts: 10,
-      restart_delay: 3000,
-    },
-    {
-      name: 'unowire-backend',
-      script: '/var/www/unowire/backend/venv/bin/gunicorn',
-      args: 'app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 127.0.0.1:8000',
-      cwd: '/var/www/unowire/backend',
-      instances: 1,
-      exec_mode: 'fork',
-      max_memory_restart: '512M',
-      env: {
-        DATABASE_URL: 'postgresql+asyncpg://unowire:CHANGE_ME@127.0.0.1:5432/unowire',
-      },
-      out_file: '/var/www/unowire/backend/logs/out.log',
-      error_file: '/var/www/unowire/backend/logs/err.log',
-      merge_logs: true,
-      time: true,
-      wait_ready: false,
-      kill_timeout: 5000,
-      listen_timeout: 10000,
-      min_uptime: '10s',
-      max_restarts: 10,
-      restart_delay: 3000,
-    },
-  ],
-};
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name www.unowire.com unowire.com;
+
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    server_tokens off;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
 
-- [ ] **Step 3: Update deploy.sh to include backend steps**
+- [ ] **Step 9: Create .env.docker**
+
+Write `.env.docker`:
+
+```
+DB_PASSWORD=CHANGE_ME_IN_PRODUCTION
+DATABASE_URL=postgresql+asyncpg://unowire:${DB_PASSWORD}@db:5432/unowire
+DEBUG=false
+```
+
+- [ ] **Step 10: Rewrite deploy/deploy.sh for Docker**
 
 Write `deploy/deploy.sh`:
 
 ```bash
 #!/usr/bin/env bash
-# Unowire deployment script — run on the production server.
-# Usage: ./deploy/deploy.sh [branch]
-#   branch defaults to "master"
-#
-# Prerequisites:
-#   - Node.js 20+ installed
-#   - Python 3.12+ installed
-#   - PM2 installed globally (npm install -g pm2)
-#   - Nginx installed
-#   - PostgreSQL installed with unowire database created
-#   - Repository cloned to /var/www/unowire
-#   - frontend/.env.production present
-#   - backend/.env present (with DATABASE_URL)
-#
-# What this script does:
-#   1. Pull latest code from the given branch
-#   2. Install npm dependencies (npm ci)
-#   3. Build Next.js (npm run build, includes prebuild data validation)
-#   4. Install Python dependencies
-#   5. Run Alembic migrations
-#   6. Reload PM2 processes (graceful restart)
-#   7. Reload Nginx (config may have changed)
-
 set -euo pipefail
 
 BRANCH="${1:-master}"
 APP_DIR="/var/www/unowire"
-FRONTEND_DIR="$APP_DIR/frontend"
-BACKEND_DIR="$APP_DIR/backend"
 
-echo "==> [1/7] Pulling latest code from branch: $BRANCH"
+echo "==> [1/4] Pulling latest code from branch: $BRANCH"
 cd "$APP_DIR"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git pull origin "$BRANCH"
 
-echo "==> [2/7] Installing npm dependencies"
-cd "$FRONTEND_DIR"
-npm ci
+echo "==> [2/4] Building Docker images"
+docker compose build
 
-echo "==> [3/7] Building Next.js (with prebuild data validation)"
-npm run build
+echo "==> [3/4] Starting services (graceful restart)"
+docker compose up -d --remove-orphans
 
-echo "==> [4/7] Installing Python dependencies"
-cd "$BACKEND_DIR"
-source venv/bin/activate
-pip install -r requirements.txt
-
-echo "==> [5/7] Running Alembic migrations"
-alembic upgrade head
-
-echo "==> [6/7] Reloading PM2 processes (graceful restart)"
-pm2 reload "$APP_DIR/deploy/ecosystem.config.cjs" --update-env
-pm2 save
-
-echo "==> [7/7] Reloading Nginx"
-sudo nginx -t
-sudo systemctl reload nginx
+echo "==> [4/4] Running database migrations"
+docker compose exec backend alembic upgrade head
 
 echo ""
 echo "==> Deployment complete."
 echo "    Site: https://www.unowire.com"
-echo "    PM2 status: pm2 status"
-echo "    PM2 logs:   pm2 logs --lines 50"
+echo "    Status: docker compose ps"
+echo "    Logs:   docker compose logs --tail=50"
 ```
 
-- [ ] **Step 4: Delete old ecosystem.config.cjs from frontend/**
+- [ ] **Step 11: Delete obsolete files**
 
 ```bash
 cd d:\projects\unowire
 git rm frontend/ecosystem.config.cjs
+git rm deploy/nginx-unowire.conf
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 12: Add .dockerignore files**
+
+Write `frontend/.dockerignore`:
+
+```
+node_modules
+.next
+.git
+.gitignore
+README.md
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+```
+
+Write `backend/.dockerignore`:
+
+```
+__pycache__
+*.pyc
+.env
+venv
+.git
+.gitignore
+*.egg-info
+```
+
+- [ ] **Step 13: Verify Docker build works**
 
 ```bash
 cd d:\projects\unowire
-git add deploy/ frontend/ecosystem.config.cjs
-git commit -m "feat(deploy): add backend PM2 process, Nginx /api/ proxy, update deploy.sh"
+docker compose build
+```
+
+Expected: All 4 images build successfully.
+
+- [ ] **Step 14: Verify dev mode starts**
+
+```bash
+cd d:\projects\unowire
+docker compose up
+```
+
+Expected: All services start. Visit http://localhost:8080/api/health to verify.
+
+Stop with `docker compose down`.
+
+- [ ] **Step 15: Commit**
+
+```bash
+cd d:\projects\unowire
+git add -A
+git commit -m "feat(deploy): add Docker Compose configuration (4 services), remove PM2"
 ```
 
 ---
 
-### Task 11: Frontend .env.local + integration smoke test
+### Task 11: Integration smoke test (Docker)
 
 **Files:**
-- Create: `frontend/.env.local`
+- No new files
 
-- [ ] **Step 1: Create frontend/.env.local**
+- [ ] **Step 1: Start all services with Docker Compose**
 
-Write `frontend/.env.local`:
-
-```
-NEXT_PUBLIC_API_BASE=http://localhost:8000
-```
-
-Note: This file is in `.gitignore` (already listed as `.env.local`).
-
-- [ ] **Step 2: Start backend + frontend together**
-
-Terminal 1 (backend):
 ```bash
-cd d:\projects\unowire\backend
-.\venv\Scripts\activate
-uvicorn app.main:app --reload --port 8000
+cd d:\projects\unowire
+docker compose up
 ```
 
-Terminal 2 (frontend):
+Wait for all services to be healthy.
+
+- [ ] **Step 2: Run database migrations and seed**
+
 ```bash
-cd d:\projects\unowire\frontend
-npm run dev
+docker compose exec backend alembic upgrade head
+docker compose exec backend python -m scripts.seed
 ```
 
-- [ ] **Step 3: Smoke test via browser**
-
-Visit these URLs and verify pages render correctly:
-
-1. http://localhost:3000/ — Homepage
-2. http://localhost:3000/cables — Cable overview
-3. http://localhost:3000/cables/consumer-electronics — Industry page
-4. http://localhost:3000/cables/consumer-electronics/internal-wiring — Category page
-5. http://localhost:3000/cables/consumer-electronics/internal-wiring/electronic-wire — Product type page (with filters)
-6. http://localhost:3000/cable/hitachi/ul1007 — Cable detail page
-7. http://localhost:3000/categories/automotive — Legacy redirect (308)
-
-- [ ] **Step 4: Smoke test API directly**
+- [ ] **Step 3: Smoke test API directly**
 
 ```bash
 curl http://localhost:8000/api/health
 curl http://localhost:8000/api/manufacturers
 curl http://localhost:8000/api/taxonomy
 curl http://localhost:8000/api/cables
-curl "http://localhost:8000/api/cables?industry=consumer_electronics&category=consumer_electronics%2Finternal_wiring&product_type=consumer_electronics%2Finternal_wiring%2Felectronic_wire"
 curl http://localhost:8000/api/cables/by-url/hitachi/ul1007
 curl http://localhost:8000/api/recommended-equipments
 ```
 
 All should return 200 with JSON data.
 
-- [ ] **Step 5: Commit .env.local (it's gitignored, so no commit needed)**
+- [ ] **Step 4: Smoke test via browser (through Nginx)**
 
-No commit needed — `.env.local` is in `.gitignore`.
+Visit these URLs and verify pages render correctly:
+
+1. http://localhost:8080/ — Homepage
+2. http://localhost:8080/cables — Cable overview
+3. http://localhost:8080/cables/consumer-electronics — Industry page
+4. http://localhost:8080/cables/consumer-electronics/internal-wiring — Category page
+5. http://localhost:8080/cables/consumer-electronics/internal-wiring/electronic-wire — Product type page
+6. http://localhost:8080/cable/hitachi/ul1007 — Cable detail page
+
+- [ ] **Step 5: Stop Docker**
+
+```bash
+docker compose down
+```
+
+No commit needed — no code changes in this task.
 
 ---
 
@@ -3596,24 +3815,35 @@ npm run validate
 
 Expected: 0 errors (4 pre-existing recommended-equipments warnings).
 
-- [ ] **Step 3: Run production build (requires backend running)**
+- [ ] **Step 3: Run production Docker build**
 
-Start backend first:
 ```bash
-cd d:\projects\unowire\backend
-.\venv\Scripts\activate
-uvicorn app.main:app --port 8000
+cd d:\projects\unowire
+docker compose build
+docker compose up -d
 ```
 
-Then build:
+Wait for services to be healthy, then:
+
 ```bash
-cd d:\projects\unowire\frontend
-npm run build
+docker compose exec backend alembic upgrade head
+docker compose exec backend python -m scripts.seed
 ```
 
-Expected: Build succeeds. All pages render at build time via ISR.
+- [ ] **Step 4: Verify production build**
 
-- [ ] **Step 4: Commit any remaining fixes**
+```bash
+curl http://localhost:8080/api/health
+curl http://localhost:8080/
+```
+
+Expected: Both return 200.
+
+- [ ] **Step 5: Stop and commit any fixes**
+
+```bash
+docker compose down
+```
 
 If any fixes were needed, commit them:
 
