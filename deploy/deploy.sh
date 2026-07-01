@@ -1,51 +1,26 @@
 #!/usr/bin/env bash
-# Unowire deployment script — run on the production server.
-# Usage: ./deploy/deploy.sh [branch]
-#   branch defaults to "master"
-#
-# Prerequisites:
-#   - Node.js 20+ installed
-#   - PM2 installed globally (npm install -g pm2)
-#   - Nginx installed
-#   - Repository cloned to /var/www/unowire
-#   - frontend/.env.production present
-#
-# What this script does:
-#   1. Pull latest code from the given branch
-#   2. Install npm dependencies (npm ci)
-#   3. Build Next.js (npm run build, includes prebuild data validation)
-#   4. Reload PM2 process (graceful restart)
-#   5. Reload Nginx (config may have changed)
-
 set -euo pipefail
 
 BRANCH="${1:-master}"
 APP_DIR="/var/www/unowire"
-FRONTEND_DIR="$APP_DIR/frontend"
 
-echo "==> [1/5] Pulling latest code from branch: $BRANCH"
+echo "==> [1/4] Pulling latest code from branch: $BRANCH"
 cd "$APP_DIR"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git pull origin "$BRANCH"
 
-echo "==> [2/5] Installing npm dependencies"
-cd "$FRONTEND_DIR"
-npm ci
+echo "==> [2/4] Building Docker images"
+docker compose build
 
-echo "==> [3/5] Building Next.js (with prebuild data validation)"
-npm run build
+echo "==> [3/4] Starting services (graceful restart)"
+docker compose up -d --remove-orphans
 
-echo "==> [4/5] Reloading PM2 process (graceful restart)"
-pm2 reload ecosystem.config.cjs --update-env
-pm2 save
-
-echo "==> [5/5] Reloading Nginx"
-sudo nginx -t
-sudo systemctl reload nginx
+echo "==> [4/4] Running database migrations"
+docker compose exec backend alembic upgrade head
 
 echo ""
 echo "==> Deployment complete."
 echo "    Site: https://www.unowire.com"
-echo "    PM2 status: pm2 status"
-echo "    PM2 logs:   pm2 logs unowire-frontend --lines 50"
+echo "    Status: docker compose ps"
+echo "    Logs:   docker compose logs --tail=50"

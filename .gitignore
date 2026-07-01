@@ -12,3 +12,4 @@ __pycache__/
 *.pyc
 .next/
 coverage/
+.env.docker.local
