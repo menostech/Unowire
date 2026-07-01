@@ -71,12 +71,13 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
   }
 
   // Default: industry cards
-  const industries = api.taxonomy.industries();
-  const allCables = api.cables.all();
+  const industries = await api.taxonomy.industries();
+  const allCables = await api.cables.all();
+  const taxonomyAll = await api.taxonomy.all();
   const stats = industries.map(ind => {
     // Find the industry key by slug match
     let industryKey = "";
-    for (const [k, v] of Object.entries(api.taxonomy.all())) {
+    for (const [k, v] of Object.entries(taxonomyAll)) {
       if (v === ind) { industryKey = k; break; }
     }
     const cableCount = allCables.filter(c => c.industry === industryKey).length;

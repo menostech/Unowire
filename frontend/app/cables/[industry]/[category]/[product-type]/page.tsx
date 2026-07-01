@@ -13,7 +13,7 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ industry: string; category: string; 'product-type': string }> }): Promise<Metadata> {
   const { industry: industrySlug, category: categorySlug, 'product-type': ptSlug } = await params;
-  const found = api.taxonomy.findBySlug(industrySlug, categorySlug, ptSlug);
+  const found = await api.taxonomy.findBySlug(industrySlug, categorySlug, ptSlug);
   if (!found) return { title: 'Not Found' };
   return generateProductTypeMetadata(found.industry, found.category, found.productType);
 }
@@ -46,7 +46,7 @@ export default async function ProductTypePage({
   searchParams: Promise<SearchParams>;
 }) {
   const { industry: indSlug, category: catSlug, 'product-type': ptSlug } = await params;
-  const found = api.taxonomy.findBySlug(indSlug, catSlug, ptSlug);
+  const found = await api.taxonomy.findBySlug(indSlug, catSlug, ptSlug);
   if (!found) notFound();
   const { industry, category, productType, industryKey, categoryKey, productTypeKey } = found;
 

@@ -12,9 +12,9 @@ export function generateMetadata(): Metadata {
   return generateHomeMetadata();
 }
 
-export default function HomePage() {
-  const cables = api.cables.all();
-  const brands = api.brands.all();
+export default async function HomePage() {
+  const cables = await api.cables.all();
+  const brands = await api.brands.all();
   const categories = api.categories.all();
   const rootCategories = api.categories.roots();
   const featuredCables = cables.slice(0, 6);
@@ -96,13 +96,13 @@ export default function HomePage() {
         <Container>
           <h2 className="text-2xl font-bold mb-6">Featured Cables</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {featuredCables.map(cable => {
-              const brand = api.brands.getById(cable.brand_id);
-              const manufacturer = brand ? api.manufacturers.getById(brand.manufacturer_id) : null;
+            {(await Promise.all(featuredCables.map(async cable => {
+              const brand = await api.brands.getById(cable.brand_id);
+              const manufacturer = brand ? await api.manufacturers.getById(brand.manufacturer_id) : null;
               return (
                 <CableCard key={cable.id} cable={cable} brand={brand} manufacturer={manufacturer} />
               );
-            })}
+            })))}
           </div>
           <div className="mt-8 text-center">
             <Link href="/cables" className="text-blue-600 hover:underline">

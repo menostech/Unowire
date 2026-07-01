@@ -11,12 +11,12 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ industry: string; category: string }> }): Promise<Metadata> {
   const { industry: industrySlug, category: categorySlug } = await params;
-  const industryKey = api.taxonomy.industryKeyBySlug(industrySlug);
+  const industryKey = await api.taxonomy.industryKeyBySlug(industrySlug);
   if (!industryKey) return { title: 'Not Found' };
-  const categoryKey = api.taxonomy.categoryKeyBySlug(industryKey, categorySlug);
+  const categoryKey = await api.taxonomy.categoryKeyBySlug(industryKey, categorySlug);
   if (!categoryKey) return { title: 'Not Found' };
-  const industry = api.taxonomy.industry(industryKey)!;
-  const category = api.taxonomy.category(industryKey, categoryKey)!;
+  const industry = (await api.taxonomy.industry(industryKey))!;
+  const category = (await api.taxonomy.category(industryKey, categoryKey))!;
   return generateCategoryMetadata(industry, category);
 }
 
@@ -24,14 +24,14 @@ export default async function CategoryPage({
   params,
 }: { params: Promise<{ industry: string; category: string }> }) {
   const { industry: industrySlug, category: categorySlug } = await params;
-  const industryKey = api.taxonomy.industryKeyBySlug(industrySlug);
+  const industryKey = await api.taxonomy.industryKeyBySlug(industrySlug);
   if (!industryKey) notFound();
-  const categoryKey = api.taxonomy.categoryKeyBySlug(industryKey, categorySlug);
+  const categoryKey = await api.taxonomy.categoryKeyBySlug(industryKey, categorySlug);
   if (!categoryKey) notFound();
-  const industry = api.taxonomy.industry(industryKey)!;
-  const category = api.taxonomy.category(industryKey, categoryKey)!;
+  const industry = (await api.taxonomy.industry(industryKey))!;
+  const category = (await api.taxonomy.category(industryKey, categoryKey))!;
 
-  const allCables = api.cables.all();
+  const allCables = await api.cables.all();
   const productTypes = Object.entries(category.product_types).map(([key, pt]) => {
     const cableCount = allCables.filter(c =>
       c.industry === industryKey && c.category === categoryKey && c.product_type === key

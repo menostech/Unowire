@@ -10,19 +10,19 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ industry: string }> }): Promise<Metadata> {
   const { industry: industrySlug } = await params;
-  const industryKey = api.taxonomy.industryKeyBySlug(industrySlug);
+  const industryKey = await api.taxonomy.industryKeyBySlug(industrySlug);
   if (!industryKey) return { title: 'Not Found' };
-  const industry = api.taxonomy.industry(industryKey)!;
+  const industry = (await api.taxonomy.industry(industryKey))!;
   return generateIndustryMetadata(industry);
 }
 
 export default async function IndustryPage({ params }: { params: Promise<{ industry: string }> }) {
   const { industry: industrySlug } = await params;
-  const industryKey = api.taxonomy.industryKeyBySlug(industrySlug);
+  const industryKey = await api.taxonomy.industryKeyBySlug(industrySlug);
   if (!industryKey) notFound();
-  const industry = api.taxonomy.industry(industryKey)!;
+  const industry = (await api.taxonomy.industry(industryKey))!;
 
-  const allCables = api.cables.all();
+  const allCables = await api.cables.all();
   const categories = Object.entries(industry.categories).map(([key, cat]) => {
     const productTypeCount = Object.keys(cat.product_types).length;
     const cableCount = allCables.filter(c => c.industry === industryKey && c.category === key).length;

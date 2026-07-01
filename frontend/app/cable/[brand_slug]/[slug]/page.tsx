@@ -17,9 +17,9 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ brand_slug: string; slug: string }> }): Promise<Metadata> {
   const { brand_slug, slug } = await params;
-  const cable = api.cables.getByUrl(brand_slug, slug);
+  const cable = await api.cables.getByUrl(brand_slug, slug);
   if (!cable) return { title: 'Not Found' };
-  const brand = api.brands.getById(cable.brand_id);
+  const brand = await api.brands.getById(cable.brand_id);
   return generateCableMetadata(cable, brand);
 }
 
@@ -27,14 +27,14 @@ export default async function CableDetailPage({
   params,
 }: { params: Promise<{ brand_slug: string; slug: string }> }) {
   const { brand_slug, slug } = await params;
-  const cable = api.cables.getByUrl(brand_slug, slug);
+  const cable = await api.cables.getByUrl(brand_slug, slug);
   if (!cable) notFound();
 
-  const brand = api.brands.getById(cable.brand_id);
-  const manufacturer = brand ? api.manufacturers.getById(brand.manufacturer_id) : null;
+  const brand = await api.brands.getById(cable.brand_id);
+  const manufacturer = brand ? await api.manufacturers.getById(brand.manufacturer_id) : null;
   const categories = api.categories.getByIds(cable.category_ids);
-  const recommended = recommendEquipments(cable, api.recommendedEquipments.all());
-  const similar = api.cables.similar(cable, 4);
+  const recommended = recommendEquipments(cable, await api.recommendedEquipments.all());
+  const similar = await api.cables.similar(cable, 4);
   const jsonUrl = `/api/cables/${brand_slug}/${slug}`;
 
   const breadcrumbItems = [
