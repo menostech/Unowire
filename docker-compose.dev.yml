@@ -1,3 +1,5 @@
+# Development override file - NOT auto-merged by docker compose (renamed from docker-compose.override.yml).
+# Must be used explicitly: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 services:
   frontend:
     build:

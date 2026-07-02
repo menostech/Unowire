@@ -1,7 +1,9 @@
 import { validateAllData, printValidationResult } from '../lib/validate';
 
-const errors = validateAllData();
-const hasErrors = printValidationResult(errors);
-if (hasErrors) {
-  process.exit(1);
-}
+(async () => {
+  const errors = await validateAllData();
+  const hasErrors = printValidationResult(errors);
+  if (hasErrors) {
+    process.exit(1);
+  }
+})();

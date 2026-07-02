@@ -2,23 +2,19 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback } from 'react';
-import type { FilterFacets } from '@/lib/types';
-import { api } from '@/lib/api';
+import type { FilterFacets, ProductTypeConfig } from '@/lib/types';
 import { formatSizeLabel } from '@/lib/utils';
 
 interface CableFiltersProps {
   facets: FilterFacets;
-  industry: string;
-  category: string;
-  productType: string;
+  ptConfig: ProductTypeConfig | null;
 }
 
-function CableFiltersInner({ facets, industry, category, productType }: CableFiltersProps) {
+function CableFiltersInner({ facets, ptConfig }: CableFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const ptConfig = api.taxonomy.productType(industry, category, productType);
   if (!ptConfig) return null;
 
   const sizeFilter = ptConfig.filters.find(f => f.spec_key === "size");

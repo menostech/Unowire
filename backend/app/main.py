@@ -1,9 +1,16 @@
-from fastapi import FastAPI, Request
+﻿import logging
+
+from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 
 from app.api.routes import brands, cables, categories, equipment, health, industries, manufacturers, product_types, taxonomy
 from app.core.config import settings
+from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Unowire API",
@@ -25,9 +32,46 @@ if settings.debug:
 # Custom error handler for standardized error format
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
     return JSONResponse(
         status_code=500,
         content={"code": 500, "message": "Internal server error"},
+    )
+
+
+@app.exception_handler(FastAPIHTTPException)
+async def http_exception_handler(request: Request, exc: FastAPIHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=exc.detail if isinstance(exc.detail, dict) else {"code": exc.status_code, "message": str(exc.detail)},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    details = []
+    for error in exc.errors():
+        details.append(ValidationErrorDetail(
+            loc=error.get("loc", []),
+            msg=error.get("msg", ""),
+            type=error.get("type", ""),
+        ))
+    return JSONResponse(
+        status_code=422,
+        content=ValidationErrorResponse(
+            code=422,
+            message="Validation error",
+            details=details,
+        ).model_dump(),
+    )
+
+
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(request: Request, exc: IntegrityError):
+    logger.warning("Integrity constraint violation: %s", exc.orig)
+    return JSONResponse(
+        status_code=409,
+        content={"code": 409, "message": "Resource already exists or violates a constraint"},
     )
 
 

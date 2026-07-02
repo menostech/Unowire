@@ -14,7 +14,7 @@ class RecommendedEquipment(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     brand: Mapped[str | None] = mapped_column(String(200))
-    applicable_specs: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="[]")
+    applicable_specs: Mapped[list] = mapped_column(JSONB, nullable=False, server_default="[]")
     description: Mapped[str | None] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -16,7 +16,7 @@ async def list_product_types(category_id: str, db: AsyncSession = Depends(get_db
 @router.get("/{id}", response_model=ProductTypeRead)
 async def get_product_type(category_id: str, id: str, db: AsyncSession = Depends(get_db)):
     obj = await crud_product_type.get(db, id)
-    if not obj:
+    if not obj or obj.category_id != category_id:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Product type not found"})
     return obj
 
@@ -38,14 +38,14 @@ async def update_product_type(
     category_id: str, id: str, obj_in: ProductTypeUpdate, db: AsyncSession = Depends(get_db)
 ):
     obj = await crud_product_type.get(db, id)
-    if not obj:
+    if not obj or obj.category_id != category_id:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Product type not found"})
     return await crud_product_type.update(db, db_obj=obj, obj_in=obj_in)
 
 
 @router.delete("/{id}", response_model=ProductTypeRead)
 async def delete_product_type(category_id: str, id: str, db: AsyncSession = Depends(get_db)):
-    obj = await crud_product_type.remove(db, id=id)
-    if not obj:
+    obj = await crud_product_type.get(db, id)
+    if not obj or obj.category_id != category_id:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Product type not found"})
-    return obj
+    return await crud_product_type.remove(db, id=id)

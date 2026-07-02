@@ -3,9 +3,9 @@ import { api, getCableUrl } from '@/lib/api';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.unowire.com';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const cables = api.cables.all();
-  const taxonomy = api.taxonomy.all();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const cables = await api.cables.all();
+  const taxonomy = await api.taxonomy.all();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },

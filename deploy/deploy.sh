@@ -11,16 +11,25 @@ git checkout "$BRANCH"
 git pull origin "$BRANCH"
 
 echo "==> [2/4] Building Docker images"
-docker compose build
+docker compose -f docker-compose.yml build
 
-echo "==> [3/4] Starting services (graceful restart)"
-docker compose up -d --remove-orphans
+echo "==> [3/4] Running database migrations"
+docker compose -f docker-compose.yml up -d db backend
+echo "Waiting for backend to be ready..."
+for i in $(seq 1 30); do
+  if docker compose -f docker-compose.yml exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')" 2>/dev/null; then
+    break
+  fi
+  sleep 2
+done
+docker compose -f docker-compose.yml exec -T backend alembic upgrade head
+docker compose -f docker-compose.yml exec -T backend python -m scripts.seed
 
-echo "==> [4/4] Running database migrations"
-docker compose exec backend alembic upgrade head
+echo "==> [4/4] Starting all services (graceful restart)"
+docker compose -f docker-compose.yml up -d --remove-orphans
 
 echo ""
 echo "==> Deployment complete."
 echo "    Site: https://www.unowire.com"
-echo "    Status: docker compose ps"
-echo "    Logs:   docker compose logs --tail=50"
+echo "    Status: docker compose -f docker-compose.yml ps"
+echo "    Logs:   docker compose -f docker-compose.yml logs --tail=50"

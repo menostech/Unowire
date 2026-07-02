@@ -46,7 +46,7 @@ class Cable(Base):
     base_description: Mapped[str | None] = mapped_column()
     meta_title: Mapped[str | None] = mapped_column(String(200))
     meta_description: Mapped[str | None] = mapped_column()
-    category_ids: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="[]")
+    category_ids: Mapped[list] = mapped_column(JSONB, nullable=False, server_default="[]")
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 

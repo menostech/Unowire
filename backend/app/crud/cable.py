@@ -1,10 +1,12 @@
-from sqlalchemy import and_, func, or_, select
+﻿from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.crud.base import CRUDBase
 from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.equipment import RecommendedEquipment
+from app.models.brand import Brand
+from app.models.manufacturer import Manufacturer
 from app.schemas.cable import (
     BrandFacet,
     CableCreate,
@@ -22,9 +24,7 @@ from app.schemas.cable import (
 class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
     async def get_detail(self, db: AsyncSession, id: str) -> Cable | None:
         stmt = select(Cable).where(Cable.id == id).options(
-            selectinload(Cable.brand).selectinload(
-                Cable.brand.property.mapper.relationships["manufacturer"].mapper.class_
-            ),
+            selectinload(Cable.brand).selectinload(Brand.manufacturer),
             selectinload(Cable.variants).selectinload(CableVariant.specs),
             selectinload(Cable.common_specs),
         )
@@ -32,16 +32,12 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
         return result.scalar_one_or_none()
 
     async def get_by_url(self, db: AsyncSession, brand_slug: str, cable_slug: str) -> Cable | None:
-        from app.models.brand import Brand
-
         stmt = (
             select(Cable)
             .join(Brand, Cable.brand_id == Brand.id)
             .where(Brand.slug == brand_slug, Cable.slug == cable_slug)
             .options(
-                selectinload(Cable.brand).selectinload(
-                    Cable.brand.property.mapper.relationships["manufacturer"].mapper.class_
-                ),
+                selectinload(Cable.brand).selectinload(Brand.manufacturer),
                 selectinload(Cable.variants).selectinload(CableVariant.specs),
                 selectinload(Cable.common_specs),
             )
@@ -78,7 +74,6 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
 
         # Manufacturer / brand filters
         if params.manufacturer:
-            from app.models.brand import Brand
             stmt = stmt.join(Brand, Cable.brand_id == Brand.id).where(
                 Brand.manufacturer_id.in_(params.manufacturer)
             )
@@ -166,9 +161,6 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
     async def _build_facets(
         self, db: AsyncSession, base_stmt, params: CableFilterParams
     ) -> FilterFacets:
-        from app.models.brand import Brand
-        from app.models.manufacturer import Manufacturer
-
         # Get cable IDs from the base query
         cable_id_sub = base_stmt.with_only_columns(Cable.id)
         cable_ids_result = await db.execute(cable_id_sub)

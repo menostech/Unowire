@@ -66,7 +66,7 @@ export default async function ProductTypePage({
     specFilters[key] = Array.isArray(value) ? value : [value];
   }
 
-  const result = filterCables({
+  const result = await filterCables({
     industry: industryKey,
     category: categoryKey,
     product_type: productTypeKey,
@@ -106,9 +106,7 @@ export default async function ProductTypePage({
       <div className="flex gap-6">
         <CableFilters
           facets={result.filters}
-          industry={industryKey}
-          category={categoryKey}
-          productType={productTypeKey}
+          ptConfig={productType}
         />
         <div className="flex-1 min-w-0">
           {result.items.length === 0 ? (

@@ -5,13 +5,13 @@ import type { ValidationError } from './types';
  * 校验所有 JSON 数据的引用完整性、key 唯一性、slug 唯一性。
  * 在 dev 启动和 build 前运行。
  */
-export function validateAllData(): ValidationError[] {
+export async function validateAllData(): Promise<ValidationError[]> {
   const errors: ValidationError[] = [];
-  const brands = api.brands.all();
-  const manufacturers = api.manufacturers.all();
+  const brands = await api.brands.all();
+  const manufacturers = await api.manufacturers.all();
   const categories = api.categories.all();
-  const cables = api.cables.all();
-  const equipments = api.recommendedEquipments.all();
+  const cables = await api.cables.all();
+  const equipments = await api.recommendedEquipments.all();
 
   const brandIds = new Set(brands.map(b => b.id));
   const manufacturerIds = new Set(manufacturers.map(m => m.id));
@@ -82,9 +82,11 @@ export function validateAllData(): ValidationError[] {
     }
 
     // 5b. industry presence and validity (now reads from taxonomy)
-    const validIndustries = new Set(api.taxonomy.industries().map(i => {
+    const industriesList = await api.taxonomy.industries();
+    const taxonomyTree = await api.taxonomy.all();
+    const validIndustries = new Set(industriesList.map(i => {
       // Find the key for this industry object
-      for (const [k, v] of Object.entries(api.taxonomy.all())) {
+      for (const [k, v] of Object.entries(taxonomyTree)) {
         if (v === i) return k;
       }
       return "";
@@ -150,7 +152,7 @@ export function validateAllData(): ValidationError[] {
 
     // 5e. cable.category must exist in taxonomy[industry].categories
     if (cable.industry && validIndustries.has(cable.industry)) {
-      const indConfig = api.taxonomy.industry(cable.industry);
+      const indConfig = await api.taxonomy.industry(cable.industry);
       if (indConfig && !indConfig.categories[cable.category]) {
         errors.push({
           file: "cables.json",
@@ -201,7 +203,7 @@ export function validateAllData(): ValidationError[] {
   }
 
   // 5h. For each product_type in taxonomy, size filter presence and control consistency
-  for (const [indKey, ind] of Object.entries(api.taxonomy.all())) {
+  for (const [indKey, ind] of Object.entries(await api.taxonomy.all())) {
     for (const [catKey, cat] of Object.entries(ind.categories)) {
       for (const [ptKey, pt] of Object.entries(cat.product_types)) {
         const sizeFilters = pt.filters.filter(f => f.spec_key === "size");
@@ -236,7 +238,7 @@ export function validateAllData(): ValidationError[] {
   }
 
   // 5j. Warn about orphan filter spec_keys (defined in taxonomy but no cable has that spec)
-  for (const [indKey, ind] of Object.entries(api.taxonomy.all())) {
+  for (const [indKey, ind] of Object.entries(await api.taxonomy.all())) {
     for (const [catKey, cat] of Object.entries(ind.categories)) {
       for (const [ptKey, pt] of Object.entries(cat.product_types)) {
         const cablesOfThisType = cables.filter(c =>
@@ -264,7 +266,7 @@ export function validateAllData(): ValidationError[] {
   // 6. (brand_slug, cable_slug) 组合唯一
   const urlSet = new Set<string>();
   for (const cable of cables) {
-    const brand = api.brands.getById(cable.brand_id);
+    const brand = await api.brands.getById(cable.brand_id);
     if (brand) {
       const urlKey = `${brand.slug}/${cable.slug}`;
       if (urlSet.has(urlKey)) {

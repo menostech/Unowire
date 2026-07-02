@@ -52,10 +52,12 @@ async def seed_manufacturers(db: AsyncSession, dry_run: bool):
             country=item.get("country"),
             website=item.get("website"),
         )
-        db.add(obj)
         if dry_run:
             print(f"  + Manufacturer: {obj.id} - {obj.name}")
-    await db.commit()
+            continue
+        db.add(obj)
+    if not dry_run:
+        await db.commit()
 
 
 async def seed_brands(db: AsyncSession, dry_run: bool):
@@ -67,10 +69,12 @@ async def seed_brands(db: AsyncSession, dry_run: bool):
             slug=item["slug"],
             manufacturer_id=item["manufacturer_id"],
         )
-        db.add(obj)
         if dry_run:
             print(f"  + Brand: {obj.id} - {obj.name}")
-    await db.commit()
+            continue
+        db.add(obj)
+    if not dry_run:
+        await db.commit()
 
 
 async def seed_taxonomy(db: AsyncSession, dry_run: bool):
@@ -82,9 +86,10 @@ async def seed_taxonomy(db: AsyncSession, dry_run: bool):
             slug=ind_data["slug"],
             description=ind_data.get("description"),
         )
-        db.add(industry)
         if dry_run:
             print(f"  + Industry: {ind_key} - {ind_data['label']}")
+        else:
+            db.add(industry)
 
         for cat_key, cat_data in ind_data["categories"].items():
             category = Category(
@@ -93,9 +98,10 @@ async def seed_taxonomy(db: AsyncSession, dry_run: bool):
                 label=cat_data["label"],
                 slug=cat_data["slug"],
             )
-            db.add(category)
             if dry_run:
                 print(f"    + Category: {cat_key} - {cat_data['label']}")
+            else:
+                db.add(category)
 
             for pt_key, pt_data in cat_data["product_types"].items():
                 product_type = ProductType(
@@ -106,10 +112,12 @@ async def seed_taxonomy(db: AsyncSession, dry_run: bool):
                     size_system=pt_data["size_system"],
                     filters=pt_data.get("filters", []),
                 )
-                db.add(product_type)
                 if dry_run:
                     print(f"      + ProductType: {pt_key} - {pt_data['label']}")
-    await db.commit()
+                else:
+                    db.add(product_type)
+    if not dry_run:
+        await db.commit()
 
 
 async def seed_cables(db: AsyncSession, dry_run: bool):
@@ -133,16 +141,18 @@ async def seed_cables(db: AsyncSession, dry_run: bool):
             meta_description=cable_data.get("meta_description"),
             category_ids=cable_data.get("category_ids", []),
         )
-        db.add(cable)
-        await db.flush()
-
         if dry_run:
             print(f"  + Cable: {cable.id} - {cable.model}")
+        else:
+            db.add(cable)
+            await db.flush()
+
+        cable_id = cable.id
 
         # Common specs
         for i, spec in enumerate(cable_data.get("common_specs", [])):
             spec_item = SpecItem(
-                cable_id=cable.id,
+                cable_id=cable_id,
                 variant_id=None,
                 spec_key=spec["key"],
                 label=spec["label"],
@@ -153,22 +163,27 @@ async def seed_cables(db: AsyncSession, dry_run: bool):
                 filterable=spec.get("filterable", False),
                 sort_order=i,
             )
-            db.add(spec_item)
+            if not dry_run:
+                db.add(spec_item)
 
         # Variants + variant specs
         for v_idx, variant_data in enumerate(cable_data.get("variants", [])):
             variant = CableVariant(
-                cable_id=cable.id,
+                cable_id=cable_id,
                 slug=variant_data["slug"],
                 sort_order=v_idx,
             )
-            db.add(variant)
-            await db.flush()
+            if dry_run:
+                variant_id = None
+            else:
+                db.add(variant)
+                await db.flush()
+                variant_id = variant.id
 
             for s_idx, spec in enumerate(variant_data.get("specs", [])):
                 spec_item = SpecItem(
-                    cable_id=cable.id,
-                    variant_id=variant.id,
+                    cable_id=cable_id,
+                    variant_id=variant_id,
                     spec_key=spec["key"],
                     label=spec["label"],
                     value_string=spec.get("value") if spec["type"] in ("enum", "string") else None,
@@ -178,9 +193,11 @@ async def seed_cables(db: AsyncSession, dry_run: bool):
                     filterable=spec.get("filterable", False),
                     sort_order=s_idx,
                 )
-                db.add(spec_item)
+                if not dry_run:
+                    db.add(spec_item)
 
-    await db.commit()
+    if not dry_run:
+        await db.commit()
 
 
 async def seed_equipment(db: AsyncSession, dry_run: bool):
@@ -194,16 +211,21 @@ async def seed_equipment(db: AsyncSession, dry_run: bool):
             applicable_specs=item.get("applicable_specs", []),
             description=item.get("description"),
         )
-        db.add(obj)
         if dry_run:
             print(f"  + Equipment: {obj.id} - {obj.name}")
-    await db.commit()
+            continue
+        db.add(obj)
+    if not dry_run:
+        await db.commit()
 
 
 async def main(dry_run: bool):
     async with async_session() as db:
-        print("Truncating all tables...")
-        await truncate_all(db)
+        if dry_run:
+            print("DRY RUN: no database writes will be performed")
+        else:
+            print("Truncating all tables...")
+            await truncate_all(db)
 
         print("Seeding manufacturers...")
         await seed_manufacturers(db, dry_run)

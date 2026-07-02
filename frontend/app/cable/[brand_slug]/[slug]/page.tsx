@@ -32,7 +32,9 @@ export default async function CableDetailPage({
 
   const brand = await api.brands.getById(cable.brand_id);
   const manufacturer = brand ? await api.manufacturers.getById(brand.manufacturer_id) : null;
-  const categories = api.categories.getByIds(cable.category_ids);
+  const categories = cable.category_ids
+    ? await api.categories.getByIds(cable.category_ids)
+    : [];
   const recommended = recommendEquipments(cable, await api.recommendedEquipments.all());
   const similar = await api.cables.similar(cable, 4);
   const jsonUrl = `/api/cables/${brand_slug}/${slug}`;

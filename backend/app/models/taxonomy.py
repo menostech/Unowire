@@ -61,7 +61,7 @@ class ProductType(Base):
     label: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), nullable=False)
     size_system: Mapped[str] = mapped_column(String(20), nullable=False)
-    filters: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="[]")
+    filters: Mapped[list] = mapped_column(JSONB, nullable=False, server_default="[]")
     sort_order: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)

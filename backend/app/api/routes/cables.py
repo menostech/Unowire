@@ -1,4 +1,4 @@
-import json
+﻿import json
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -72,10 +72,9 @@ async def get_cable_by_url(brand_slug: str, cable_slug: str, db: AsyncSession = 
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})
     # Get recommended equipment
     equipment = await crud_equipment.get_matching_cable(db, cable.id)
-    return CableDetailRead(
-        **{k: v for k, v in cable.__dict__.items() if k != "_sa_instance_state"},
-        recommended_equipments=equipment,
-    )
+    detail = CableDetailRead.model_validate(cable)
+    detail.recommended_equipments = equipment
+    return detail
 
 
 @router.get("/{id}", response_model=CableRead)

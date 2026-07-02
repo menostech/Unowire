@@ -25,7 +25,7 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
   // Cross-industry text search mode
   if (sp.q) {
     const page = parseInt(sp.page || '1');
-    const result = filterCablesByText({ q: sp.q, page, page_size: 16 });
+    const result = await filterCablesByText({ q: sp.q, page, page_size: 16 });
     const totalPages = Math.ceil(result.total / result.page_size);
     return (
       <Container className="py-6">

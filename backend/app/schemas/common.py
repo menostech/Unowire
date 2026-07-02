@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+﻿from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
@@ -23,8 +23,9 @@ class ErrorResponse(BaseModel):
 
 
 class ValidationErrorDetail(BaseModel):
-    field: str
-    error: str
+    loc: list
+    msg: str
+    type: str
 
 
 class ValidationErrorResponse(BaseModel):

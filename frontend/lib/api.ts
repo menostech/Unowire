@@ -1,15 +1,18 @@
 import type {
-  Brand, Cable, CableDetailResponse, Category,
-  Manufacturer, ProductTypeConfig, RecommendedEquipment,
-  Taxonomy, TaxonomyCategory, TaxonomyIndustry,
+  ApplicableSpecRule, Brand, Cable, CableDetailResponse, Category,
+  Industry, Manufacturer, ProductTypeConfig, RecommendedEquipment,
+  SizeSystem, SpecItem, SpecType, Taxonomy, TaxonomyCategory,
+  TaxonomyIndustry,
 } from './types';
 
 import categoriesData from '@/data/categories.json';
 
 // === API Base URL ===
-// Production: empty string → fetch('/api/...') → Nginx reverse proxy
-// Local dev: 'http://localhost:8000' → direct FastAPI call
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '';
+// Server-side: use internal URL (set in Docker env) for absolute fetch
+// Client-side: NEXT_PUBLIC_API_BASE (empty in production for same-origin browser requests)
+// Local dev: NEXT_PUBLIC_API_BASE=http://localhost:8000
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE
+  || (typeof window === 'undefined' ? process.env.INTERNAL_API_BASE || 'http://backend:8000' : '');
 
 // === In-memory cache + ISR ===
 const cache = new Map<string, { data: unknown; expires: number }>();
@@ -95,36 +98,180 @@ function getCategoryIndex(): CategoryIndex {
   return _categoryIndex;
 }
 
-// === Adapter functions: API response → frontend types ===
-// The API returns snake_case fields; frontend types use snake_case too,
-// so most objects pass through directly. These adapters handle
-// structural differences (e.g., taxonomy tree shape).
+// === Backend response interfaces (not exported, internal use) ===
+interface BackendSpecItem {
+  spec_key: string;
+  label: string;
+  value_string: string | null;
+  value_number: number | null;
+  unit: string | null;
+  spec_type: string;
+  filterable: boolean;
+  sort_order?: number;
+}
+
+interface BackendCable {
+  id: string;
+  brand_id: string;
+  product_type_id: string;
+  industry_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  size_system: string;
+  base_description: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  category_ids?: string[];
+  brand?: BackendBrand | null;
+  common_specs?: BackendSpecItem[];
+  variants?: { slug: string; specs: BackendSpecItem[]; sort_order?: number; id?: number }[];
+}
+
+interface BackendBrand {
+  id: string;
+  name: string;
+  slug: string;
+  manufacturer_id: string;
+  manufacturer?: { id: string; name: string; slug: string; country: string | null; website: string | null } | null;
+}
+
+interface BackendManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+}
+
+interface BackendEquipment {
+  id: string;
+  name: string;
+  slug: string;
+  brand: string | null;
+  model: string | null;
+  type: string | null;
+  external_url: string | null;
+  applicable_specs: Record<string, unknown>[];
+  description: string | null;
+}
+
+interface BackendCableListResponse {
+  items: BackendCable[];
+  total: number;
+  page: number;
+  page_size: number;
+  facets: {
+    manufacturers: { id: string; name: string; count: number }[];
+    brands: { id: string; name: string; count: number }[];
+    size: { value: string; count: number }[];
+    size_range: { min: number; max: number } | null;
+    spec_facets: Record<string, { value: string; count: number }[]>;
+    outer_diameter: { min: number; max: number } | null;
+  };
+}
+
+// === Adapter functions: API response -> frontend types ===
+// The backend returns different field names than frontend types expect
+// (e.g., industry_id vs industry, spec_key/value_string vs key/value).
+// These adapters normalize the backend responses into frontend types.
 
 function adaptTaxonomyTree(tree: Record<string, unknown>): Taxonomy {
   // API returns the same structure as taxonomy.json — direct pass-through
   return tree as unknown as Taxonomy;
 }
+function adaptSpecItem(s: BackendSpecItem): SpecItem {
+  return {
+    key: s.spec_key,
+    label: s.label,
+    value: s.value_number !== null && s.value_number !== undefined ? s.value_number : (s.value_string ?? ''),
+    unit: s.unit,
+    type: s.spec_type as SpecType,
+    filterable: s.filterable,
+  };
+}
 
-// === URL lookup Map: (brand_slug, cable_slug) → cable ===
-// Built on-demand from API data for cables.url() and getCableUrl()
+function adaptCable(c: BackendCable): Cable {
+  const cable: Cable = {
+    id: c.id,
+    brand_id: c.brand_id,
+    model: c.model,
+    slug: c.slug,
+    type: c.product_type_id,
+    industry: c.industry_id as Industry,
+    category: c.category_id,
+    product_type: c.product_type_id,
+    size_system: c.size_system as SizeSystem,
+    category_ids: c.category_ids ?? [],
+    base_description: c.base_description ?? '',
+    meta_title: c.meta_title,
+    meta_description: c.meta_description,
+    common_specs: (c.common_specs ?? []).map(adaptSpecItem),
+    variants: (c.variants ?? []).map(v => ({
+      slug: v.slug,
+      specs: (v.specs ?? []).map(adaptSpecItem),
+    })),
+  };
+  // Preserve brand slug for getCableUrl (attached as extra property, not in Cable type)
+  if (c.brand) {
+    (cable as Cable & { brand?: { slug: string } }).brand = { slug: c.brand.slug };
+  }
+  return cable;
+}
+
+function adaptBrand(b: BackendBrand): Brand {
+  return {
+    id: b.id,
+    name: b.name,
+    slug: b.slug,
+    manufacturer_id: b.manufacturer_id,
+    country: b.manufacturer?.country ?? '',
+    website: b.manufacturer?.website ?? '',
+  };
+}
+
+function adaptManufacturer(m: BackendManufacturer): Manufacturer {
+  return {
+    id: m.id,
+    name: m.name,
+    slug: m.slug,
+    country: m.country ?? '',
+    website: m.website ?? '',
+  };
+}
+
+function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
+  return {
+    id: e.id,
+    brand: e.brand ?? '',
+    model: e.model ?? e.name,
+    type: e.type ?? '',
+    description: e.description ?? '',
+    applicable_specs: (e.applicable_specs ?? []) as unknown as ApplicableSpecRule[],
+    external_url: e.external_url ?? '',
+  };
+}
 
 // === Helper functions ===
 export function getCableUrl(cable: Cable): string {
-  // Brand slug comes from the nested brand object in API responses
-  const brandSlug = ((cable as Record<string, unknown>).brand as { slug: string } | undefined)?.slug ?? "unknown";
-  return `/cable/${brandSlug}/${cable.slug}`;
+  const brandSlug = (cable as unknown as Record<string, unknown>).brand_slug as string | undefined;
+  if (brandSlug) return `/cable/${brandSlug}/${cable.slug}`;
+  // Fallback: try nested brand object (attached by adaptCable for detail page)
+  const brand = (cable as unknown as Record<string, unknown>).brand as { slug: string } | undefined;
+  return `/cable/${brand?.slug ?? 'unknown'}/${cable.slug}`;
 }
 
 // === API object ===
 export const api = {
   manufacturers: {
     async all(): Promise<Manufacturer[]> {
-      const res = await fetchWithCache<{ items: Manufacturer[] }>('/api/manufacturers?page_size=999');
-      return res.items;
+      const res = await fetchWithCache<{ items: BackendManufacturer[] }>('/api/manufacturers?page_size=999');
+      return res.items.map(adaptManufacturer);
     },
     async getById(id: string): Promise<Manufacturer | null> {
       try {
-        return await fetchWithCache<Manufacturer>(`/api/manufacturers/${id}`);
+        const data = await fetchWithCache<BackendManufacturer>(`/api/manufacturers/${id}`);
+        return adaptManufacturer(data);
       } catch {
         return null;
       }
@@ -133,12 +280,13 @@ export const api = {
 
   brands: {
     async all(): Promise<Brand[]> {
-      const res = await fetchWithCache<{ items: Brand[] }>('/api/brands?page_size=999');
-      return res.items;
+      const res = await fetchWithCache<{ items: BackendBrand[] }>('/api/brands?page_size=999');
+      return res.items.map(adaptBrand);
     },
     async getById(id: string): Promise<Brand | null> {
       try {
-        return await fetchWithCache<Brand>(`/api/brands/${id}`);
+        const data = await fetchWithCache<BackendBrand>(`/api/brands/${id}`);
+        return adaptBrand(data);
       } catch {
         return null;
       }
@@ -186,24 +334,31 @@ export const api = {
 
   cables: {
     async all(): Promise<Cable[]> {
-      const res = await fetchWithCache<{ items: Cable[] }>('/api/cables?page_size=999');
-      return res.items;
+      const res = await fetchWithCache<BackendCableListResponse>('/api/cables?page_size=999');
+      return res.items.map(c => {
+        const adapted = adaptCable(c);
+        // Attach brand slug for getCableUrl (not part of Cable type)
+        (adapted as unknown as Record<string, unknown>).brand_slug = c.brand?.slug ?? 'unknown';
+        return adapted;
+      });
     },
     async getById(id: string): Promise<Cable | null> {
       try {
-        return await fetchWithCache<Cable>(`/api/cables/${id}`);
+        const data = await fetchWithCache<BackendCable>(`/api/cables/${id}`);
+        return adaptCable(data);
       } catch {
         return null;
       }
     },
     async getByUrl(brandSlug: string, cableSlug: string): Promise<Cable | null> {
       try {
-        const data = await fetchWithCache<Record<string, unknown>>(
+        const data = await fetchWithCache<BackendCable>(
           `/api/cables/by-url/${brandSlug}/${cableSlug}`
         );
-        // Adapt: API returns cable with brand/manufacturer nested objects
-        // Frontend Cable type has brand_id, not brand object
-        return data as unknown as Cable;
+        const adapted = adaptCable(data);
+        // Attach brand slug for getCableUrl (not part of Cable type)
+        (adapted as unknown as Record<string, unknown>).brand_slug = data.brand?.slug ?? brandSlug;
+        return adapted;
       } catch {
         return null;
       }
@@ -219,13 +374,12 @@ export const api = {
         .slice(0, limit);
     },
   },
-
   recommendedEquipments: {
     async all(): Promise<RecommendedEquipment[]> {
-      const res = await fetchWithCache<{ items: RecommendedEquipment[] }>(
+      const res = await fetchWithCache<{ items: BackendEquipment[] }>(
         '/api/recommended-equipments?page_size=999'
       );
-      return res.items;
+      return res.items.map(adaptEquipment);
     },
   },
 
@@ -301,27 +455,23 @@ export const api = {
 
   async getCableDetail(brandSlug: string, cableSlug: string): Promise<CableDetailResponse | null> {
     try {
-      const data = await fetchWithCache<Record<string, unknown>>(
-        `/api/cables/by-url/${brandSlug}/${cableSlug}`
-      );
-      // The API returns a flat cable detail with brand/manufacturer/equipment nested.
-      // Adapt to CableDetailResponse shape.
-      const cable = data as unknown as Cable;
-      const brand = (data as Record<string, Record<string, unknown>>).brand as Brand | null ?? null;
-      const manufacturer = brand
-        ? ((data as Record<string, Record<string, unknown>>).manufacturer as Manufacturer | null ?? null)
-        : null;
-      const cableCategories = cable.category_ids
-        ? api.categories.getByIds(cable.category_ids)
-        : [];
-      const recommendedEquipments = ((data as Record<string, unknown>).recommended_equipments as RecommendedEquipment[]) ?? [];
-      return {
-        cable,
-        brand,
-        manufacturer,
-        categories: cableCategories,
-        recommended_equipments: recommendedEquipments,
-      };
+      const data = await fetchWithCache<BackendCable & {
+        manufacturer: BackendManufacturer | null;
+        recommended_equipments: BackendEquipment[];
+      }>(`/api/cables/by-url/${brandSlug}/${cableSlug}`);
+      const cable = adaptCable(data);
+      const brand = data.brand ? adaptBrand(data.brand) : null;
+      const manufacturer = data.manufacturer ? adaptManufacturer(data.manufacturer) : null;
+      const cableCategories = cable.category_ids ? api.categories.getByIds(cable.category_ids) : [];
+      const recommendedEquipments = (data.recommended_equipments ?? []).map(e => {
+        const equipment = adaptEquipment(e);
+        return {
+          equipment,
+          matched_variants: [],
+          explanation: [],
+        };
+      });
+      return { cable, brand, manufacturer, categories: cableCategories, recommended_equipments: recommendedEquipments };
     } catch {
       return null;
     }

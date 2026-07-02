@@ -1,6 +1,6 @@
 import type {
-  Cable, CableListItem, CableListResponse, CableQueryParams,
-  FilterFacets, SizeSystem, TextSearchParams,
+  Brand, Cable, CableListItem, CableListResponse, CableQueryParams,
+  FilterFacets, Manufacturer, SizeSystem, TextSearchParams,
 } from './types';
 import { api } from './api';
 
@@ -80,11 +80,19 @@ function applySizeFilter(
 }
 
 /** Main filter function — route-scoped (industry+category+product_type required). */
-export function filterCables(params: CableQueryParams): CableListResponse {
+export async function filterCables(params: CableQueryParams): Promise<CableListResponse> {
   const { industry, category, product_type, ...filterParams } = params;
 
+  const [allCables, allBrands, allManufacturers] = await Promise.all([
+    api.cables.all(),
+    api.brands.all(),
+    api.manufacturers.all(),
+  ]);
+  const brandMap = new Map(allBrands.map(b => [b.id, b]));
+  const manufacturerMap = new Map(allManufacturers.map(m => [m.id, m]));
+
   // 1. Hard filter by route identity
-  let filtered = api.cables.all().filter(c =>
+  let filtered = allCables.filter(c =>
     c.industry === industry &&
     c.category === category &&
     c.product_type === product_type
@@ -104,7 +112,7 @@ export function filterCables(params: CableQueryParams): CableListResponse {
   if (filterParams.manufacturer && filterParams.manufacturer.length > 0) {
     const manufacturerIds = new Set(filterParams.manufacturer);
     filtered = filtered.filter(c => {
-      const brand = api.brands.getById(c.brand_id);
+      const brand = brandMap.get(c.brand_id);
       return brand && manufacturerIds.has(brand.manufacturer_id);
     });
   }
@@ -116,7 +124,7 @@ export function filterCables(params: CableQueryParams): CableListResponse {
   }
 
   // 5. Size filter (enum + range union)
-  const ptConfig = api.taxonomy.productType(industry, category, product_type);
+  const ptConfig = await api.taxonomy.productType(industry, category, product_type);
   const sizeSystem = ptConfig?.size_system ?? "none";
   filtered = applySizeFilter(
     filtered,
@@ -150,7 +158,7 @@ export function filterCables(params: CableQueryParams): CableListResponse {
   }
 
   // 8. Build facets
-  const filters = buildFacets(filtered, sizeSystem);
+  const filters = buildFacets(filtered, sizeSystem, brandMap, allManufacturers, allBrands);
 
   // 9. Pagination
   const total = filtered.length;
@@ -160,18 +168,26 @@ export function filterCables(params: CableQueryParams): CableListResponse {
   const paged = filtered.slice(start, start + page_size);
 
   const items: CableListItem[] = paged.map(cable => {
-    const brand = api.brands.getById(cable.brand_id);
-    const manufacturer = brand ? api.manufacturers.getById(brand.manufacturer_id) : null;
+    const brand = brandMap.get(cable.brand_id) ?? null;
+    const manufacturer = brand ? manufacturerMap.get(brand.manufacturer_id) ?? null : null;
     return { cable, brand, manufacturer };
   });
 
   return { items, total, page, page_size, filters };
 }
-
 /** Cross-industry text search (for /cables overview). No facet filters applied. */
-export function filterCablesByText(params: TextSearchParams): CableListResponse {
+export async function filterCablesByText(params: TextSearchParams): Promise<CableListResponse> {
   const q = params.q.toLowerCase();
-  let filtered = api.cables.all().filter(c =>
+
+  const [allCables, allBrands, allManufacturers] = await Promise.all([
+    api.cables.all(),
+    api.brands.all(),
+    api.manufacturers.all(),
+  ]);
+  const brandMap = new Map(allBrands.map(b => [b.id, b]));
+  const manufacturerMap = new Map(allManufacturers.map(m => [m.id, m]));
+
+  let filtered = allCables.filter(c =>
     c.model.toLowerCase().includes(q) ||
     c.base_description.toLowerCase().includes(q) ||
     c.variants.some(v => v.specs.some(s => String(s.value).toLowerCase().includes(q)))
@@ -184,8 +200,8 @@ export function filterCablesByText(params: TextSearchParams): CableListResponse 
   const paged = filtered.slice(start, start + page_size);
 
   const items: CableListItem[] = paged.map(cable => {
-    const brand = api.brands.getById(cable.brand_id);
-    const manufacturer = brand ? api.manufacturers.getById(brand.manufacturer_id) : null;
+    const brand = brandMap.get(cable.brand_id) ?? null;
+    const manufacturer = brand ? manufacturerMap.get(brand.manufacturer_id) ?? null : null;
     return { cable, brand, manufacturer };
   });
 
@@ -203,7 +219,13 @@ export function filterCablesByText(params: TextSearchParams): CableListResponse 
 }
 
 /** Build facets for a route-scoped cable list. */
-function buildFacets(cableList: Cable[], sizeSystem: SizeSystem): FilterFacets {
+function buildFacets(
+  cableList: Cable[],
+  sizeSystem: SizeSystem,
+  brandMap: Map<string, Brand>,
+  allManufacturers: Manufacturer[],
+  allBrands: Brand[],
+): FilterFacets {
   const manufacturerCounts = new Map<string, number>();
   const brandCounts = new Map<string, number>();
   const sizeCounts = new Map<string, number>();
@@ -227,7 +249,7 @@ function buildFacets(cableList: Cable[], sizeSystem: SizeSystem): FilterFacets {
 
   for (const cable of cableList) {
     // manufacturer + brand
-    const brand = api.brands.getById(cable.brand_id);
+    const brand = brandMap.get(cable.brand_id);
     if (brand) {
       brandCounts.set(cable.brand_id, (brandCounts.get(cable.brand_id) ?? 0) + 1);
       manufacturerCounts.set(brand.manufacturer_id, (manufacturerCounts.get(brand.manufacturer_id) ?? 0) + 1);
@@ -273,10 +295,10 @@ function buildFacets(cableList: Cable[], sizeSystem: SizeSystem): FilterFacets {
     }
   }
 
-  const manufacturers = api.manufacturers.all()
+  const manufacturers = allManufacturers
     .map(m => ({ id: m.id, name: m.name, count: manufacturerCounts.get(m.id) ?? 0 }))
     .filter(m => m.count > 0);
-  const brandsList = api.brands.all()
+  const brandsList = allBrands
     .map(b => ({ id: b.id, name: b.name, count: brandCounts.get(b.id) ?? 0 }))
     .filter(b => b.count > 0);
 

@@ -6,8 +6,10 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     networks:
       - unowire-net
     restart: unless-stopped
@@ -16,18 +18,27 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: production
     environment:
       - NODE_ENV=production
+      - INTERNAL_API_BASE=http://backend:8000
     env_file:
       - ./frontend/.env.production
     networks:
       - unowire-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     restart: unless-stopped
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: production
     environment:
       - DATABASE_URL=postgresql+asyncpg://unowire:${DB_PASSWORD}@db:5432/unowire
     depends_on:
@@ -35,6 +46,13 @@ services:
         condition: service_healthy
     networks:
       - unowire-net
+      - backend-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
 
   db:
@@ -46,7 +64,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - unowire-net
+      - backend-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U unowire"]
       interval: 5s
@@ -59,4 +77,6 @@ volumes:
 
 networks:
   unowire-net:
+    driver: bridge
+  backend-net:
     driver: bridge
