@@ -14,5 +14,6 @@ class Manufacturer(Base):
     slug: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     country: Mapped[str | None] = mapped_column(String(100))
     website: Mapped[str | None] = mapped_column(String(500))
+    image_url: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)

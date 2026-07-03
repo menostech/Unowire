@@ -15,6 +15,7 @@ class Brand(Base):
     manufacturer_id: Mapped[str] = mapped_column(
         String(100), ForeignKey("manufacturers.id", ondelete="RESTRICT"), nullable=False
     )
+    image_url: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 
