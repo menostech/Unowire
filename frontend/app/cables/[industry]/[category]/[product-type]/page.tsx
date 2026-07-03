@@ -91,8 +91,8 @@ export default async function ProductTypePage({
       <Breadcrumbs items={[
         { name: 'Home', url: '/' },
         { name: 'Cables', url: '/cables' },
-        { name: industry.label, url: `/cables/${indSlug}` },
-        { name: category.label, url: `/cables/${indSlug}/${catSlug}` },
+        { name: industry.label },
+        { name: category.label },
         { name: productType.label },
       ]} />
 

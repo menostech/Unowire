@@ -81,16 +81,9 @@ export async function validateAllData(): Promise<ValidationError[]> {
       }
     }
 
-    // 5b. industry presence and validity (now reads from taxonomy)
-    const industriesList = await api.taxonomy.industries();
+    // 5b. industry presence and validity (reads from taxonomy)
     const taxonomyTree = await api.taxonomy.all();
-    const validIndustries = new Set(industriesList.map(i => {
-      // Find the key for this industry object
-      for (const [k, v] of Object.entries(taxonomyTree)) {
-        if (v === i) return k;
-      }
-      return "";
-    }));
+    const validIndustries = new Set(Object.keys(taxonomyTree));
     const validSizeSystems = new Set(["awg", "mm2", "kcmil", "none"]);
     if (!cable.industry) {
       errors.push({

@@ -13,3 +13,8 @@ __pycache__/
 .next/
 coverage/
 .env.docker.local
+.trae/
+*.bak
+__writetest.txt
+backend/pip_packages/
+backend/fix_files.py

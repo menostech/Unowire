@@ -12,28 +12,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/cables`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
   ];
 
-  // Taxonomy routes: industries, categories, product types
+  // Taxonomy routes: product types only (flat, no intermediate pages)
   const taxonomyPages: MetadataRoute.Sitemap = [];
   for (const ind of Object.values(taxonomy)) {
-    taxonomyPages.push({
-      url: `${SITE_URL}/cables/${ind.slug}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    });
     for (const cat of Object.values(ind.categories)) {
-      taxonomyPages.push({
-        url: `${SITE_URL}/cables/${ind.slug}/${cat.slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      });
       for (const pt of Object.values(cat.product_types)) {
         taxonomyPages.push({
           url: `${SITE_URL}/cables/${ind.slug}/${cat.slug}/${pt.slug}`,
           lastModified: new Date(),
           changeFrequency: 'weekly' as const,
-          priority: 0.6,
+          priority: 0.7,
         });
       }
     }

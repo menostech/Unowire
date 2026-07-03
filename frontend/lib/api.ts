@@ -176,9 +176,56 @@ interface BackendCableListResponse {
 // (e.g., industry_id vs industry, spec_key/value_string vs key/value).
 // These adapters normalize the backend responses into frontend types.
 
-function adaptTaxonomyTree(tree: Record<string, unknown>): Taxonomy {
-  // API returns the same structure as taxonomy.json — direct pass-through
-  return tree as unknown as Taxonomy;
+function adaptTaxonomyTree(data: unknown): Taxonomy {
+  // Backend returns an array of industries with array-valued categories/product_types.
+  // Frontend expects Record<string, Industry> keyed by id, with Record-valued children.
+  const arr = data as Array<{
+    id: string;
+    label: string;
+    slug: string;
+    description: string;
+    categories: Array<{
+      id: string;
+      label: string;
+      slug: string;
+      product_types: Array<{
+        id: string;
+        label: string;
+        slug: string;
+        size_system: string;
+        filters: Array<{ spec_key: string; label: string; control: string; unit: string | null }>;
+      }>;
+    }>;
+  }>;
+  const result: Record<string, unknown> = {};
+  for (const ind of arr) {
+    const categories: Record<string, unknown> = {};
+    for (const cat of ind.categories) {
+      const pts: Record<string, unknown> = {};
+      for (const pt of cat.product_types) {
+        const ptKey = pt.id.split('/').pop()!;
+        pts[ptKey] = {
+          label: pt.label,
+          slug: pt.slug,
+          size_system: pt.size_system,
+          filters: pt.filters,
+        };
+      }
+      const catKey = cat.id.split('/').pop()!;
+      categories[catKey] = {
+        label: cat.label,
+        slug: cat.slug,
+        product_types: pts,
+      };
+    }
+    result[ind.id] = {
+      label: ind.label,
+      slug: ind.slug,
+      description: ind.description,
+      categories,
+    };
+  }
+  return result as unknown as Taxonomy;
 }
 function adaptSpecItem(s: BackendSpecItem): SpecItem {
   return {
@@ -199,8 +246,8 @@ function adaptCable(c: BackendCable): Cable {
     slug: c.slug,
     type: c.product_type_id,
     industry: c.industry_id as Industry,
-    category: c.category_id,
-    product_type: c.product_type_id,
+    category: c.category_id?.split('/').pop() ?? '',
+    product_type: c.product_type_id?.split('/').pop() ?? '',
     size_system: c.size_system as SizeSystem,
     category_ids: c.category_ids ?? [],
     base_description: c.base_description ?? '',
@@ -385,7 +432,7 @@ export const api = {
 
   taxonomy: {
     async all(): Promise<Taxonomy> {
-      const tree = await fetchWithCache<Record<string, unknown>>('/api/taxonomy');
+      const tree = await fetchWithCache<unknown>('/api/taxonomy');
       return adaptTaxonomyTree(tree);
     },
     async industries(): Promise<TaxonomyIndustry[]> {

@@ -23,27 +23,6 @@ export function generateCableMetadata(cable: Cable, brand: Brand | null): Metada
 }
 
 // === Taxonomy Metadata ===
-export function generateIndustryMetadata(industry: TaxonomyIndustry): Metadata {
-  return {
-    title: `${industry.label} Cables`,
-    description: industry.description,
-    alternates: { canonical: `/cables/${industry.slug}` },
-    robots: { index: true, follow: true },
-  };
-}
-
-export function generateCategoryMetadata(
-  industry: TaxonomyIndustry,
-  category: TaxonomyCategory
-): Metadata {
-  return {
-    title: `${category.label} | ${industry.label} Cables`,
-    description: `Browse ${category.label.toLowerCase()} cables for ${industry.label.toLowerCase()} applications.`,
-    alternates: { canonical: `/cables/${industry.slug}/${category.slug}` },
-    robots: { index: true, follow: true },
-  };
-}
-
 export function generateProductTypeMetadata(
   industry: TaxonomyIndustry,
   category: TaxonomyCategory,
@@ -72,7 +51,7 @@ export function generateHomeMetadata(): Metadata {
 export function generateCablesListMetadata(): Metadata {
   return {
     title: 'Cable Directory',
-    description: 'Browse cables by industry. Select an industry to explore its categories and product types.',
+    description: 'Browse all cable product types. Select a product type to filter and compare cable specifications.',
     alternates: { canonical: '/cables' },
     robots: { index: true, follow: true },
   };
