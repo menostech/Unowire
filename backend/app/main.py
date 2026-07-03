@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import brands, cables, categories, equipment, health, industries, manufacturers, product_types, taxonomy
+from app.api.routes import auth, brands, cables, categories, equipment, health, industries, manufacturers, product_types, taxonomy
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -76,6 +76,7 @@ async def integrity_error_handler(request: Request, exc: IntegrityError):
 
 
 # Register routers
+app.include_router(auth.router)
 app.include_router(health.router, prefix=settings.api_prefix, tags=["health"])
 app.include_router(manufacturers.router, prefix=f"{settings.api_prefix}/manufacturers", tags=["manufacturers"])
 app.include_router(brands.router, prefix=f"{settings.api_prefix}/brands", tags=["brands"])

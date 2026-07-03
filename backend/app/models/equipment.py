@@ -10,7 +10,7 @@ from app.core.database import Base
 class RecommendedEquipment(Base):
     __tablename__ = "recommended_equipments"
 
-    id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     brand: Mapped[str | None] = mapped_column(String(200))

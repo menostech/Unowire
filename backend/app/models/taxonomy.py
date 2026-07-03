@@ -10,7 +10,7 @@ from app.core.database import Base
 class Industry(Base):
     __tablename__ = "industries"
 
-    id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
     label: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     description: Mapped[str | None] = mapped_column()
@@ -27,9 +27,9 @@ class Category(Base):
     __tablename__ = "categories"
     __table_args__ = (UniqueConstraint("industry_id", "slug"),)
 
-    id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
     industry_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("industries.id", ondelete="CASCADE"), nullable=False
+        String(100), ForeignKey("industries.id", ondelete="CASCADE"), nullable=False
     )
     label: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -54,9 +54,9 @@ class ProductType(Base):
         UniqueConstraint("category_id", "slug"),
     )
 
-    id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
     category_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("categories.id", ondelete="CASCADE"), nullable=False
+        String(100), ForeignKey("categories.id", ondelete="CASCADE"), nullable=False
     )
     label: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), nullable=False)

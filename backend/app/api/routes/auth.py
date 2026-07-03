@@ -1,0 +1,76 @@
+import time
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_current_admin
+from app.core.config import settings
+from app.core.database import get_db
+from app.core.security import create_access_token, verify_password
+from app.models.user import User
+
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+_login_attempts: dict[str, list[float]] = {}
+
+RATE_LIMIT_WINDOW = 300  # 5 minutes
+RATE_LIMIT_MAX = 10
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@router.post("/login")
+async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    ip = request.client.host if request.client else "unknown"
+
+    # Rate limit check
+    attempts = _login_attempts.get(ip, [])
+    attempts = [t for t in attempts if time.time() - t < RATE_LIMIT_WINDOW]
+    _login_attempts[ip] = attempts
+    if len(attempts) >= RATE_LIMIT_MAX:
+        return JSONResponse(
+            status_code=429,
+            content={"code": 429, "message": "Too many login attempts"},
+        )
+
+    result = await db.execute(select(User).where(User.email == body.email))
+    user = result.scalar_one_or_none()
+
+    if user is None or not verify_password(body.password, user.password_hash) or not user.is_active:
+        _login_attempts.setdefault(ip, []).append(time.time())
+        raise HTTPException(status_code=401, detail={"code": 401, "message": "Invalid email or password"})
+
+    token = create_access_token(user.id, user.email, user.role)
+    _login_attempts.pop(ip, None)
+
+    response = JSONResponse(
+        content={"user": {"id": user.id, "email": user.email, "role": user.role}, "token": token}
+    )
+    response.set_cookie(
+        "admin_token",
+        token,
+        httponly=True,
+        secure=not settings.debug,
+        samesite="lax",
+        max_age=28800,
+        path="/",
+    )
+    return response
+
+
+@router.post("/logout")
+async def logout():
+    response = JSONResponse(content={"message": "Logged out"})
+    response.set_cookie("admin_token", "", max_age=0, path="/")
+    return response
+
+
+@router.get("/me")
+async def me(admin: dict = Depends(get_current_admin)):
+    return {"id": admin["id"], "email": admin["email"], "role": admin["role"]}

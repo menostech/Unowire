@@ -6,3 +6,7 @@ alembic==1.14.*
 asyncpg==0.30.*
 pydantic==2.*
 pydantic-settings==2.*
+passlib[bcrypt]==1.7.*
+bcrypt==4.0.1
+pyjwt==2.*
+python-multipart==0.0.*

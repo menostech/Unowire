@@ -27,20 +27,20 @@ class Cable(Base):
         UniqueConstraint("brand_id", "slug"),
     )
 
-    id: Mapped[str] = mapped_column(String(50), primary_key=True)
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
     brand_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("brands.id", ondelete="RESTRICT"), nullable=False
+        String(100), ForeignKey("brands.id", ondelete="RESTRICT"), nullable=False
     )
     product_type_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("product_types.id", ondelete="RESTRICT"), nullable=False
+        String(100), ForeignKey("product_types.id", ondelete="RESTRICT"), nullable=False
     )
     model: Mapped[str] = mapped_column(String(200), nullable=False)
     slug: Mapped[str] = mapped_column(String(200), nullable=False)
     industry_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("industries.id", ondelete="RESTRICT"), nullable=False
+        String(100), ForeignKey("industries.id", ondelete="RESTRICT"), nullable=False
     )
     category_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("categories.id", ondelete="RESTRICT"), nullable=False
+        String(100), ForeignKey("categories.id", ondelete="RESTRICT"), nullable=False
     )
     size_system: Mapped[str] = mapped_column(String(20), nullable=False)
     base_description: Mapped[str | None] = mapped_column()
@@ -68,7 +68,7 @@ class CableVariant(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     cable_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("cables.id", ondelete="CASCADE"), nullable=False
+        String(100), ForeignKey("cables.id", ondelete="CASCADE"), nullable=False
     )
     slug: Mapped[str] = mapped_column(String(200), nullable=False)
     sort_order: Mapped[int] = mapped_column(default=0)
@@ -103,7 +103,7 @@ class SpecItem(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     cable_id: Mapped[str] = mapped_column(
-        String(50), ForeignKey("cables.id", ondelete="CASCADE"), nullable=False
+        String(100), ForeignKey("cables.id", ondelete="CASCADE"), nullable=False
     )
     variant_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("cable_variants.id", ondelete="CASCADE"), nullable=True

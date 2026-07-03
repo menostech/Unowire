@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import get_current_admin
 from app.core.database import get_db
 from app.crud.taxonomy import crud_industry
 from app.schemas.taxonomy import IndustryCreate, IndustryRead, IndustryUpdate
@@ -22,12 +23,12 @@ async def get_industry(id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=IndustryRead, status_code=201)
-async def create_industry(obj_in: IndustryCreate, db: AsyncSession = Depends(get_db)):
+async def create_industry(obj_in: IndustryCreate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
     return await crud_industry.create(db, obj_in=obj_in)
 
 
 @router.put("/{id}", response_model=IndustryRead)
-async def update_industry(id: str, obj_in: IndustryUpdate, db: AsyncSession = Depends(get_db)):
+async def update_industry(id: str, obj_in: IndustryUpdate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
     obj = await crud_industry.get(db, id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Industry not found"})
@@ -35,7 +36,7 @@ async def update_industry(id: str, obj_in: IndustryUpdate, db: AsyncSession = De
 
 
 @router.delete("/{id}", response_model=IndustryRead)
-async def delete_industry(id: str, db: AsyncSession = Depends(get_db)):
+async def delete_industry(id: str, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
     obj = await crud_industry.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Industry not found"})

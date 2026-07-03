@@ -10,15 +10,19 @@ import asyncio
 import json
 from pathlib import Path
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import async_session, engine
+from app.core.security import hash_password
 from app.models import *  # noqa: F401, F403
 from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.equipment import RecommendedEquipment
 from app.models.manufacturer import Manufacturer
 from app.models.brand import Brand
 from app.models.taxonomy import Category, Industry, ProductType
+from app.models.user import User
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "frontend" / "data"
 
@@ -30,12 +34,16 @@ def load_json(filename: str):
 
 
 async def truncate_all(db: AsyncSession):
-    """Truncate all tables in reverse FK order."""
+    """Truncate all tables in reverse FK order.
+
+    Taxonomy tables (industries, categories, product_types) are NOT truncated
+    because they are upserted by seed_taxonomy to preserve admin edits.
+    """
     from sqlalchemy import text
     tables = [
         "spec_items", "cable_variants", "cables",
-        "recommended_equipments", "product_types", "categories", "industries",
-        "brands", "manufacturers", "audit_log", "users",
+        "recommended_equipments",
+        "brands", "manufacturers", "audit_log",
     ]
     for t in tables:
         await db.execute(text(f'TRUNCATE TABLE "{t}" CASCADE'))
@@ -78,46 +86,93 @@ async def seed_brands(db: AsyncSession, dry_run: bool):
 
 
 async def seed_taxonomy(db: AsyncSession, dry_run: bool):
+    """Upsert taxonomy from taxonomy.json.
+
+    - Records in JSON: update label/description/sort_order (and size_system/filters for ProductType)
+    - Records NOT in JSON (admin-added): left untouched
+    - Never deletes records
+    """
+    from sqlalchemy import select
+
     data = load_json("taxonomy.json")
+    created = 0
+    updated = 0
+
     for ind_key, ind_data in data.items():
-        industry = Industry(
-            id=ind_key,
-            label=ind_data["label"],
-            slug=ind_data["slug"],
-            description=ind_data.get("description"),
-        )
-        if dry_run:
-            print(f"  + Industry: {ind_key} - {ind_data['label']}")
+        # === Industry upsert ===
+        stmt = select(Industry).where(Industry.id == ind_key)
+        existing = (await db.execute(stmt)).scalar_one_or_none()
+        if existing:
+            existing.label = ind_data["label"]
+            existing.slug = ind_data["slug"]
+            existing.description = ind_data.get("description")
+            updated += 1
+            if dry_run:
+                print(f"  ~ Industry (update): {ind_key} - {ind_data['label']}")
         else:
-            db.add(industry)
+            db.add(Industry(
+                id=ind_key,
+                label=ind_data["label"],
+                slug=ind_data["slug"],
+                description=ind_data.get("description"),
+            ))
+            created += 1
+            if dry_run:
+                print(f"  + Industry (create): {ind_key} - {ind_data['label']}")
 
         for cat_key, cat_data in ind_data["categories"].items():
-            category = Category(
-                id=f"{ind_key}/{cat_key}",
-                industry_id=ind_key,
-                label=cat_data["label"],
-                slug=cat_data["slug"],
-            )
-            if dry_run:
-                print(f"    + Category: {cat_key} - {cat_data['label']}")
+            cat_id = f"{ind_key}/{cat_key}"
+            # === Category upsert ===
+            stmt = select(Category).where(Category.id == cat_id)
+            existing_cat = (await db.execute(stmt)).scalar_one_or_none()
+            if existing_cat:
+                existing_cat.industry_id = ind_key
+                existing_cat.label = cat_data["label"]
+                existing_cat.slug = cat_data["slug"]
+                updated += 1
+                if dry_run:
+                    print(f"    ~ Category (update): {cat_id} - {cat_data['label']}")
             else:
-                db.add(category)
+                db.add(Category(
+                    id=cat_id,
+                    industry_id=ind_key,
+                    label=cat_data["label"],
+                    slug=cat_data["slug"],
+                ))
+                created += 1
+                if dry_run:
+                    print(f"    + Category (create): {cat_id} - {cat_data['label']}")
 
             for pt_key, pt_data in cat_data["product_types"].items():
-                product_type = ProductType(
-                    id=f"{ind_key}/{cat_key}/{pt_key}",
-                    category_id=f"{ind_key}/{cat_key}",
-                    label=pt_data["label"],
-                    slug=pt_data["slug"],
-                    size_system=pt_data["size_system"],
-                    filters=pt_data.get("filters", []),
-                )
-                if dry_run:
-                    print(f"      + ProductType: {pt_key} - {pt_data['label']}")
+                pt_id = f"{ind_key}/{cat_key}/{pt_key}"
+                # === ProductType upsert ===
+                stmt = select(ProductType).where(ProductType.id == pt_id)
+                existing_pt = (await db.execute(stmt)).scalar_one_or_none()
+                if existing_pt:
+                    existing_pt.category_id = cat_id
+                    existing_pt.label = pt_data["label"]
+                    existing_pt.slug = pt_data["slug"]
+                    existing_pt.size_system = pt_data["size_system"]
+                    existing_pt.filters = pt_data.get("filters", [])
+                    updated += 1
+                    if dry_run:
+                        print(f"      ~ ProductType (update): {pt_id} - {pt_data['label']}")
                 else:
-                    db.add(product_type)
+                    db.add(ProductType(
+                        id=pt_id,
+                        category_id=cat_id,
+                        label=pt_data["label"],
+                        slug=pt_data["slug"],
+                        size_system=pt_data["size_system"],
+                        filters=pt_data.get("filters", []),
+                    ))
+                    created += 1
+                    if dry_run:
+                        print(f"      + ProductType (create): {pt_id} - {pt_data['label']}")
+
     if not dry_run:
         await db.commit()
+    print(f"  Taxonomy upsert: {created} created, {updated} updated")
 
 
 async def seed_cables(db: AsyncSession, dry_run: bool):
@@ -204,9 +259,9 @@ async def seed_equipment(db: AsyncSession, dry_run: bool):
     data = load_json("recommended-equipments.json")
     for item in data:
         obj = RecommendedEquipment(
-            id=item["id"],
-            name=item["name"],
-            slug=item["slug"],
+            id=item.get("id"),
+            name=item.get("name") or item.get("model", ""),
+            slug=item.get("slug") or item.get("id", ""),
             brand=item.get("brand"),
             applicable_specs=item.get("applicable_specs", []),
             description=item.get("description"),
@@ -216,6 +271,24 @@ async def seed_equipment(db: AsyncSession, dry_run: bool):
             continue
         db.add(obj)
     if not dry_run:
+        await db.commit()
+
+
+async def seed_admin(db: AsyncSession, dry_run: bool):
+    result = await db.execute(select(User).where(User.email == settings.admin_email))
+    if result.scalar_one_or_none() is not None:
+        print("  = Admin already exists, skipping")
+        return
+    obj = User(
+        email=settings.admin_email,
+        password_hash=hash_password(settings.admin_password),
+        role="admin",
+        is_active=True,
+    )
+    if dry_run:
+        print(f"  + Admin: {obj.email}")
+    else:
+        db.add(obj)
         await db.commit()
 
 
@@ -241,6 +314,9 @@ async def main(dry_run: bool):
 
         print("Seeding recommended equipment...")
         await seed_equipment(db, dry_run)
+
+        print("Seeding admin account...")
+        await seed_admin(db, dry_run)
 
         print("Seed complete!")
 
