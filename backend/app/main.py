@@ -4,9 +4,11 @@ from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import os
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, brands, cables, categories, equipment, health, industries, manufacturers, product_types, taxonomy
+from app.api.routes import auth, brands, cables, categories, equipment, health, industries, manufacturers, product_types, taxonomy, uploads
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -86,3 +88,9 @@ app.include_router(product_types.router, prefix=f"{settings.api_prefix}/industri
 app.include_router(cables.router, prefix=f"{settings.api_prefix}/cables", tags=["cables"])
 app.include_router(equipment.router, prefix=f"{settings.api_prefix}/recommended-equipments", tags=["recommended-equipments"])
 app.include_router(taxonomy.router, prefix=f"{settings.api_prefix}/taxonomy", tags=["taxonomy"])
+app.include_router(uploads.router, prefix=f"{settings.api_prefix}/uploads", tags=["uploads"])
+
+# Mount media directory for static file serving
+media_dir = os.environ.get("MEDIA_DIR", "/app/media")
+os.makedirs(os.path.join(media_dir, "uploads"), exist_ok=True)
+app.mount("/media", StaticFiles(directory=media_dir), name="media")
