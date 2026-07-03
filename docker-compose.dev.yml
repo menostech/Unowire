@@ -19,6 +19,7 @@ services:
     volumes:
       - ./backend:/app
       - ./frontend/data:/frontend/data:ro  # expose taxonomy/cable JSON for seed.py
+      - ./backend/media:/app/media  # local dev: write to host filesystem
     ports:
       - "8000:8000"
     environment:

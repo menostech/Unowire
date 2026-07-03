@@ -44,6 +44,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    volumes:
+      - media_data:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -77,6 +79,7 @@ services:
 
 volumes:
   pgdata:
+  media_data:
 
 networks:
   unowire-net:
