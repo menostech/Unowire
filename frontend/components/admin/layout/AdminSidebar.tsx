@@ -15,7 +15,7 @@ const navLinks: NavLink[] = [
   { href: '/admin/cables', label: 'Cables', icon: Cable },
   { href: '/admin/brands', label: 'Brands', icon: Tag },
   { href: '/admin/manufacturers', label: 'Manufacturers', icon: Factory },
-  { href: '/admin/taxonomy/industries', label: 'Taxonomy', icon: FolderOpen },
+  { href: '/admin/industries', label: 'Industries', icon: FolderOpen },
   { href: '/admin/media', label: 'Media', icon: Image },
 ];
 
