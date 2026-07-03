@@ -17,6 +17,16 @@ class UploadCreate(UploadBase):
     pass
 
 
+class UploadUpdate(BaseModel):
+    filename: str | None = None
+    original_filename: str | None = None
+    content_type: str | None = None
+    size_bytes: int | None = None
+    url_path: str | None = None
+    entity_type: str | None = None
+    entity_id: str | None = None
+
+
 class UploadRead(UploadBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
