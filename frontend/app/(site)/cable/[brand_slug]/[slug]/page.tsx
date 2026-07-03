@@ -63,7 +63,7 @@ export default async function CableDetailPage({
         <div className="flex-1 min-w-0 space-y-8">
           {/* 标题 */}
           <div>
-            <h1 className="text-3xl font-bold mb-1">{cable.model}</h1>
+            <h1 className="mb-1">{cable.model}</h1>
             <p className="text-gray-600">
               {brand?.name ?? 'Unknown'}{manufacturer ? ` · ${manufacturer.country}` : ''}
             </p>
@@ -83,7 +83,7 @@ export default async function CableDetailPage({
 
           {/* Recommended Equipment */}
           <div>
-            <h2 className="text-lg font-semibold mb-3">Recommended Equipment</h2>
+            <h2 className="mb-3">Recommended Equipment</h2>
             {recommended.length === 0 ? (
               <p className="text-gray-500 text-sm">No recommended equipment available for this cable.</p>
             ) : (

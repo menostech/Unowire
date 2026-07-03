@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { adminApi } from '@/lib/adminApi';
 import { AdminSidebar } from '@/components/admin/layout/AdminSidebar';
-import { AdminHeader } from '@/components/admin/layout/AdminHeader';
 
 // Auth guard for dashboard routes. The middleware already redirects when the
 // cookie is absent; here we additionally validate the token against the
@@ -21,7 +20,6 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     <div className="flex min-h-screen">
       <AdminSidebar />
       <div className="flex flex-1 flex-col">
-        <AdminHeader email={user.email} />
         <main className="flex-1 bg-gray-50 p-6">{children}</main>
       </div>
     </div>

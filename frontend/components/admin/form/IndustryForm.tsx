@@ -21,6 +21,7 @@ export function IndustryForm({ initial }: IndustryFormProps) {
   const [slug, setSlug] = useState(initial?.slug ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [sortOrder, setSortOrder] = useState(initial?.sort_order ?? 0);
+  const [imageUrl, setImageUrl] = useState(initial?.image_url ?? '');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 

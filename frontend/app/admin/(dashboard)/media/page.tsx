@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Trash2, Copy, Check, Download, Image as ImageIcon } from 'lucide-react';
-import { adminApi } from '@/lib/adminApi';
+import { listUploads, deleteUpload } from '@/lib/clientUploads';
 import { MediaUploader } from '@/components/admin/form/MediaUploader';
-import type { BackendUpload } from '@/lib/adminApi';
+import type { BackendUpload } from '@/lib/clientUploads';
 
 export default function MediaPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,7 +22,7 @@ export default function MediaPage() {
   const loadMedia = async () => {
     setLoading(true);
     try {
-      const result = await adminApi.taxonomy.uploads.list(currentPage, pageSize);
+      const result = await listUploads(currentPage, pageSize);
       setItems(result.items);
       setTotal(result.total);
       setPageSize(result.page_size);
@@ -43,7 +43,7 @@ export default function MediaPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      await adminApi.taxonomy.uploads.delete(id);
+      await deleteUpload(id);
       setDeleteConfirmId(null);
       loadMedia();
     } catch (error) {

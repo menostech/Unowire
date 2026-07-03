@@ -3,26 +3,6 @@ import type { Manufacturer, Brand, Cable } from './types';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
 
-// === Upload types ===
-export interface BackendUpload {
-  id: number;
-  filename: string;
-  original_filename: string;
-  content_type: string;
-  size_bytes: number;
-  url_path: string;
-  entity_type: string | null;
-  entity_id: string | null;
-  created_at: string;
-}
-
-export interface UploadListResponse {
-  items: BackendUpload[];
-  total: number;
-  page: number;
-  page_size: number;
-}
-
 // === Backend response shapes (raw, un-adapted) ===
 // Admin pages edit raw backend data, so we keep the original field names
 // (spec_key/value_string/etc.) to enable round-tripping through the JSON editors.
@@ -199,12 +179,6 @@ async function adminGet<T>(path: string): Promise<T> {
   const res = await adminFetch(path);
   if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
   return res.json() as Promise<T>;
-}
-
-// DELETE helper: throw on non-ok
-async function adminDelete(path: string): Promise<void> {
-  const res = await adminFetch(path, { method: 'DELETE' });
-  if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
 }
 
 // === Admin API namespaces ===
@@ -475,28 +449,6 @@ export const adminApi = {
         const [industryId, catSlug, ptSlug] = segments;
         const res = await adminFetch(`/api/industries/${encodeURIComponent(industryId)}/categories/${encodeURIComponent(catSlug)}/product-types/${encodeURIComponent(ptSlug)}`, { method: 'DELETE' });
         if (!res.ok) throw new Error(`API ${res.status}: product-types delete ${id}`);
-      },
-    },
-
-    uploads: {
-      upload: async (file: File): Promise<BackendUpload> => {
-        const cookieStore = await cookies();
-        const token = cookieStore.get('admin_token')?.value;
-        const formData = new FormData();
-        formData.append('file', file);
-        const res = await fetch(`${API_BASE}/api/uploads`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        });
-        if (!res.ok) throw new Error('Upload failed');
-        return res.json();
-      },
-      list: async (page = 1, pageSize = 20): Promise<UploadListResponse> => {
-        return await adminGet<UploadListResponse>(`/api/uploads?page=${page}&page_size=${pageSize}`);
-      },
-      delete: async (id: number): Promise<void> => {
-        return await adminDelete(`/api/uploads/${id}`);
       },
     },
   },

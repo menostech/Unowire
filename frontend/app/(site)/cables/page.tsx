@@ -131,7 +131,7 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
 
       {industryGroups.map(group => (
         <div key={group.industry.slug} className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b">
+          <h2 className="text-gray-800 mb-3 pb-2 border-b">
             {group.industry.label}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

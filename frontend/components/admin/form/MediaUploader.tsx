@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Upload, X, Copy, Check } from 'lucide-react';
-import { adminApi } from '@/lib/adminApi';
+import { uploadFile } from '@/lib/clientUploads';
 
 interface UploadResult {
   file: File;
@@ -32,7 +32,7 @@ export function MediaUploader() {
     );
 
     try {
-      const result = await adminApi.taxonomy.uploads.upload(item.file);
+      const result = await uploadFile(item.file);
       setUploads((prev) =>
         prev.map((u) =>
           u.file.name === item.file.name ? { ...u, status: 'success', progress: 100, url: result.url_path } : u

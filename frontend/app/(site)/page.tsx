@@ -2,11 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { SearchBox } from '@/components/shared/SearchBox';
-import { CategoryCard } from '@/components/category/CategoryCard';
 import { CableCard } from '@/components/cable/CableCard';
 import { api } from '@/lib/api';
 import { generateHomeMetadata } from '@/lib/seo';
-import { getDescendantIds } from '@/lib/category-tree';
 
 export function generateMetadata(): Metadata {
   return generateHomeMetadata();
@@ -15,15 +13,13 @@ export function generateMetadata(): Metadata {
 export default async function HomePage() {
   const cables = await api.cables.all();
   const brands = await api.brands.all();
-  const categories = api.categories.all();
-  const rootCategories = api.categories.roots();
+  const taxonomy = await api.taxonomy.all();
   const featuredCables = cables.slice(0, 6);
 
-  // 每个根分类的 cable 计数
-  const categoryCounts = rootCategories.map(root => {
-    const descendantIds = getDescendantIds(root.id);
-    const count = cables.filter(c => c.category_ids.some(id => descendantIds.has(id))).length;
-    return { category: root, count };
+  // 每个 industry 的 cable 计数（按 cable.industry 字段匹配）
+  const industryCounts = Object.entries(taxonomy).map(([id, industry]) => {
+    const count = cables.filter(c => c.industry === id).length;
+    return { id, industry, count };
   });
 
   return (
@@ -72,20 +68,30 @@ export default async function HomePage() {
               <p className="text-sm text-gray-500">Brands</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-blue-600">{categories.filter(c => c.level === 1).length}</p>
-              <p className="text-sm text-gray-500">Categories</p>
+              <p className="text-3xl font-bold text-blue-600">{industryCounts.length}</p>
+              <p className="text-sm text-gray-500">Industries</p>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* 分类导航 */}
+      {/* Industry 导航 */}
       <section className="py-12">
         <Container>
-          <h2 className="text-2xl font-bold mb-6">Browse by Category</h2>
+          <h2 className="mb-6">Browse by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {categoryCounts.map(({ category, count }) => (
-              <CategoryCard key={category.id} category={category} count={count} />
+            {industryCounts.map(({ id, industry, count }) => (
+              <Link
+                key={id}
+                href="/cables"
+                className="block border rounded-lg p-5 hover:shadow-md hover:border-blue-300 transition bg-white"
+              >
+                <h3 className="font-semibold text-gray-900 mb-1">{industry.label}</h3>
+                {industry.description && (
+                  <p className="text-xs text-gray-500 line-clamp-2 mb-1">{industry.description}</p>
+                )}
+                <p className="text-sm text-gray-500">{count} cable{count !== 1 ? 's' : ''}</p>
+              </Link>
             ))}
           </div>
         </Container>
