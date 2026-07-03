@@ -11,6 +11,7 @@ interface IndustryFormProps {
     slug: string;
     description: string | null;
     sort_order: number;
+    image_url: string | null;
   };
 }
 
@@ -33,6 +34,7 @@ export function IndustryForm({ initial }: IndustryFormProps) {
       slug,
       description: description || null,
       sort_order: Number(sortOrder),
+      image_url: imageUrl || null,
     };
     try {
       const url = initial
@@ -133,6 +135,34 @@ export function IndustryForm({ initial }: IndustryFormProps) {
           className={inputClass}
         />
         <p className="text-xs text-gray-500">Lower numbers appear first</p>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="image_url" className="text-sm font-medium text-gray-700">
+          Image URL
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="image_url"
+            type="text"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className={`${inputClass} flex-1`}
+            placeholder="/media/uploads/xxx.webp"
+          />
+          <a
+            href="/admin/media"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+          >
+            Media
+          </a>
+        </div>
+        {imageUrl && (
+          <div className="mt-2">
+            <img src={imageUrl} alt="Preview" className="h-24 w-24 object-cover rounded" />
+          </div>
+        )}
       </div>
 
       {error && (

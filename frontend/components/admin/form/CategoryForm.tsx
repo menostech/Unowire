@@ -17,6 +17,7 @@ interface CategoryFormProps {
     slug: string;
     description: string | null;
     sort_order: number;
+    image_url: string | null;
   };
   industries: IndustryOption[];
   // Pre-selected industry when creating new category via ?industry_id= query
@@ -30,6 +31,7 @@ export function CategoryForm({ initial, industries, preselectIndustryId }: Categ
   const [slug, setSlug] = useState(initial?.slug ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [sortOrder, setSortOrder] = useState(initial?.sort_order ?? 0);
+  const [imageUrl, setImageUrl] = useState(initial?.image_url ?? '');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -46,6 +48,7 @@ export function CategoryForm({ initial, industries, preselectIndustryId }: Categ
       slug,
       description: description || null,
       sort_order: Number(sortOrder),
+      image_url: imageUrl || null,
     };
     try {
       const url = initial
@@ -167,6 +170,34 @@ export function CategoryForm({ initial, industries, preselectIndustryId }: Categ
           onChange={(e) => setSortOrder(Number(e.target.value))}
           className={inputClass}
         />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="image_url" className="text-sm font-medium text-gray-700">
+          Image URL
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="image_url"
+            type="text"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className={`${inputClass} flex-1`}
+            placeholder="/media/uploads/xxx.webp"
+          />
+          <a
+            href="/admin/media"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+          >
+            Media
+          </a>
+        </div>
+        {imageUrl && (
+          <div className="mt-2">
+            <img src={imageUrl} alt="Preview" className="h-24 w-24 object-cover rounded" />
+          </div>
+        )}
       </div>
 
       {error && (
