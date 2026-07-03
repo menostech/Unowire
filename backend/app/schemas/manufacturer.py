@@ -9,6 +9,7 @@ class ManufacturerBase(BaseModel):
     slug: str
     country: str | None = None
     website: str | None = None
+    image_url: str | None = None
 
 
 class ManufacturerRead(ManufacturerBase):
@@ -24,6 +25,7 @@ class ManufacturerCreate(BaseModel):
     slug: str
     country: str | None = None
     website: str | None = None
+    image_url: str | None = None
 
 
 class ManufacturerUpdate(BaseModel):
@@ -31,3 +33,4 @@ class ManufacturerUpdate(BaseModel):
     slug: str | None = None
     country: str | None = None
     website: str | None = None
+    image_url: str | None = None

@@ -59,6 +59,7 @@ class ProductTypeCreate(BaseModel):
     size_system: str
     filters: list[TaxonomyFilterSchema] = []
     sort_order: int = 0
+    image_url: str | None = None
 
 
 class ProductTypeUpdate(BaseModel):
@@ -67,6 +68,7 @@ class ProductTypeUpdate(BaseModel):
     size_system: str | None = None
     filters: list[TaxonomyFilterSchema] | None = None
     sort_order: int | None = None
+    image_url: str | None = None
 
 
 class CategoryCreate(BaseModel):
@@ -75,6 +77,7 @@ class CategoryCreate(BaseModel):
     slug: str
     description: str | None = None
     sort_order: int = 0
+    image_url: str | None = None
 
 
 class CategoryUpdate(BaseModel):
@@ -82,6 +85,7 @@ class CategoryUpdate(BaseModel):
     slug: str | None = None
     description: str | None = None
     sort_order: int | None = None
+    image_url: str | None = None
 
 
 class IndustryCreate(BaseModel):
@@ -90,6 +94,7 @@ class IndustryCreate(BaseModel):
     slug: str
     description: str | None = None
     sort_order: int = 0
+    image_url: str | None = None
 
 
 class IndustryUpdate(BaseModel):
@@ -97,6 +102,7 @@ class IndustryUpdate(BaseModel):
     slug: str | None = None
     description: str | None = None
     sort_order: int | None = None
+    image_url: str | None = None
 
 
 # Taxonomy tree aggregation (mirrors frontend Taxonomy type)

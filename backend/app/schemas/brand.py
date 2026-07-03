@@ -10,6 +10,7 @@ class BrandBase(BaseModel):
     name: str
     slug: str
     manufacturer_id: str
+    image_url: str | None = None
 
 
 class BrandRead(BrandBase):
@@ -25,9 +26,11 @@ class BrandCreate(BaseModel):
     name: str
     slug: str
     manufacturer_id: str
+    image_url: str | None = None
 
 
 class BrandUpdate(BaseModel):
     name: str | None = None
     slug: str | None = None
     manufacturer_id: str | None = None
+    image_url: str | None = None
