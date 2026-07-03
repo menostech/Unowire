@@ -52,6 +52,31 @@ class IndustryRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class IndustryBase(BaseModel):
+    label: str
+    slug: str
+    description: str | None = None
+    sort_order: int = 0
+    image_url: str | None = None
+
+
+class CategoryBase(BaseModel):
+    label: str
+    slug: str
+    description: str | None = None
+    sort_order: int = 0
+    image_url: str | None = None
+
+
+class ProductTypeBase(BaseModel):
+    label: str
+    slug: str
+    size_system: str
+    filters: list[TaxonomyFilterSchema] = []
+    sort_order: int = 0
+    image_url: str | None = None
+
+
 class ProductTypeCreate(BaseModel):
     id: str
     label: str
