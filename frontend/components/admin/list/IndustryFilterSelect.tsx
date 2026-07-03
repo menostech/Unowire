@@ -12,8 +12,8 @@ export function IndustryFilterSelect({ industries, value }: IndustryFilterSelect
       onChange={(e) => {
         const val = e.target.value;
         window.location.href = val
-          ? `/admin/taxonomy/categories?industry_id=${encodeURIComponent(val)}`
-          : '/admin/taxonomy/categories';
+          ? `/admin/industries/categories?industry_id=${encodeURIComponent(val)}`
+          : '/admin/industries/categories';
       }}
       className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
     >

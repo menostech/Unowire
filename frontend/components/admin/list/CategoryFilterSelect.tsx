@@ -12,8 +12,8 @@ export function CategoryFilterSelect({ categories, value }: CategoryFilterSelect
       onChange={(e) => {
         const val = e.target.value;
         window.location.href = val
-          ? `/admin/taxonomy/product-types?category_id=${encodeURIComponent(val)}`
-          : '/admin/taxonomy/product-types';
+          ? `/admin/industries/product-types?category_id=${encodeURIComponent(val)}`
+          : '/admin/industries/product-types';
       }}
       className="rounded-md border border-gray-300 px-3 py-1.5 text-sm"
     >
