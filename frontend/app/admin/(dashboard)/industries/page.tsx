@@ -9,7 +9,7 @@ export default async function IndustriesPage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Industries</h1>
         <Link
-          href="/admin/taxonomy/industries/new"
+          href="/admin/industries/new"
           className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
         >
           New
@@ -44,13 +44,13 @@ export default async function IndustriesPage() {
                 </td>
                 <td className="px-4 py-3 space-x-3">
                   <Link
-                    href={`/admin/taxonomy/industries/${encodeURIComponent(ind.id)}`}
+                    href={`/admin/industries/${encodeURIComponent(ind.id)}`}
                     className="text-blue-600 hover:underline"
                   >
                     Edit
                   </Link>
                   <Link
-                    href={`/admin/taxonomy/categories?industry_id=${encodeURIComponent(ind.id)}`}
+                    href={`/admin/industries/categories?industry_id=${encodeURIComponent(ind.id)}`}
                     className="text-blue-600 hover:underline"
                   >
                     View Categories →

@@ -30,8 +30,8 @@ export default async function CategoriesPage({ searchParams }: PageProps) {
         </h1>
         <Link
           href={industryFilter
-            ? `/admin/taxonomy/categories/new?industry_id=${encodeURIComponent(industryFilter)}`
-            : '/admin/taxonomy/categories/new'}
+            ? `/admin/industries/categories/new?industry_id=${encodeURIComponent(industryFilter)}`
+            : '/admin/industries/categories/new'}
           className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
         >
           New
@@ -80,13 +80,13 @@ export default async function CategoriesPage({ searchParams }: PageProps) {
                   </td>
                   <td className="px-4 py-3 space-x-3">
                     <Link
-                      href={`/admin/taxonomy/categories/${encodeURIComponent(cat.id)}`}
+                      href={`/admin/industries/categories/${encodeURIComponent(cat.id)}`}
                       className="text-blue-600 hover:underline"
                     >
                       Edit
                     </Link>
                     <Link
-                      href={`/admin/taxonomy/product-types?category_id=${encodeURIComponent(cat.id)}`}
+                      href={`/admin/industries/product-types?category_id=${encodeURIComponent(cat.id)}`}
                       className="text-blue-600 hover:underline"
                     >
                       View Product Types →

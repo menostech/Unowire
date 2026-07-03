@@ -34,13 +34,13 @@ export default async function EditProductTypePage({ params }: PageProps) {
   return (
     <div>
       <nav className="mb-4 text-sm text-gray-500">
-        <Link href="/admin/taxonomy/industries" className="hover:underline">
+        <Link href="/admin/industries" className="hover:underline">
           Industries
         </Link>
         <span className="mx-2">/</span>
         {industry ? (
           <Link
-            href={`/admin/taxonomy/categories?industry_id=${encodeURIComponent(industry.id)}`}
+            href={`/admin/industries/categories?industry_id=${encodeURIComponent(industry.id)}`}
             className="hover:underline"
           >
             {industry.label}
@@ -51,7 +51,7 @@ export default async function EditProductTypePage({ params }: PageProps) {
         <span className="mx-2">/</span>
         {category ? (
           <Link
-            href={`/admin/taxonomy/product-types?category_id=${encodeURIComponent(category.id)}`}
+            href={`/admin/industries/product-types?category_id=${encodeURIComponent(category.id)}`}
             className="hover:underline"
           >
             {category.label}

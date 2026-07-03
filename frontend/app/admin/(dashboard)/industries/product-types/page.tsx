@@ -36,8 +36,8 @@ export default async function ProductTypesPage({ searchParams }: PageProps) {
         </h1>
         <Link
           href={categoryFilter
-            ? `/admin/taxonomy/product-types/new?category_id=${encodeURIComponent(categoryFilter)}`
-            : '/admin/taxonomy/product-types/new'}
+            ? `/admin/industries/product-types/new?category_id=${encodeURIComponent(categoryFilter)}`
+            : '/admin/industries/product-types/new'}
           className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
         >
           New
@@ -83,7 +83,7 @@ export default async function ProductTypesPage({ searchParams }: PageProps) {
                   <td className="px-4 py-3 text-gray-600">{pt.size_system}</td>
                   <td className="px-4 py-3">
                     <Link
-                      href={`/admin/taxonomy/product-types/${encodeURIComponent(pt.id)}`}
+                      href={`/admin/industries/product-types/${encodeURIComponent(pt.id)}`}
                       className="text-blue-600 hover:underline"
                     >
                       Edit

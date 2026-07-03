@@ -15,7 +15,7 @@ export default async function EditIndustryPage({ params }: PageProps) {
   return (
     <div>
       <nav className="mb-4 text-sm text-gray-500">
-        <Link href="/admin/taxonomy/industries" className="hover:underline">
+        <Link href="/admin/industries" className="hover:underline">
           Industries
         </Link>
         <span className="mx-2">/</span>
