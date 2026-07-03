@@ -48,7 +48,7 @@ export function IndustryForm({ initial }: IndustryFormProps) {
         body: JSON.stringify(body),
       });
       if (res.ok) {
-        router.push('/admin/taxonomy/industries');
+        router.push('/admin/industries');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -68,7 +68,7 @@ export function IndustryForm({ initial }: IndustryFormProps) {
         method: 'DELETE',
       });
       if (res.ok || res.status === 204) {
-        router.push('/admin/taxonomy/industries');
+        router.push('/admin/industries');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -179,7 +179,7 @@ export function IndustryForm({ initial }: IndustryFormProps) {
           {saving ? 'Saving…' : 'Save'}
         </button>
         <Link
-          href="/admin/taxonomy/industries"
+          href="/admin/industries"
           className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
         >
           Cancel
