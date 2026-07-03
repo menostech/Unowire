@@ -136,8 +136,7 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {group.productTypes.map(({ productType, category, industry, cableCount, manufacturerCount }) => {
-              const imgPrompt = `${productType.label} cable product photo, professional industrial product photography, clean white background`;
-              const imgSrc = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent(imgPrompt)}&image_size=square`;
+              const imgSrc = productType.image_url || `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent(`${productType.label} cable product photo, professional industrial product photography, clean white background`)}&image_size=square`;
               return (
                 <a
                   key={`${industry.slug}/${category.slug}/${productType.slug}`}
