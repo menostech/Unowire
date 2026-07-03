@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Cable, Tag, Factory, ExternalLink, LogOut, FolderOpen } from 'lucide-react';
+import { LayoutDashboard, Cable, Tag, Factory, ExternalLink, LogOut, FolderOpen, Image } from 'lucide-react';
 
 interface NavLink {
   href: string;
@@ -16,6 +16,7 @@ const navLinks: NavLink[] = [
   { href: '/admin/brands', label: 'Brands', icon: Tag },
   { href: '/admin/manufacturers', label: 'Manufacturers', icon: Factory },
   { href: '/admin/taxonomy/industries', label: 'Taxonomy', icon: FolderOpen },
+  { href: '/admin/media', label: 'Media', icon: Image },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -37,7 +38,7 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-56 flex-col bg-gray-900 p-4 text-gray-100">
+    <aside className="sticky top-0 z-40 flex h-screen w-56 shrink-0 flex-col bg-gray-900 p-4 text-gray-100">
       <div className="mb-6 px-2 text-lg font-bold tracking-tight">
         Unowire <span className="text-gray-400">Admin</span>
       </div>
