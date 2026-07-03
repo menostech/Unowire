@@ -29,6 +29,7 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
+              <th className="px-4 py-3 font-medium">Image</th>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Country</th>
               <th className="px-4 py-3 font-medium">Website</th>
@@ -38,6 +39,13 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
           <tbody>
             {items.map((m) => (
               <tr key={m.id} className="border-b border-gray-100 last:border-0">
+                <td className="px-4 py-3">
+                  {m.image_url ? (
+                    <img src={m.image_url} alt={m.name} className="h-10 w-10 rounded object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 rounded bg-gray-200" />
+                  )}
+                </td>
                 <td className="px-4 py-3 text-gray-900">{m.name}</td>
                 <td className="px-4 py-3 text-gray-600">{m.country || '—'}</td>
                 <td className="px-4 py-3 text-gray-600">
@@ -66,7 +74,7 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
                   No manufacturers found.
                 </td>
               </tr>

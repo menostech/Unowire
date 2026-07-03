@@ -33,6 +33,7 @@ export default async function BrandsPage({ searchParams }: PageProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
+              <th className="px-4 py-3 font-medium">Image</th>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Manufacturer</th>
               <th className="px-4 py-3 font-medium">Slug</th>
@@ -42,6 +43,13 @@ export default async function BrandsPage({ searchParams }: PageProps) {
           <tbody>
             {items.map((b) => (
               <tr key={b.id} className="border-b border-gray-100 last:border-0">
+                <td className="px-4 py-3">
+                  {b.image_url ? (
+                    <img src={b.image_url} alt={b.name} className="h-10 w-10 rounded object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 rounded bg-gray-200" />
+                  )}
+                </td>
                 <td className="px-4 py-3 text-gray-900">{b.name}</td>
                 <td className="px-4 py-3 text-gray-600">
                   {mfrNameById.get(b.manufacturer_id) || b.manufacturer_id || '—'}
@@ -59,7 +67,7 @@ export default async function BrandsPage({ searchParams }: PageProps) {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
                   No brands found.
                 </td>
               </tr>

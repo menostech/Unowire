@@ -20,6 +20,7 @@ export default async function IndustriesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
+              <th className="px-4 py-3 font-medium">Image</th>
               <th className="px-4 py-3 font-medium">Label</th>
               <th className="px-4 py-3 font-medium">Slug</th>
               <th className="px-4 py-3 font-medium">Categories</th>
@@ -29,6 +30,13 @@ export default async function IndustriesPage() {
           <tbody>
             {industries.map((ind) => (
               <tr key={ind.id} className="border-b border-gray-100 last:border-0">
+                <td className="px-4 py-3">
+                  {ind.image_url ? (
+                    <img src={ind.image_url} alt={ind.label} className="h-10 w-10 rounded object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 rounded bg-gray-200" />
+                  )}
+                </td>
                 <td className="px-4 py-3 text-gray-900">{ind.label}</td>
                 <td className="px-4 py-3 text-gray-600 font-mono text-xs">{ind.slug}</td>
                 <td className="px-4 py-3 text-gray-600">
@@ -52,7 +60,7 @@ export default async function IndustriesPage() {
             ))}
             {industries.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
                   No industries found.
                 </td>
               </tr>

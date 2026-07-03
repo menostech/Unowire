@@ -55,6 +55,7 @@ export default async function ProductTypesPage({ searchParams }: PageProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
+              <th className="px-4 py-3 font-medium">Image</th>
               <th className="px-4 py-3 font-medium">Industry</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Label</th>
@@ -68,12 +69,15 @@ export default async function ProductTypesPage({ searchParams }: PageProps) {
               const industryId = pt.category_id?.split('/')[0];
               return (
                 <tr key={pt.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-4 py-3 text-gray-600">
-                    {industryMap.get(industryId ?? '') ?? industryId}
+                  <td className="px-4 py-3">
+                    {pt.image_url ? (
+                      <img src={pt.image_url} alt={pt.label} className="h-10 w-10 rounded object-cover" />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-gray-200" />
+                    )}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {categoryMap.get(pt.category_id) ?? pt.category_id}
-                  </td>
+                  <td className="px-4 py-3 text-gray-600">{industryMap.get(industryId || '') || industryId}</td>
+                  <td className="px-4 py-3 text-gray-600">{categoryMap.get(pt.category_id) || pt.category_id}</td>
                   <td className="px-4 py-3 text-gray-900">{pt.label}</td>
                   <td className="px-4 py-3 text-gray-600 font-mono text-xs">{pt.slug}</td>
                   <td className="px-4 py-3 text-gray-600">{pt.size_system}</td>
@@ -90,7 +94,7 @@ export default async function ProductTypesPage({ searchParams }: PageProps) {
             })}
             {productTypes.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                   No product types found.
                 </td>
               </tr>

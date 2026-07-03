@@ -50,6 +50,7 @@ export default async function CategoriesPage({ searchParams }: PageProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
+              <th className="px-4 py-3 font-medium">Image</th>
               <th className="px-4 py-3 font-medium">Industry</th>
               <th className="px-4 py-3 font-medium">Label</th>
               <th className="px-4 py-3 font-medium">Slug</th>
@@ -62,6 +63,13 @@ export default async function CategoriesPage({ searchParams }: PageProps) {
               const industry = industries.find((i) => i.id === cat.industry_id);
               return (
                 <tr key={cat.id} className="border-b border-gray-100 last:border-0">
+                  <td className="px-4 py-3">
+                    {cat.image_url ? (
+                      <img src={cat.image_url} alt={cat.label} className="h-10 w-10 rounded object-cover" />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-gray-200" />
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-gray-600">
                     {industry?.label ?? cat.industry_id}
                   </td>
@@ -89,7 +97,7 @@ export default async function CategoriesPage({ searchParams }: PageProps) {
             })}
             {categories.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                   No categories found.
                 </td>
               </tr>
