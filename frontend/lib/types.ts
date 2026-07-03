@@ -22,6 +22,7 @@ export interface Category {
   name: string;
   slug: string;
   parent_id: string | null;
+  image_url: string | null;
 }
 
 export type SpecType = "string" | "number" | "enum";
@@ -61,6 +62,7 @@ export interface ProductTypeConfig {
   slug: string;
   size_system: SizeSystem;
   filters: TaxonomyFilter[];
+  image_url: string | null;
 }
 
 export interface TaxonomyCategory {
@@ -74,6 +76,7 @@ export interface TaxonomyIndustry {
   slug: string;
   description: string;
   categories: Record<string, TaxonomyCategory>;
+  image_url: string | null;
 }
 
 export type Taxonomy = Record<string, TaxonomyIndustry>;

@@ -142,6 +142,7 @@ interface BackendManufacturer {
   slug: string;
   country: string | null;
   website: string | null;
+  image_url: string | null;
 }
 
 interface BackendEquipment {
@@ -184,15 +185,18 @@ function adaptTaxonomyTree(data: unknown): Taxonomy {
     label: string;
     slug: string;
     description: string;
+    image_url: string | null;
     categories: Array<{
       id: string;
       label: string;
       slug: string;
+      image_url: string | null;
       product_types: Array<{
         id: string;
         label: string;
         slug: string;
         size_system: string;
+        image_url: string | null;
         filters: Array<{ spec_key: string; label: string; control: string; unit: string | null }>;
       }>;
     }>;
@@ -209,6 +213,7 @@ function adaptTaxonomyTree(data: unknown): Taxonomy {
           slug: pt.slug,
           size_system: pt.size_system,
           filters: pt.filters,
+          image_url: pt.image_url ?? null,
         };
       }
       const catKey = cat.id.split('/').pop()!;
@@ -216,6 +221,7 @@ function adaptTaxonomyTree(data: unknown): Taxonomy {
         label: cat.label,
         slug: cat.slug,
         product_types: pts,
+        image_url: cat.image_url ?? null,
       };
     }
     result[ind.id] = {
@@ -223,6 +229,7 @@ function adaptTaxonomyTree(data: unknown): Taxonomy {
       slug: ind.slug,
       description: ind.description,
       categories,
+      image_url: ind.image_url ?? null,
     };
   }
   return result as unknown as Taxonomy;
@@ -284,6 +291,7 @@ function adaptManufacturer(m: BackendManufacturer): Manufacturer {
     slug: m.slug,
     country: m.country ?? '',
     website: m.website ?? '',
+    image_url: m.image_url ?? null,
   };
 }
 
