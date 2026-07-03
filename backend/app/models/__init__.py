@@ -3,6 +3,7 @@ from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.equipment import RecommendedEquipment
 from app.models.manufacturer import Manufacturer
 from app.models.taxonomy import Category, Industry, ProductType
+from app.models.upload import Upload
 from app.models.user import AuditLog, User
 
 __all__ = [
@@ -16,5 +17,6 @@ __all__ = [
     "ProductType",
     "RecommendedEquipment",
     "SpecItem",
+    "Upload",
     "User",
 ]
