@@ -22,6 +22,14 @@ async def list_manufacturers(
     return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
+@router.get("/slug/{slug}", response_model=ManufacturerRead)
+async def get_manufacturer_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
+    obj = await crud_manufacturer.get_by_slug(db, slug)
+    if not obj:
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Manufacturer not found"})
+    return obj
+
+
 @router.get("/{id}", response_model=ManufacturerRead)
 async def get_manufacturer(id: str, db: AsyncSession = Depends(get_db)):
     obj = await crud_manufacturer.get(db, id)
