@@ -33,6 +33,12 @@ export default async function CablesPage({ searchParams }: PageProps) {
             <CableSearchBox />
           </Suspense>
           <Link
+            href="/admin/cables/import"
+            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            Import
+          </Link>
+          <Link
             href="/admin/cables/new"
             className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
           >
