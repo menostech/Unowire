@@ -12,6 +12,7 @@ export interface BackendUpload {
   url_path: string;
   entity_type: string | null;
   entity_id: string | null;
+  folder_id: number | null;
   created_at: string;
 }
 
@@ -22,11 +23,16 @@ export interface UploadListResponse {
   page_size: number;
 }
 
+export type FolderFilter = 'all' | 'unfiled' | number;
+
 const BASE = '/api/admin/uploads';
 
-export async function uploadFile(file: File): Promise<BackendUpload> {
+export async function uploadFile(file: File, folderId?: number): Promise<BackendUpload> {
   const formData = new FormData();
   formData.append('file', file);
+  if (folderId !== undefined) {
+    formData.append('folder_id', String(folderId));
+  }
   const res = await fetch(BASE, {
     method: 'POST',
     body: formData,
@@ -37,12 +43,18 @@ export async function uploadFile(file: File): Promise<BackendUpload> {
 
 export async function listUploads(
   page = 1,
-  pageSize = 20
+  pageSize = 20,
+  folderId: FolderFilter = 'all'
 ): Promise<UploadListResponse> {
-  const res = await fetch(
-    `${BASE}?page=${page}&page_size=${pageSize}`,
-    { cache: 'no-store' }
-  );
+  const params = new URLSearchParams();
+  params.set('page', String(page));
+  params.set('page_size', String(pageSize));
+  if (folderId === 'unfiled') {
+    params.set('folder_id', 'none');
+  } else if (folderId !== 'all') {
+    params.set('folder_id', String(folderId));
+  }
+  const res = await fetch(`${BASE}?${params.toString()}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(`List failed: ${res.status}`);
   return res.json();
 }
@@ -50,4 +62,33 @@ export async function listUploads(
 export async function deleteUpload(id: number): Promise<void> {
   const res = await fetch(`${BASE}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+}
+
+export async function updateUpload(
+  id: number,
+  originalFilename: string
+): Promise<BackendUpload> {
+  const res = await fetch(`${BASE}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ original_filename: originalFilename }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Rename failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function moveUpload(id: number, folderId: number | null): Promise<BackendUpload> {
+  const res = await fetch(`${BASE}/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder_id: folderId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Move failed: ${res.status}`);
+  }
+  return res.json();
 }
