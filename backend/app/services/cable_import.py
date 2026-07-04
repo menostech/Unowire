@@ -455,3 +455,51 @@ def build_preview(validated: list[ValidatedRow], file_format: Literal["csv", "js
         rows=rows,
         file_format=file_format,
     )
+
+
+async def commit_valid_rows(
+    db: AsyncSession,
+    validated_rows: list[ValidatedRow],
+) -> int:
+    """Commit all valid rows in a single transaction.
+    Any exception → transaction rolls back, exception propagates.
+    Returns created_count.
+    """
+    from app.models.cable import Cable as CableModel, CableVariant, SpecItem
+
+    valid_rows = [v for v in validated_rows if v.status == "valid" and v.cable_create is not None]
+    created_count = 0
+
+    try:
+        for row in valid_rows:
+            cable_create = row.cable_create
+            cable_data = cable_create.model_dump(exclude={"common_specs", "variants"})
+            cable = CableModel(**cable_data)
+            db.add(cable)
+            await db.flush()
+
+            # Common specs
+            for spec_data in cable_create.common_specs:
+                spec = SpecItem(cable_id=cable.id, variant_id=None, **spec_data.model_dump())
+                db.add(spec)
+
+            # Variants + their specs
+            for variant_data in cable_create.variants:
+                variant = CableVariant(
+                    cable_id=cable.id,
+                    slug=variant_data.slug,
+                    sort_order=variant_data.sort_order,
+                )
+                db.add(variant)
+                await db.flush()
+                for spec_data in variant_data.specs:
+                    spec = SpecItem(cable_id=cable.id, variant_id=variant.id, **spec_data.model_dump())
+                    db.add(spec)
+
+            created_count += 1
+
+        await db.commit()
+        return created_count
+    except Exception:
+        await db.rollback()
+        raise
