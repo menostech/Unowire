@@ -5,6 +5,17 @@ export interface Manufacturer {
   slug: string;
   country: string;
   website: string;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  featured_cable_ids: string[];
+  featured_image: boolean;
+  featured_image_sort: number;
+  featured_text: boolean;
+  featured_text_sort: number;
 }
 
 export interface Brand {

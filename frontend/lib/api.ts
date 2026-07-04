@@ -143,6 +143,16 @@ interface BackendManufacturer {
   country: string | null;
   website: string | null;
   image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  featured_cable_ids: string[];
+  featured_image: boolean;
+  featured_image_sort: number;
+  featured_text: boolean;
+  featured_text_sort: number;
 }
 
 interface BackendEquipment {
@@ -292,6 +302,16 @@ function adaptManufacturer(m: BackendManufacturer): Manufacturer {
     country: m.country ?? '',
     website: m.website ?? '',
     image_url: m.image_url ?? null,
+    description: m.description ?? null,
+    founded_year: m.founded_year ?? null,
+    address: m.address ?? null,
+    phone: m.phone ?? null,
+    email: m.email ?? null,
+    featured_cable_ids: m.featured_cable_ids ?? [],
+    featured_image: m.featured_image ?? false,
+    featured_image_sort: m.featured_image_sort ?? 0,
+    featured_text: m.featured_text ?? false,
+    featured_text_sort: m.featured_text_sort ?? 0,
   };
 }
 
@@ -326,6 +346,14 @@ export const api = {
     async getById(id: string): Promise<Manufacturer | null> {
       try {
         const data = await fetchWithCache<BackendManufacturer>(`/api/manufacturers/${id}`);
+        return adaptManufacturer(data);
+      } catch {
+        return null;
+      }
+    },
+    async getBySlug(slug: string): Promise<Manufacturer | null> {
+      try {
+        const data = await fetchWithCache<BackendManufacturer>(`/api/manufacturers/slug/${slug}`);
         return adaptManufacturer(data);
       } catch {
         return null;
