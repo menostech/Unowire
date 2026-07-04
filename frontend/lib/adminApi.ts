@@ -225,6 +225,13 @@ export const adminApi = {
         return null;
       }
     },
+    async getRawById(id: string): Promise<BackendManufacturer | null> {
+      try {
+        return await adminGet<BackendManufacturer>(`/api/manufacturers/${id}`);
+      } catch {
+        return null;
+      }
+    },
     async create(payload: { id: string; name: string; slug: string; country?: string | null; website?: string | null }): Promise<Manufacturer> {
       const res = await adminFetch('/api/manufacturers', {
         method: 'POST',
@@ -240,6 +247,14 @@ export const adminApi = {
       });
       if (!res.ok) throw new Error(`API ${res.status}: /api/manufacturers/${id}`);
       return adaptManufacturer(await res.json() as BackendManufacturer);
+    },
+    async updateShowcase(id: string, payload: Partial<BackendManufacturer>): Promise<BackendManufacturer> {
+      const res = await adminFetch(`/api/manufacturers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/manufacturers/${id}`);
+      return await res.json() as BackendManufacturer;
     },
     async remove(id: string): Promise<void> {
       const res = await adminFetch(`/api/manufacturers/${id}`, { method: 'DELETE' });
