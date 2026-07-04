@@ -26,7 +26,7 @@ def upgrade() -> None:
     op.add_column('manufacturers', sa.Column('address', sa.String(length=500), nullable=True))
     op.add_column('manufacturers', sa.Column('phone', sa.String(length=100), nullable=True))
     op.add_column('manufacturers', sa.Column('email', sa.String(length=200), nullable=True))
-    op.add_column('manufacturers', sa.Column('featured_cable_ids', JSONB(astext_type=sa.Text()), nullable=False, server_default="[]"))
+    op.add_column('manufacturers', sa.Column('featured_cable_ids', JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'[]'::jsonb")))
     op.add_column('manufacturers', sa.Column('featured_image', sa.Boolean(), nullable=False, server_default=sa.false()))
     op.add_column('manufacturers', sa.Column('featured_image_sort', sa.Integer(), nullable=False, server_default="0"))
     op.add_column('manufacturers', sa.Column('featured_text', sa.Boolean(), nullable=False, server_default=sa.false()))
