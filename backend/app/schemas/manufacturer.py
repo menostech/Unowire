@@ -10,6 +10,16 @@ class ManufacturerBase(BaseModel):
     country: str | None = None
     website: str | None = None
     image_url: str | None = None
+    description: str | None = None
+    founded_year: int | None = None
+    address: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    featured_cable_ids: list[str] = []
+    featured_image: bool = False
+    featured_image_sort: int = 0
+    featured_text: bool = False
+    featured_text_sort: int = 0
 
 
 class ManufacturerRead(ManufacturerBase):
@@ -26,6 +36,16 @@ class ManufacturerCreate(BaseModel):
     country: str | None = None
     website: str | None = None
     image_url: str | None = None
+    description: str | None = None
+    founded_year: int | None = None
+    address: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    featured_cable_ids: list[str] = []
+    featured_image: bool = False
+    featured_image_sort: int = 0
+    featured_text: bool = False
+    featured_text_sort: int = 0
 
 
 class ManufacturerUpdate(BaseModel):
@@ -34,3 +54,13 @@ class ManufacturerUpdate(BaseModel):
     country: str | None = None
     website: str | None = None
     image_url: str | None = None
+    description: str | None = None
+    founded_year: int | None = None
+    address: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    featured_cable_ids: list[str] | None = None
+    featured_image: bool | None = None
+    featured_image_sort: int | None = None
+    featured_text: bool | None = None
+    featured_text_sort: int | None = None
