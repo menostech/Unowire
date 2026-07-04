@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, Integer, String, Text
+from sqlalchemy import Boolean, Integer, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.types import JSON
 
 from app.core.database import Base
 
@@ -22,7 +22,7 @@ class Manufacturer(Base):
     address: Mapped[str | None] = mapped_column(String(500))
     phone: Mapped[str | None] = mapped_column(String(100))
     email: Mapped[str | None] = mapped_column(String(200))
-    featured_cable_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    featured_cable_ids: Mapped[list] = mapped_column(JSONB, nullable=False, server_default="[]")
     featured_image: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     featured_image_sort: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     featured_text: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
