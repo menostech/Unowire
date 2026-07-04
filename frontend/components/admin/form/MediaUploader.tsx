@@ -12,7 +12,12 @@ interface UploadResult {
   error?: string;
 }
 
-export function MediaUploader() {
+interface MediaUploaderProps {
+  folderId?: number;
+  onUploaded?: () => void;
+}
+
+export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
   const [uploads, setUploads] = useState<UploadResult[]>([]);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
@@ -23,21 +28,22 @@ export function MediaUploader() {
       progress: 0,
     }));
     setUploads((prev) => [...newUploads, ...prev]);
-    newUploads.forEach((item) => uploadFile(item));
+    newUploads.forEach((item) => processUpload(item));
   };
 
-  const uploadFile = async (item: UploadResult) => {
+  const processUpload = async (item: UploadResult) => {
     setUploads((prev) =>
       prev.map((u) => (u.file.name === item.file.name ? { ...u, status: 'uploading' } : u))
     );
 
     try {
-      const result = await uploadFile(item.file);
+      const result = await uploadFile(item.file, folderId);
       setUploads((prev) =>
         prev.map((u) =>
           u.file.name === item.file.name ? { ...u, status: 'success', progress: 100, url: result.url_path } : u
         )
       );
+      if (onUploaded) onUploaded();
     } catch (error) {
       setUploads((prev) =>
         prev.map((u) =>
