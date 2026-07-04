@@ -42,7 +42,7 @@ export async function validateImport(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.detail || 'Validation failed');
+    throw new Error(data.detail || data.message || 'Validation failed');
   }
   return data as ImportPreview;
 }
@@ -60,7 +60,7 @@ export async function commitImport(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.detail || 'Commit failed');
+    throw new Error(data.detail || data.message || 'Commit failed');
   }
   return data as ImportResult;
 }

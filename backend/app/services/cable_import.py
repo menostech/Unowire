@@ -131,6 +131,10 @@ def _validate_spec(spec_data: dict[str, Any], row_number: int, spec_index: int) 
         errors.append(f"Row {row_number}: spec {spec_index} spec_type 'number' requires value_number")
     if spec_type in ("string", "enum") and not value_string:
         errors.append(f"Row {row_number}: spec {spec_index} spec_type '{spec_type}' requires value_string")
+    if spec_type == "number" and value_string:
+        errors.append(f"Row {row_number}: spec {spec_index} spec_type 'number' requires value_string to be null")
+    if spec_type in ("string", "enum") and value_number is not None:
+        errors.append(f"Row {row_number}: spec {spec_index} spec_type '{spec_type}' requires value_number to be null")
 
     if errors:
         return None, errors
