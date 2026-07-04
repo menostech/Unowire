@@ -9,6 +9,7 @@ export function Footer() {
           <p>© {new Date().getFullYear()} Unowire. Cable specs database.</p>
           <nav className="flex gap-4">
             <Link href="/cables" className="hover:text-blue-600">Cables</Link>
+            <Link href="/manufacturers" className="hover:text-blue-600">Manufacturers</Link>
             <Link href="/categories/automotive" className="hover:text-blue-600">Automotive</Link>
             <Link href="/categories/consumer-electronics" className="hover:text-blue-600">Consumer Electronics</Link>
           </nav>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -105,7 +106,7 @@ export default async function CableDetailPage({
           {manufacturer && (
             <div>
               <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Manufacturer</h3>
-              <p className="text-sm font-medium text-gray-900">{manufacturer.name}</p>
+              <Link href={`/manufacturers/${manufacturer.slug}`} className="text-sm font-medium text-gray-900 hover:text-blue-600">{manufacturer.name}</Link>
               <p className="text-sm text-gray-500">{manufacturer.country}</p>
               {manufacturer.website && (
                 <a
