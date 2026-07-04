@@ -1,4 +1,6 @@
-from sqlalchemy import select, func
+from typing import Literal
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -24,19 +26,22 @@ class CRUDUpload(CRUDBase[Upload, UploadCreate, UploadUpdate]):
         self,
         db: AsyncSession,
         page: int = 1,
-        page_size: int = 20
+        page_size: int = 20,
+        folder_id: int | None | Literal["none"] = None,
     ) -> tuple[list[Upload], int]:
         offset = (page - 1) * page_size
-        total_stmt = select(func.count()).select_from(Upload)
-        total_result = await db.execute(total_stmt)
-        total = total_result.scalar_one()
+        base = select(Upload)
+        count_base = select(func.count()).select_from(Upload)
 
-        stmt = (
-            select(Upload)
-            .order_by(Upload.created_at.desc())
-            .offset(offset)
-            .limit(page_size)
-        )
+        if folder_id == "none":
+            base = base.where(Upload.folder_id.is_(None))
+            count_base = count_base.where(Upload.folder_id.is_(None))
+        elif folder_id is not None:
+            base = base.where(Upload.folder_id == folder_id)
+            count_base = count_base.where(Upload.folder_id == folder_id)
+
+        total = (await db.execute(count_base)).scalar_one()
+        stmt = base.order_by(Upload.created_at.desc()).offset(offset).limit(page_size)
         result = await db.execute(stmt)
         return list(result.scalars().all()), total
 
