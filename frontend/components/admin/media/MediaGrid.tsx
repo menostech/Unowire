@@ -17,9 +17,10 @@ interface MediaGridProps {
   folders: Folder[];
   onToast: (message: string) => void;
   onFoldersChanged: () => void;
+  refreshKey?: number;
 }
 
-export function MediaGrid({ folderId, folders, onToast, onFoldersChanged }: MediaGridProps) {
+export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refreshKey }: MediaGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [items, setItems] = useState<BackendUpload[]>([]);
   const [total, setTotal] = useState(0);
@@ -39,7 +40,7 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged }: Medi
 
   useEffect(() => {
     loadMedia();
-  }, [currentPage, folderId]);
+  }, [currentPage, folderId, refreshKey]);
 
   async function loadMedia() {
     setLoading(true);

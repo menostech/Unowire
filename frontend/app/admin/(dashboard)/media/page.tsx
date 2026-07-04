@@ -12,6 +12,7 @@ export default function MediaPage() {
   const [selectedFolder, setSelectedFolder] = useState<FolderSelection>('all');
   const [toast, setToast] = useState<string | null>(null);
   const [uploaderOpen, setUploaderOpen] = useState(false);
+  const [gridRefreshKey, setGridRefreshKey] = useState(0);
 
   const refreshFolders = useCallback(async () => {
     try {
@@ -21,6 +22,11 @@ export default function MediaPage() {
       console.error('Failed to load folders:', e);
     }
   }, []);
+
+  const handleUploaded = useCallback(() => {
+    refreshFolders();
+    setGridRefreshKey(k => k + 1);
+  }, [refreshFolders]);
 
   useEffect(() => {
     refreshFolders();
@@ -56,7 +62,7 @@ export default function MediaPage() {
       )}
 
       {uploaderOpen && (
-        <MediaUploader folderId={currentFolderId} onUploaded={refreshFolders} />
+        <MediaUploader folderId={currentFolderId} onUploaded={handleUploaded} />
       )}
 
       <div className="flex gap-4">
@@ -76,6 +82,7 @@ export default function MediaPage() {
             folders={folders}
             onToast={showToast}
             onFoldersChanged={refreshFolders}
+            refreshKey={gridRefreshKey}
           />
         </div>
       </div>

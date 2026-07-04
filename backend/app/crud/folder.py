@@ -60,6 +60,19 @@ class CRUDFolder(CRUDBase[Folder, FolderCreate, FolderUpdate]):
                     status_code=400,
                     detail={"code": 400, "message": f"Max folder depth is {MAX_FOLDER_DEPTH}"},
                 )
+        # Check for duplicate name within same parent (PostgreSQL NULLs are distinct in UNIQUE)
+        dup_stmt = select(Folder).where(Folder.name == obj_in.name)
+        if obj_in.parent_id is None:
+            dup_stmt = dup_stmt.where(Folder.parent_id.is_(None))
+        else:
+            dup_stmt = dup_stmt.where(Folder.parent_id == obj_in.parent_id)
+        dup_result = await db.execute(dup_stmt)
+        if dup_result.scalars().first() is not None:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=409,
+                detail={"code": 409, "message": "Folder name already exists"},
+            )
         obj_data = obj_in.model_dump()
         db_obj = Folder(**obj_data)
         db.add(db_obj)
