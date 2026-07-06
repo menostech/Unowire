@@ -18,9 +18,10 @@ interface MediaGridProps {
   onToast: (message: string) => void;
   onFoldersChanged: () => void;
   refreshKey?: number;
+  onSelect?: (urlPath: string) => void;
 }
 
-export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refreshKey }: MediaGridProps) {
+export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refreshKey, onSelect }: MediaGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [items, setItems] = useState<BackendUpload[]>([]);
   const [total, setTotal] = useState(0);
@@ -118,7 +119,11 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
           {items.map((upload) => (
             <div
               key={upload.id}
-              className="relative group rounded-lg overflow-hidden border border-gray-200 hover:border-blue-300 transition-colors"
+              className={`relative group rounded-lg overflow-hidden border border-gray-200 hover:border-blue-300 transition-colors ${onSelect ? 'cursor-pointer' : ''}`}
+              onClick={onSelect ? (e) => {
+                if (e.target instanceof HTMLElement && e.target.closest('button, a')) return;
+                onSelect(upload.url_path);
+              } : undefined}
               onContextMenu={(e) => {
                 e.preventDefault();
                 setMenuFor(upload.id);
@@ -178,6 +183,12 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
                     ))}
                 </div>
               </div>
+
+              {onSelect && (
+                <div className="absolute inset-0 flex items-center justify-center bg-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <span className="px-3 py-1 bg-white/90 rounded text-sm font-medium text-blue-700">Select</span>
+                </div>
+              )}
 
               <div className="px-2 py-1 bg-gray-50 border-t text-xs text-gray-600 truncate">
                 {renamingId === upload.id ? (
