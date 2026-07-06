@@ -1,16 +1,79 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.crud.base import CRUDBase
-from app.models.cable import Cable, SpecItem
-from app.models.equipment import RecommendedEquipment
-from app.schemas.equipment import RecommendedEquipmentCreate, RecommendedEquipmentUpdate
+from app.models.cable import SpecItem
+from app.models.equipment import EquipmentCategory, EquipmentManufacturer, RecommendedEquipment
+from app.schemas.equipment import (
+    EquipmentCategoryCreate,
+    EquipmentCategoryUpdate,
+    EquipmentManufacturerCreate,
+    EquipmentManufacturerUpdate,
+    RecommendedEquipmentCreate,
+    RecommendedEquipmentUpdate,
+)
+
+
+class CRUDEquipmentManufacturer(CRUDBase[EquipmentManufacturer, EquipmentManufacturerCreate, EquipmentManufacturerUpdate]):
+    pass
+
+
+class CRUDEquipmentCategory(CRUDBase[EquipmentCategory, EquipmentCategoryCreate, EquipmentCategoryUpdate]):
+    async def get_with_children(self, db: AsyncSession, id: str) -> EquipmentCategory | None:
+        stmt = select(EquipmentCategory).where(EquipmentCategory.id == id).options(
+            selectinload(EquipmentCategory.children)
+        )
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_all_top_level_with_children(self, db: AsyncSession) -> list[EquipmentCategory]:
+        stmt = select(EquipmentCategory).where(
+            EquipmentCategory.parent_id.is_(None)
+        ).options(
+            selectinload(EquipmentCategory.children)
+        ).order_by(EquipmentCategory.sort_order)
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
+    async def get_all_flat(self, db: AsyncSession) -> list[EquipmentCategory]:
+        stmt = select(EquipmentCategory).order_by(EquipmentCategory.sort_order)
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
 
 
 class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, RecommendedEquipmentUpdate]):
+    async def get_with_relations(self, db: AsyncSession, id: str) -> RecommendedEquipment | None:
+        stmt = select(RecommendedEquipment).where(RecommendedEquipment.id == id).options(
+            selectinload(RecommendedEquipment.manufacturer),
+            selectinload(RecommendedEquipment.category),
+        )
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_all_with_relations(
+        self,
+        db: AsyncSession,
+        page: int = 1,
+        page_size: int = 20,
+        category_id: str | None = None,
+        manufacturer_id: str | None = None,
+    ) -> tuple[list[RecommendedEquipment], int]:
+        stmt = select(RecommendedEquipment)
+        if category_id is not None:
+            stmt = stmt.where(RecommendedEquipment.category_id == category_id)
+        if manufacturer_id is not None:
+            stmt = stmt.where(RecommendedEquipment.manufacturer_id == manufacturer_id)
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await db.execute(count_stmt)).scalar() or 0
+        stmt = stmt.options(
+            selectinload(RecommendedEquipment.manufacturer),
+            selectinload(RecommendedEquipment.category),
+        ).offset((page - 1) * page_size).limit(page_size)
+        result = await db.execute(stmt)
+        return list(result.scalars().all()), total
+
     async def get_matching_cable(self, db: AsyncSession, cable_id: str) -> list[RecommendedEquipment]:
-        """Run rules engine: find equipment whose applicable_specs match cable's specs."""
-        # Get cable's variant specs
         spec_stmt = select(SpecItem).where(
             SpecItem.cable_id == cable_id,
             SpecItem.variant_id.isnot(None),
@@ -18,7 +81,6 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
         spec_result = await db.execute(spec_stmt)
         specs = list(spec_result.scalars().all())
 
-        # Build a lookup: spec_key -> list of values
         spec_values: dict[str, list[float | str]] = {}
         for s in specs:
             if s.spec_key not in spec_values:
@@ -28,8 +90,10 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
             if s.value_string is not None:
                 spec_values[s.spec_key].append(s.value_string)
 
-        # Check each equipment
-        eq_stmt = select(RecommendedEquipment)
+        eq_stmt = select(RecommendedEquipment).options(
+            selectinload(RecommendedEquipment.manufacturer),
+            selectinload(RecommendedEquipment.category),
+        )
         eq_result = await db.execute(eq_stmt)
         all_equipment = list(eq_result.scalars().all())
 
@@ -66,4 +130,6 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
         return matched
 
 
+crud_equipment_manufacturer = CRUDEquipmentManufacturer(EquipmentManufacturer)
+crud_equipment_category = CRUDEquipmentCategory(EquipmentCategory)
 crud_equipment = CRUDEquipment(RecommendedEquipment)

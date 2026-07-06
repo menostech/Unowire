@@ -1,4 +1,5 @@
 import logging
+import mimetypes
 
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -8,9 +9,12 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, folders, health, industries, manufacturers, product_types, taxonomy, uploads
+from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, product_types, taxonomy, uploads
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
+
+# Ensure modern image MIME types are recognized (some base images lack .webp)
+mimetypes.add_type("image/webp", ".webp")
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +91,8 @@ app.include_router(categories.router, prefix=f"{settings.api_prefix}/industries/
 app.include_router(product_types.router, prefix=f"{settings.api_prefix}/industries/{{industry_id}}/categories/{{category_id}}/product-types", tags=["product-types"])
 app.include_router(cables.router, prefix=f"{settings.api_prefix}/cables", tags=["cables"])
 app.include_router(equipment.router, prefix=f"{settings.api_prefix}/recommended-equipments", tags=["recommended-equipments"])
+app.include_router(equipment_manufacturers.router, prefix=f"{settings.api_prefix}/equipment-manufacturers", tags=["equipment-manufacturers"])
+app.include_router(equipment_categories.router, prefix=f"{settings.api_prefix}/equipment-categories", tags=["equipment-categories"])
 app.include_router(taxonomy.router, prefix=f"{settings.api_prefix}/taxonomy", tags=["taxonomy"])
 app.include_router(uploads.router, prefix=f"{settings.api_prefix}/uploads", tags=["uploads"])
 app.include_router(folders.router, prefix=f"{settings.api_prefix}/admin/folders", tags=["folders"])
