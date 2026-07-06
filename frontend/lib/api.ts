@@ -1,5 +1,6 @@
 import type {
   ApplicableSpecRule, Brand, Cable, CableDetailResponse, Category,
+  EquipmentManufacturer, EquipmentCategory,
   Industry, Manufacturer, ProductTypeConfig, RecommendedEquipment,
   SizeSystem, SpecItem, SpecType, Taxonomy, TaxonomyCategory,
   TaxonomyIndustry,
@@ -122,6 +123,7 @@ interface BackendCable {
   base_description: string | null;
   meta_title: string | null;
   meta_description: string | null;
+  image_url: string | null;
   category_ids?: string[];
   brand?: BackendBrand | null;
   common_specs?: BackendSpecItem[];
@@ -133,6 +135,7 @@ interface BackendBrand {
   name: string;
   slug: string;
   manufacturer_id: string;
+  image_url: string | null;
   manufacturer?: { id: string; name: string; slug: string; country: string | null; website: string | null } | null;
 }
 
@@ -155,16 +158,39 @@ interface BackendManufacturer {
   featured_text_sort: number;
 }
 
-interface BackendEquipment {
+interface BackendEquipmentManufacturer {
   id: string;
   name: string;
   slug: string;
-  brand: string | null;
-  model: string | null;
-  type: string | null;
-  external_url: string | null;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+}
+
+interface BackendEquipmentCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  children: BackendEquipmentCategory[];
+}
+
+interface BackendEquipment {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
   applicable_specs: Record<string, unknown>[];
   description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer?: BackendEquipmentManufacturer | null;
+  category?: BackendEquipmentCategory | null;
 }
 
 interface BackendCableListResponse {
@@ -270,6 +296,7 @@ function adaptCable(c: BackendCable): Cable {
     base_description: c.base_description ?? '',
     meta_title: c.meta_title,
     meta_description: c.meta_description,
+    image_url: c.image_url,
     common_specs: (c.common_specs ?? []).map(adaptSpecItem),
     variants: (c.variants ?? []).map(v => ({
       slug: v.slug,
@@ -291,6 +318,7 @@ function adaptBrand(b: BackendBrand): Brand {
     manufacturer_id: b.manufacturer_id,
     country: b.manufacturer?.country ?? '',
     website: b.manufacturer?.website ?? '',
+    image_url: b.image_url,
   };
 }
 
@@ -315,15 +343,46 @@ function adaptManufacturer(m: BackendManufacturer): Manufacturer {
   };
 }
 
+function adaptEquipmentManufacturer(m: BackendEquipmentManufacturer | null | undefined): EquipmentManufacturer | null {
+  if (!m) return null;
+  return {
+    id: m.id,
+    name: m.name,
+    slug: m.slug,
+    country: m.country ?? null,
+    website: m.website ?? null,
+    image_url: m.image_url ?? null,
+    description: m.description ?? null,
+  };
+}
+
+function adaptEquipmentCategory(c: BackendEquipmentCategory | null | undefined): EquipmentCategory | null {
+  if (!c) return null;
+  return {
+    id: c.id,
+    parent_id: c.parent_id ?? null,
+    label: c.label,
+    slug: c.slug,
+    description: c.description ?? null,
+    image_url: c.image_url ?? null,
+    children: (c.children ?? []).map(child => adaptEquipmentCategory(child)!),
+  };
+}
+
 function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
   return {
     id: e.id,
-    brand: e.brand ?? '',
-    model: e.model ?? e.name,
-    type: e.type ?? '',
-    description: e.description ?? '',
+    manufacturer_id: e.manufacturer_id,
+    category_id: e.category_id,
+    model: e.model,
+    slug: e.slug,
+    description: e.description ?? null,
     applicable_specs: (e.applicable_specs ?? []) as unknown as ApplicableSpecRule[],
-    external_url: e.external_url ?? '',
+    image_url: e.image_url ?? null,
+    external_url: e.external_url ?? null,
+    sort_order: e.sort_order ?? 0,
+    manufacturer: adaptEquipmentManufacturer(e.manufacturer),
+    category: adaptEquipmentCategory(e.category),
   };
 }
 
@@ -461,6 +520,12 @@ export const api = {
     async all(): Promise<RecommendedEquipment[]> {
       const res = await fetchWithCache<{ items: BackendEquipment[] }>(
         '/api/recommended-equipments?page_size=999'
+      );
+      return res.items.map(adaptEquipment);
+    },
+    async byCable(cableId: string): Promise<RecommendedEquipment[]> {
+      const res = await fetchWithCache<{ items: BackendEquipment[] }>(
+        `/api/recommended-equipments?cable_id=${encodeURIComponent(cableId)}`
       );
       return res.items.map(adaptEquipment);
     },

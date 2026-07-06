@@ -64,6 +64,7 @@ interface BackendCable {
   base_description: string | null;
   meta_title: string | null;
   meta_description: string | null;
+  image_url: string | null;
   category_ids?: string[];
   brand?: BackendBrand | null;
   common_specs?: BackendSpecItem[];
@@ -107,6 +108,47 @@ interface BackendProductType {
   filters: BackendTaxonomyFilter[];
   sort_order: number;
   image_url: string | null;
+}
+
+interface BackendEquipmentManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+}
+
+interface BackendEquipmentCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  children: BackendEquipmentCategory[];
+}
+
+interface BackendEquipment {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: Record<string, unknown>[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer?: BackendEquipmentManufacturer | null;
+  category?: BackendEquipmentCategory | null;
 }
 
 interface ListResponse<T> {
@@ -153,6 +195,7 @@ function adaptBrand(b: BackendBrand): Brand {
     manufacturer_id: b.manufacturer_id,
     country: b.manufacturer?.country ?? '',
     website: b.manufacturer?.website ?? '',
+    image_url: b.image_url,
   };
 }
 
@@ -182,6 +225,7 @@ function adaptCable(c: BackendCable): Cable {
     base_description: c.base_description ?? '',
     meta_title: c.meta_title,
     meta_description: c.meta_description,
+    image_url: c.image_url,
     common_specs: (c.common_specs ?? []).map(adaptSpecItem),
     variants: (c.variants ?? []).map(v => ({ slug: v.slug, specs: (v.specs ?? []).map(adaptSpecItem) })),
   };
@@ -492,6 +536,112 @@ export const adminApi = {
         const res = await adminFetch(`/api/industries/${encodeURIComponent(industryId)}/categories/${encodeURIComponent(catSlug)}/product-types/${encodeURIComponent(ptSlug)}`, { method: 'DELETE' });
         if (!res.ok) throw new Error(`API ${res.status}: product-types delete ${id}`);
       },
+    },
+  },
+
+  equipmentManufacturers: {
+    async all(page = 1, page_size = 20): Promise<{ items: BackendEquipmentManufacturer[]; total: number }> {
+      const data = await adminGet<ListResponse<BackendEquipmentManufacturer>>(
+        `/api/equipment-manufacturers?page=${page}&page_size=${page_size}`
+      );
+      return { items: data.items, total: data.total };
+    },
+    async getById(id: string): Promise<BackendEquipmentManufacturer | null> {
+      try {
+        return await adminGet<BackendEquipmentManufacturer>(`/api/equipment-manufacturers/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendEquipmentManufacturer> {
+      const res = await adminFetch('/api/equipment-manufacturers', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers`);
+      return await res.json() as BackendEquipmentManufacturer;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipmentManufacturer> {
+      const res = await adminFetch(`/api/equipment-manufacturers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers/${id}`);
+      return await res.json() as BackendEquipmentManufacturer;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/equipment-manufacturers/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers/${id}`);
+    },
+  },
+
+  equipmentCategories: {
+    async all(): Promise<BackendEquipmentCategory[]> {
+      return await adminGet<BackendEquipmentCategory[]>('/api/equipment-categories');
+    },
+    async getById(id: string): Promise<BackendEquipmentCategory | null> {
+      try {
+        return await adminGet<BackendEquipmentCategory>(`/api/equipment-categories/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendEquipmentCategory> {
+      const res = await adminFetch('/api/equipment-categories', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories`);
+      return await res.json() as BackendEquipmentCategory;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipmentCategory> {
+      const res = await adminFetch(`/api/equipment-categories/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories/${id}`);
+      return await res.json() as BackendEquipmentCategory;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/equipment-categories/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories/${id}`);
+    },
+  },
+
+  equipment: {
+    async all(page = 1, page_size = 20, filters?: { category_id?: string; manufacturer_id?: string }): Promise<{ items: BackendEquipment[]; total: number }> {
+      const params = new URLSearchParams({ page: String(page), page_size: String(page_size) });
+      if (filters?.category_id) params.set('category_id', filters.category_id);
+      if (filters?.manufacturer_id) params.set('manufacturer_id', filters.manufacturer_id);
+      const data = await adminGet<ListResponse<BackendEquipment>>(`/api/recommended-equipments?${params.toString()}`);
+      return { items: data.items, total: data.total };
+    },
+    async getById(id: string): Promise<BackendEquipment | null> {
+      try {
+        return await adminGet<BackendEquipment>(`/api/recommended-equipments/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendEquipment> {
+      const res = await adminFetch('/api/recommended-equipments', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments`);
+      return await res.json() as BackendEquipment;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipment> {
+      const res = await adminFetch(`/api/recommended-equipments/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
+      return await res.json() as BackendEquipment;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/recommended-equipments/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
     },
   },
 };
