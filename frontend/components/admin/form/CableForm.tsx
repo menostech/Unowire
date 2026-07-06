@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ImageFieldWithPicker } from './ImageFieldWithPicker';
 
 interface CableFormProps {
   // Cable detail in backend format (spec_key/value_string/value_number, etc.)
@@ -37,6 +38,7 @@ export function CableForm({ initial, brands, taxonomy }: CableFormProps) {
   const [baseDescription, setBaseDescription] = useState(initial?.base_description ?? '');
   const [metaTitle, setMetaTitle] = useState(initial?.meta_title ?? '');
   const [metaDescription, setMetaDescription] = useState(initial?.meta_description ?? '');
+  const [imageUrl, setImageUrl] = useState<string>(initial?.image_url ?? '');
 
   // === JSON editors ===
   const [commonSpecsText, setCommonSpecsText] = useState(
@@ -116,6 +118,7 @@ export function CableForm({ initial, brands, taxonomy }: CableFormProps) {
       base_description: baseDescription || null,
       meta_title: metaTitle || null,
       meta_description: metaDescription || null,
+      image_url: imageUrl || null,
       common_specs: JSON.parse(commonSpecsText),
       variants: JSON.parse(variantsText),
     };

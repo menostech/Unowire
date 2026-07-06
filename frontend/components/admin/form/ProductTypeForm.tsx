@@ -20,6 +20,7 @@ interface ProductTypeFormProps {
     size_system: string;
     filters: { spec_key: string; label: string; control: string; unit: string | null }[];
     sort_order: number;
+    image_url: string | null;
   };
   industries: IndustryOption[];
   preselectCategoryId?: string;
@@ -93,6 +94,7 @@ export function ProductTypeForm({ initial, industries, preselectCategoryId }: Pr
       size_system: sizeSystem,
       filters: parsedFilters,
       sort_order: Number(sortOrder),
+      image_url: imageUrl || null,
     };
 
     try {
