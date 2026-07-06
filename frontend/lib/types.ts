@@ -111,6 +111,7 @@ export interface Cable {
   base_description: string;
   meta_title: string | null;
   meta_description: string | null;
+  image_url: string | null;
   common_specs: SpecItem[];
   variants: CableVariant[];
 }
