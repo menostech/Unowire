@@ -29,6 +29,7 @@ export function BrandForm({ initial, manufacturers }: BrandFormProps) {
       name,
       slug,
       manufacturer_id: manufacturerId,
+      image_url: imageUrl || null,
     };
     try {
       const url = initial
