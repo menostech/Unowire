@@ -14,7 +14,7 @@ interface UploadResult {
 
 interface MediaUploaderProps {
   folderId?: number;
-  onUploaded?: () => void;
+  onUploaded?: (urlPath: string) => void;
 }
 
 export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
@@ -43,7 +43,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
           u.file.name === item.file.name ? { ...u, status: 'success', progress: 100, url: result.url_path } : u
         )
       );
-      if (onUploaded) onUploaded();
+      if (onUploaded) onUploaded(result.url_path);
     } catch (error) {
       setUploads((prev) =>
         prev.map((u) =>
