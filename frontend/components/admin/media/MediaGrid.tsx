@@ -121,7 +121,7 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
               key={upload.id}
               className={`relative group rounded-lg overflow-hidden border border-gray-200 hover:border-blue-300 transition-colors ${onSelect ? 'cursor-pointer' : ''}`}
               onClick={onSelect ? (e) => {
-                if (e.target instanceof HTMLElement && e.target.closest('button, a')) return;
+                if (e.target instanceof Element && e.target.closest('button, a')) return;
                 onSelect(upload.url_path);
               } : undefined}
               onContextMenu={(e) => {
