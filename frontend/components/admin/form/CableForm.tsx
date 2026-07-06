@@ -332,6 +332,12 @@ export function CableForm({ initial, brands, taxonomy }: CableFormProps) {
             />
           </div>
         </div>
+        <div className="mt-4">
+          <ImageFieldWithPicker
+            value={imageUrl}
+            onChange={setImageUrl}
+          />
+        </div>
       </div>
 
       {/* === Common Specs (JSON) === */}
