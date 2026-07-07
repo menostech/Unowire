@@ -88,11 +88,22 @@ async def delete_role(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("roles")),
 ):
+    # Fetch first so we can check is_system before self-delete.
+    # System roles must never be deletable, regardless of who is asking.
+    role = await crud_role.get_with_permissions(db, role_id)
+    if role is None:
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Role not found"})
+    if role.is_system:
+        raise HTTPException(
+            status_code=403,
+            detail={"code": 403, "message": "Cannot delete a system role"},
+        )
     if role_id == user.role_id:
         raise HTTPException(
             status_code=400,
             detail={"code": 400, "message": "Cannot delete your own role"},
         )
+    # crud_role.remove still guards is_system + user-assignment (defense in depth).
     result = await crud_role.remove(db, id=role_id)
     if result is None:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Role not found"})
