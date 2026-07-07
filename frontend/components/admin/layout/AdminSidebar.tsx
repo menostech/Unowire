@@ -30,6 +30,55 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+// Map a menu item's page_id (kebab-case, e.g. 'equipment-mfrs') to the
+// RBAC module ID (snake_case, e.g. 'equipment_mfrs') used by allowed_modules.
+const PAGE_ID_TO_MODULE_ID: Record<string, string> = {
+  dashboard: 'dashboard',
+  cables: 'cables',
+  brands: 'brands',
+  manufacturers: 'manufacturers',
+  industries: 'industries',
+  'equipment-mfrs': 'equipment_mfrs',
+  'equipment-cats': 'equipment_cats',
+  'equipment-list': 'equipment_list',
+  media: 'media',
+  'menu-config': 'menu_config',
+  users: 'users',
+  roles: 'roles',
+};
+
+function filterTreeByPermissions(
+  tree: MenuItemTree[],
+  allowed: Set<string>
+): MenuItemTree[] {
+  const result: MenuItemTree[] = [];
+  for (const item of tree) {
+    if (item.type === 'group') {
+      // Keep a group only if at least one of its children is allowed.
+      const allowedChildren = (item.children ?? []).filter((child) => {
+        if (child.type === 'page' && child.page_id) {
+          const moduleId = PAGE_ID_TO_MODULE_ID[child.page_id] ?? child.page_id;
+          return allowed.has(moduleId);
+        }
+        // Links and sub-groups without page_id are always shown.
+        return true;
+      });
+      if (allowedChildren.length > 0) {
+        result.push({ ...item, children: allowedChildren });
+      }
+    } else if (item.type === 'page' && item.page_id) {
+      const moduleId = PAGE_ID_TO_MODULE_ID[item.page_id] ?? item.page_id;
+      if (allowed.has(moduleId)) {
+        result.push(item);
+      }
+    } else {
+      // Links and other types: always show.
+      result.push(item);
+    }
+  }
+  return result;
+}
+
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -41,14 +90,29 @@ export function AdminSidebar() {
     let cancelled = false;
     async function fetchTree() {
       try {
-        const res = await fetch('/api/admin/menu/tree');
-        if (!res.ok) throw new Error('fetch failed');
-        const data: MenuItemTree[] = await res.json();
+        const [treeRes, permsRes] = await Promise.all([
+          fetch('/api/admin/menu/tree'),
+          fetch('/api/admin/auth/me/permissions'),
+        ]);
+        if (!treeRes.ok) throw new Error('tree fetch failed');
+        const data: MenuItemTree[] = await treeRes.json();
+        // Permissions fetch is best-effort: if it fails, fall back to showing
+        // all menu items (the backend will still enforce auth on each route).
+        let allowedModules: Set<string> | null = null;
+        if (permsRes.ok) {
+          const perms = await permsRes.json();
+          if (Array.isArray(perms?.allowed_modules)) {
+            allowedModules = new Set(perms.allowed_modules);
+          }
+        }
         if (cancelled) return;
-        setTree(data);
+        const filtered = allowedModules
+          ? filterTreeByPermissions(data, allowedModules)
+          : data;
+        setTree(filtered);
         // Auto-expand groups whose children match the current path.
         const initialOpen = new Set<string>();
-        for (const item of data) {
+        for (const item of filtered) {
           if (item.type === 'group' && item.children) {
             for (const child of item.children) {
               if (child.type === 'page' && child.page_id) {
