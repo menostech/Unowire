@@ -41,6 +41,9 @@ export function MenuItemForm({ initial, parentOptions }: MenuItemFormProps) {
     e.preventDefault();
     setError(null);
     setSaving(true);
+    // Always send page_id and url (null for the unused one) so the backend's
+    // exclude_unset=True merge picks up explicit nulls and clears stale DB
+    // values when the type is switched (e.g. page -> link).
     const body: Record<string, unknown> = {
       id,
       parent_id: parentId || null,
@@ -49,9 +52,9 @@ export function MenuItemForm({ initial, parentOptions }: MenuItemFormProps) {
       icon,
       sort_order: Number(sortOrder),
       is_visible: isVisible,
+      page_id: type === 'page' ? pageId : null,
+      url: type === 'link' ? url : null,
     };
-    if (type === 'page') body.page_id = pageId;
-    if (type === 'link') body.url = url;
 
     try {
       const reqUrl = initial
