@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import {
   LayoutDashboard, Cable, Tag, Factory, FolderOpen, Wrench, Image,
   Settings, ExternalLink, LogOut, FileText, Database, Box, Layers,
-  Cpu, HardDrive, Server, Cloud, Link as LinkIcon, List, Grid, Tree,
+  Cpu, HardDrive, Server, Cloud, Link as LinkIcon, List, Grid, Trees,
   User, Users, Shield, Bell, Mail, MessageSquare, Search, Filter,
   Plus, Edit, Trash2, Save, X, Check, ChevronUp, ChevronDown,
   ChevronRight, ChevronLeft, Circle, Star, Heart, Bookmark, Flag,
@@ -33,7 +33,7 @@ const ICONS: { name: string; Icon: LucideIcon }[] = [
   { name: 'Link', Icon: LinkIcon },
   { name: 'List', Icon: List },
   { name: 'Grid', Icon: Grid },
-  { name: 'Tree', Icon: Tree },
+  { name: 'Trees', Icon: Trees },
   { name: 'User', Icon: User },
   { name: 'Users', Icon: Users },
   { name: 'Shield', Icon: Shield },
