@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_access_token, verify_password
@@ -46,11 +46,11 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
         _login_attempts.setdefault(ip, []).append(time.time())
         raise HTTPException(status_code=401, detail={"code": 401, "message": "Invalid email or password"})
 
-    token = create_access_token(user.id, user.email, user.role)
+    token = create_access_token(user.id, user.email, user.role_id)
     _login_attempts.pop(ip, None)
 
     response = JSONResponse(
-        content={"user": {"id": user.id, "email": user.email, "role": user.role}, "token": token}
+        content={"user": {"id": user.id, "email": user.email, "role": user.role_id}, "token": token}
     )
     response.set_cookie(
         "admin_token",
