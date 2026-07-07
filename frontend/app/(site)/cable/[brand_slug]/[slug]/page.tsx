@@ -9,10 +9,9 @@ import { RecommendedEquipmentCard } from '@/components/equipment/RecommendedEqui
 import { SimilarCables } from '@/components/shared/SimilarCables';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { api, getCableUrl } from '@/lib/api';
-import { recommendEquipments } from '@/lib/equipment-recommend';
 import { generateCableMetadata, buildCableJsonLd, buildBreadcrumbJsonLd } from '@/lib/seo';
 
-export const revalidate = 3600; // ISR 1h
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -36,7 +35,8 @@ export default async function CableDetailPage({
   const categories = cable.category_ids
     ? await api.categories.getByIds(cable.category_ids)
     : [];
-  const recommended = recommendEquipments(cable, await api.recommendedEquipments.all());
+  const matchedEquipment = await api.recommendedEquipments.byCable(cable.id);
+  const recommended = matchedEquipment.map(equipment => ({ equipment, matched_variants: [], explanation: [] }));
   const similar = await api.cables.similar(cable, 4);
   const jsonUrl = `/api/cables/${brand_slug}/${slug}`;
 

@@ -1,3 +1,6 @@
+// Deprecated, matching now done by backend API (/api/recommended-equipments?cable_id=)
+// Retained for reference only — no longer imported by any component.
+
 import type {
   ApplicableSpecRule, Cable, CableVariant, RecommendedEquipment,
   RecommendedEquipmentResult, SpecItem,
