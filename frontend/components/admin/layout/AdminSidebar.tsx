@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Cable, Tag, Factory, ExternalLink, LogOut, FolderOpen, Image } from 'lucide-react';
+import { LayoutDashboard, Cable, Tag, Factory, ExternalLink, LogOut, FolderOpen, Image, Wrench } from 'lucide-react';
 
 interface NavLink {
   href: string;
@@ -16,6 +16,9 @@ const navLinks: NavLink[] = [
   { href: '/admin/brands', label: 'Brands', icon: Tag },
   { href: '/admin/manufacturers', label: 'Manufacturers', icon: Factory },
   { href: '/admin/industries', label: 'Industries', icon: FolderOpen },
+  { href: '/admin/equipment/manufacturers', label: 'Equipment Mfrs', icon: Wrench },
+  { href: '/admin/equipment/categories', label: 'Equipment Cats', icon: Wrench },
+  { href: '/admin/equipment', label: 'Equipment', icon: Wrench },
   { href: '/admin/media', label: 'Media', icon: Image },
 ];
 
