@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { Manufacturer, Brand, Cable } from './types';
+import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree } from './types';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
 
@@ -625,6 +625,44 @@ export const adminApi = {
     async remove(id: string): Promise<void> {
       const res = await adminFetch(`/api/recommended-equipments/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
+    },
+  },
+
+  adminMenu: {
+    async tree(): Promise<MenuItemTree[]> {
+      return await adminGet<MenuItemTree[]>('/api/admin/menu/tree');
+    },
+    async all(): Promise<MenuItem[]> {
+      return await adminGet<MenuItem[]>('/api/admin/menu');
+    },
+    async getById(id: string): Promise<MenuItem | null> {
+      try {
+        return await adminGet<MenuItem>(`/api/admin/menu/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<MenuItem> {
+      const res = await adminFetch('/api/admin/menu', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu`);
+      return await res.json() as MenuItem;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<MenuItem> {
+      const res = await adminFetch(`/api/admin/menu/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu/${id}`);
+      return await res.json() as MenuItem;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/admin/menu/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu/${id}`);
+    },
+    async sort(id: string, direction: 'up' | 'down'): Promise<MenuItem> {
+      const res = await adminFetch(`/api/admin/menu/${encodeURIComponent(id)}/sort`, {
+        method: 'PUT',
+        body: JSON.stringify({ direction }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu/${id}/sort`);
+      return await res.json() as MenuItem;
     },
   },
 };

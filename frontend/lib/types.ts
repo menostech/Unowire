@@ -241,3 +241,24 @@ export interface ValidationError {
   message: string;
   severity: "error" | "warning";
 }
+
+// === Admin Menu ===
+export type MenuItemType = "page" | "link" | "group";
+
+export interface MenuItem {
+  id: string;
+  parent_id: string | null;
+  type: MenuItemType;
+  page_id: string | null;
+  url: string | null;
+  label: string;
+  icon: string | null;
+  sort_order: number;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MenuItemTree extends MenuItem {
+  children: MenuItem[];
+}
