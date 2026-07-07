@@ -23,6 +23,8 @@ ALLOWED_PAGE_IDS = {
     "equipment-list",
     "media",
     "menu-config",
+    "users",
+    "roles",
 }
 
 # IDs that cannot be deleted (would lock admin out of menu editor).

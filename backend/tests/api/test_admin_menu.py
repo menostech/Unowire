@@ -1,26 +1,4 @@
 """Tests for admin menu API endpoints."""
-import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-
-@pytest.fixture
-def client():
-    return TestClient(app)
-
-
-@pytest.fixture
-def admin_headers(client):
-    """Login as admin and return auth headers."""
-    # Admin credentials from .env.docker
-    res = client.post(
-        "/api/auth/login",
-        json={"email": "admin@unowire.com", "password": "admin123456"},
-    )
-    assert res.status_code == 200, f"Login failed: {res.text}"
-    token = res.json()["token"]
-    return {"Authorization": f"Bearer {token}"}
 
 
 class TestMenuTree:

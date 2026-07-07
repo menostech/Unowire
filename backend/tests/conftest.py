@@ -24,3 +24,25 @@ _db_module.engine = _test_engine
 _db_module.async_session = async_sessionmaker(
     _test_engine, class_=AsyncSession, expire_on_commit=False
 )
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+
+@pytest.fixture
+def client():
+    return TestClient(app)
+
+
+@pytest.fixture
+def admin_headers(client):
+    """Login as admin and return auth headers."""
+    res = client.post(
+        "/api/auth/login",
+        json={"email": "admin@unowire.com", "password": "admin123456"},
+    )
+    assert res.status_code == 200, f"Login failed: {res.text}"
+    token = res.json()["token"]
+    return {"Authorization": f"Bearer {token}"}
