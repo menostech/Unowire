@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, product_types, taxonomy, uploads
+from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, product_types, taxonomy, uploads, admin_menu
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -93,6 +93,7 @@ app.include_router(cables.router, prefix=f"{settings.api_prefix}/cables", tags=[
 app.include_router(equipment.router, prefix=f"{settings.api_prefix}/recommended-equipments", tags=["recommended-equipments"])
 app.include_router(equipment_manufacturers.router, prefix=f"{settings.api_prefix}/equipment-manufacturers", tags=["equipment-manufacturers"])
 app.include_router(equipment_categories.router, prefix=f"{settings.api_prefix}/equipment-categories", tags=["equipment-categories"])
+app.include_router(admin_menu.router, prefix=f"{settings.api_prefix}/admin/menu", tags=["admin-menu"])
 app.include_router(taxonomy.router, prefix=f"{settings.api_prefix}/taxonomy", tags=["taxonomy"])
 app.include_router(uploads.router, prefix=f"{settings.api_prefix}/uploads", tags=["uploads"])
 app.include_router(folders.router, prefix=f"{settings.api_prefix}/admin/folders", tags=["folders"])
