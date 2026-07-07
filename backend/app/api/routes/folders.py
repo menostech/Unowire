@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.folder import crud_folder
 from app.models.folder import Folder
@@ -18,7 +19,7 @@ router = APIRouter()
 @router.get("", response_model=FolderTreeResponse)
 async def list_folders(
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     rows = await crud_folder.list_all_with_counts(db)
     folders = [
@@ -38,7 +39,7 @@ async def list_folders(
 async def create_folder(
     obj_in: FolderCreate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     return await crud_folder.create_with_depth_check(db, obj_in=obj_in)
 
@@ -48,7 +49,7 @@ async def rename_folder(
     folder_id: int,
     obj_in: FolderUpdate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     folder = await db.get(Folder, folder_id)
     if not folder:
@@ -70,7 +71,7 @@ async def rename_folder(
 async def delete_folder(
     folder_id: int,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     folder = await db.get(Folder, folder_id)
     if not folder:

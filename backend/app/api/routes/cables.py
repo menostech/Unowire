@@ -3,7 +3,8 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.cable import crud_cable
 from app.crud.equipment import crud_equipment
@@ -87,7 +88,7 @@ async def get_cable(id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=CableRead, status_code=201)
-async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
     from app.models.cable import Cable as CableModel, CableVariant, SpecItem
 
     cable_data = obj_in.model_dump(exclude={"common_specs", "variants"})
@@ -119,7 +120,7 @@ async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), 
 
 
 @router.put("/{id}", response_model=CableRead)
-async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
     from app.models.cable import CableVariant, SpecItem
 
     cable = await crud_cable.get_detail(db, id)
@@ -162,7 +163,7 @@ async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(
 
 
 @router.delete("/{id}", response_model=CableRead)
-async def delete_cable(id: str, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def delete_cable(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
     obj = await crud_cable.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})

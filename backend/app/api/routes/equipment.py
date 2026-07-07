@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.equipment import crud_equipment
 from app.schemas.common import PaginatedResponse
@@ -48,7 +49,7 @@ async def get_equipment(id: str, db: AsyncSession = Depends(get_db)):
 async def create_equipment(
     obj_in: RecommendedEquipmentCreate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_list")),
 ):
     return await crud_equipment.create(db, obj_in=obj_in)
 
@@ -58,7 +59,7 @@ async def update_equipment(
     id: str,
     obj_in: RecommendedEquipmentUpdate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_list")),
 ):
     obj = await crud_equipment.get(db, id)
     if not obj:
@@ -70,7 +71,7 @@ async def update_equipment(
 async def delete_equipment(
     id: str,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_list")),
 ):
     obj = await crud_equipment.remove(db, id=id)
     if not obj:

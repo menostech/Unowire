@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.brand import crud_brand
 from app.schemas.brand import BrandCreate, BrandRead, BrandUpdate
@@ -32,12 +33,12 @@ async def get_brand(id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=BrandRead, status_code=201)
-async def create_brand(obj_in: BrandCreate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def create_brand(obj_in: BrandCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("brands"))):
     return await crud_brand.create(db, obj_in=obj_in)
 
 
 @router.put("/{id}", response_model=BrandRead)
-async def update_brand(id: str, obj_in: BrandUpdate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def update_brand(id: str, obj_in: BrandUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("brands"))):
     obj = await crud_brand.get(db, id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Brand not found"})
@@ -45,7 +46,7 @@ async def update_brand(id: str, obj_in: BrandUpdate, db: AsyncSession = Depends(
 
 
 @router.delete("/{id}", response_model=BrandRead)
-async def delete_brand(id: str, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def delete_brand(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("brands"))):
     obj = await crud_brand.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Brand not found"})

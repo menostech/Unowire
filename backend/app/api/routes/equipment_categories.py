@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.equipment import crud_equipment_category
 from app.schemas.equipment import (
@@ -31,7 +32,7 @@ async def get_equipment_category(id: str, db: AsyncSession = Depends(get_db)):
 async def create_equipment_category(
     obj_in: EquipmentCategoryCreate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_cats")),
 ):
     if obj_in.parent_id is not None:
         parent = await crud_equipment_category.get(db, obj_in.parent_id)
@@ -47,7 +48,7 @@ async def update_equipment_category(
     id: str,
     obj_in: EquipmentCategoryUpdate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_cats")),
 ):
     obj = await crud_equipment_category.get(db, id)
     if not obj:
@@ -69,7 +70,7 @@ async def update_equipment_category(
 async def delete_equipment_category(
     id: str,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_cats")),
 ):
     obj = await crud_equipment_category.get_with_children(db, id)
     if not obj:

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.equipment import crud_equipment_manufacturer
 from app.schemas.common import PaginatedResponse
@@ -34,7 +35,7 @@ async def get_equipment_manufacturer(id: str, db: AsyncSession = Depends(get_db)
 async def create_equipment_manufacturer(
     obj_in: EquipmentManufacturerCreate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_mfrs")),
 ):
     return await crud_equipment_manufacturer.create(db, obj_in=obj_in)
 
@@ -44,7 +45,7 @@ async def update_equipment_manufacturer(
     id: str,
     obj_in: EquipmentManufacturerUpdate,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_mfrs")),
 ):
     obj = await crud_equipment_manufacturer.get(db, id)
     if not obj:
@@ -56,7 +57,7 @@ async def update_equipment_manufacturer(
 async def delete_equipment_manufacturer(
     id: str,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("equipment_mfrs")),
 ):
     obj = await crud_equipment_manufacturer.remove(db, id=id)
     if not obj:
