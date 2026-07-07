@@ -72,5 +72,26 @@ async def logout():
 
 
 @router.get("/me")
-async def me(admin: dict = Depends(get_current_admin)):
-    return {"id": admin["id"], "email": admin["email"], "role": admin["role"]}
+async def me(user: User = Depends(get_current_user)):
+    return {
+        "id": user.id,
+        "email": user.email,
+        "role_id": user.role_id,
+        "role_name": user.role.name if user.role else None,
+        "scope_type": user.role.scope_type if user.role else None,
+        "scope_id": user.scope_id,
+    }
+
+
+@router.get("/me/permissions")
+async def my_permissions(user: User = Depends(get_current_user)):
+    """Return the current user's role + allowed modules. Used by frontend sidebar."""
+    return {
+        "user_id": user.id,
+        "email": user.email,
+        "role_id": user.role_id,
+        "role_name": user.role.name if user.role else None,
+        "scope_type": user.role.scope_type if user.role else None,
+        "scope_id": user.scope_id,
+        "allowed_modules": sorted(getattr(user, "role_permissions", set())),
+    }

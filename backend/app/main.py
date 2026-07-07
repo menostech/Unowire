@@ -95,6 +95,7 @@ app.include_router(equipment_manufacturers.router, prefix=f"{settings.api_prefix
 app.include_router(equipment_categories.router, prefix=f"{settings.api_prefix}/equipment-categories", tags=["equipment-categories"])
 app.include_router(admin_menu.router, prefix=f"{settings.api_prefix}/admin/menu", tags=["admin-menu"])
 app.include_router(admin_roles.router, prefix=f"{settings.api_prefix}/admin/roles", tags=["admin-roles"])
+app.include_router(admin_users.router, prefix=f"{settings.api_prefix}/admin/users", tags=["admin-users"])
 app.include_router(taxonomy.router, prefix=f"{settings.api_prefix}/taxonomy", tags=["taxonomy"])
 app.include_router(uploads.router, prefix=f"{settings.api_prefix}/uploads", tags=["uploads"])
 app.include_router(folders.router, prefix=f"{settings.api_prefix}/admin/folders", tags=["folders"])
