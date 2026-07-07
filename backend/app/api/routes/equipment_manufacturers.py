@@ -37,6 +37,13 @@ async def create_equipment_manufacturer(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("equipment_mfrs")),
 ):
+    # Scope check: equipment_manager can only manage their own manufacturer
+    if user.role and user.role.scope_type == "equipment_manufacturer":
+        if obj_in.id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot create equipment manufacturer outside your scope"},
+            )
     return await crud_equipment_manufacturer.create(db, obj_in=obj_in)
 
 
@@ -50,6 +57,13 @@ async def update_equipment_manufacturer(
     obj = await crud_equipment_manufacturer.get(db, id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Equipment manufacturer not found"})
+    # Scope check
+    if user.role and user.role.scope_type == "equipment_manufacturer":
+        if id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot modify equipment manufacturer outside your scope"},
+            )
     return await crud_equipment_manufacturer.update(db, db_obj=obj, obj_in=obj_in)
 
 
@@ -59,6 +73,13 @@ async def delete_equipment_manufacturer(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("equipment_mfrs")),
 ):
+    # Scope check
+    if user.role and user.role.scope_type == "equipment_manufacturer":
+        if id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot delete equipment manufacturer outside your scope"},
+            )
     obj = await crud_equipment_manufacturer.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Equipment manufacturer not found"})

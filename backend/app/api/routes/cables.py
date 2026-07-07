@@ -91,6 +91,16 @@ async def get_cable(id: str, db: AsyncSession = Depends(get_db)):
 async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
     from app.models.cable import Cable as CableModel, CableVariant, SpecItem
 
+    # Scope check: cable_manager can only create cables for their own manufacturer
+    if user.role and user.role.scope_type == "manufacturer":
+        from app.crud.brand import crud_brand
+        brand = await crud_brand.get(db, obj_in.brand_id)
+        if brand is None or brand.manufacturer_id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot create cable for a brand outside your scope"},
+            )
+
     cable_data = obj_in.model_dump(exclude={"common_specs", "variants"})
     cable = CableModel(**cable_data)
     db.add(cable)
@@ -126,6 +136,16 @@ async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(
     cable = await crud_cable.get_detail(db, id)
     if not cable:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})
+
+    # Scope check: cable_manager can only modify their own manufacturer's cables
+    if user.role and user.role.scope_type == "manufacturer":
+        if cable.brand is None:
+            await db.refresh(cable, attribute_names=["brand"])
+        if cable.brand is None or cable.brand.manufacturer_id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot modify cable outside your scope"},
+            )
 
     update_data = obj_in.model_dump(exclude_unset=True, exclude={"common_specs", "variants"})
     for field, value in update_data.items():
@@ -164,6 +184,16 @@ async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(
 
 @router.delete("/{id}", response_model=CableRead)
 async def delete_cable(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
+    # Scope check: cable_manager can only delete their own manufacturer's cables
+    if user.role and user.role.scope_type == "manufacturer":
+        cable = await crud_cable.get_detail(db, id)
+        if cable is None:
+            raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})
+        if cable.brand is None or cable.brand.manufacturer_id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot delete cable outside your scope"},
+            )
     obj = await crud_cable.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})

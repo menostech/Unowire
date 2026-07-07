@@ -51,6 +51,13 @@ async def create_equipment(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("equipment_list")),
 ):
+    # Scope check: equipment_manager can only create equipment for their own manufacturer
+    if user.role and user.role.scope_type == "equipment_manufacturer":
+        if obj_in.manufacturer_id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot create equipment outside your scope"},
+            )
     return await crud_equipment.create(db, obj_in=obj_in)
 
 
@@ -64,6 +71,13 @@ async def update_equipment(
     obj = await crud_equipment.get(db, id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Equipment not found"})
+    # Scope check
+    if user.role and user.role.scope_type == "equipment_manufacturer":
+        if obj.manufacturer_id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot modify equipment outside your scope"},
+            )
     return await crud_equipment.update(db, db_obj=obj, obj_in=obj_in)
 
 
@@ -73,6 +87,16 @@ async def delete_equipment(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("equipment_list")),
 ):
+    # Scope check
+    if user.role and user.role.scope_type == "equipment_manufacturer":
+        existing = await crud_equipment.get(db, id)
+        if existing is None:
+            raise HTTPException(status_code=404, detail={"code": 404, "message": "Equipment not found"})
+        if existing.manufacturer_id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot delete equipment outside your scope"},
+            )
     obj = await crud_equipment.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Equipment not found"})
