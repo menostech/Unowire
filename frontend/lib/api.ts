@@ -189,8 +189,8 @@ interface BackendEquipment {
   image_url: string | null;
   external_url: string | null;
   sort_order: number;
-  manufacturer?: BackendEquipmentManufacturer | null;
-  category?: BackendEquipmentCategory | null;
+  manufacturer: { id: string; name: string; slug: string; country: string | null; website: string | null; image_url: string | null; description: string | null } | null;
+  category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
 }
 
 interface BackendCableListResponse {
@@ -376,13 +376,29 @@ function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
     category_id: e.category_id,
     model: e.model,
     slug: e.slug,
+    applicable_specs: (e.applicable_specs ?? []) as ApplicableSpecRule[],
     description: e.description ?? null,
-    applicable_specs: (e.applicable_specs ?? []) as unknown as ApplicableSpecRule[],
     image_url: e.image_url ?? null,
     external_url: e.external_url ?? null,
     sort_order: e.sort_order ?? 0,
-    manufacturer: adaptEquipmentManufacturer(e.manufacturer),
-    category: adaptEquipmentCategory(e.category),
+    manufacturer: e.manufacturer ? {
+      id: e.manufacturer.id,
+      name: e.manufacturer.name,
+      slug: e.manufacturer.slug,
+      country: e.manufacturer.country,
+      website: e.manufacturer.website,
+      image_url: e.manufacturer.image_url,
+      description: e.manufacturer.description,
+    } : null,
+    category: e.category ? {
+      id: e.category.id,
+      parent_id: e.category.parent_id,
+      label: e.category.label,
+      slug: e.category.slug,
+      description: e.category.description,
+      image_url: e.category.image_url,
+      children: [],
+    } : null,
   };
 }
 

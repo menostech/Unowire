@@ -93,27 +93,6 @@ export interface TaxonomyIndustry {
 
 export type Taxonomy = Record<string, TaxonomyIndustry>;
 
-// === Equipment Manufacturers & Categories ===
-export interface EquipmentManufacturer {
-  id: string;
-  name: string;
-  slug: string;
-  country: string | null;
-  website: string | null;
-  image_url: string | null;
-  description: string | null;
-}
-
-export interface EquipmentCategory {
-  id: string;
-  parent_id: string | null;
-  label: string;
-  slug: string;
-  description: string | null;
-  image_url: string | null;
-  children: EquipmentCategory[];
-}
-
 export interface CableVariant {
   slug: string;
   specs: SpecItem[];
@@ -146,14 +125,34 @@ export interface ApplicableSpecRule {
   allowed_values?: (string | number)[];
 }
 
+export interface EquipmentManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+}
+
+export interface EquipmentCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  children: EquipmentCategory[];
+}
+
 export interface RecommendedEquipment {
   id: string;
   manufacturer_id: string;
   category_id: string;
   model: string;
   slug: string;
-  description: string | null;
   applicable_specs: ApplicableSpecRule[];
+  description: string | null;
   image_url: string | null;
   external_url: string | null;
   sort_order: number;

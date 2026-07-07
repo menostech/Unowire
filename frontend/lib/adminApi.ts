@@ -147,8 +147,8 @@ interface BackendEquipment {
   image_url: string | null;
   external_url: string | null;
   sort_order: number;
-  manufacturer?: BackendEquipmentManufacturer | null;
-  category?: BackendEquipmentCategory | null;
+  manufacturer: BackendEquipmentManufacturer | null;
+  category: BackendEquipmentCategory | null;
 }
 
 interface ListResponse<T> {
@@ -548,29 +548,23 @@ export const adminApi = {
     },
     async getById(id: string): Promise<BackendEquipmentManufacturer | null> {
       try {
-        return await adminGet<BackendEquipmentManufacturer>(`/api/equipment-manufacturers/${id}`);
+        return await adminGet<BackendEquipmentManufacturer>(`/api/equipment-manufacturers/${encodeURIComponent(id)}`);
       } catch {
         return null;
       }
     },
     async create(payload: Record<string, unknown>): Promise<BackendEquipmentManufacturer> {
-      const res = await adminFetch('/api/equipment-manufacturers', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      const res = await adminFetch('/api/equipment-manufacturers', { method: 'POST', body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers`);
       return await res.json() as BackendEquipmentManufacturer;
     },
     async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipmentManufacturer> {
-      const res = await adminFetch(`/api/equipment-manufacturers/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      });
+      const res = await adminFetch(`/api/equipment-manufacturers/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers/${id}`);
       return await res.json() as BackendEquipmentManufacturer;
     },
     async remove(id: string): Promise<void> {
-      const res = await adminFetch(`/api/equipment-manufacturers/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/equipment-manufacturers/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers/${id}`);
     },
   },
@@ -581,29 +575,23 @@ export const adminApi = {
     },
     async getById(id: string): Promise<BackendEquipmentCategory | null> {
       try {
-        return await adminGet<BackendEquipmentCategory>(`/api/equipment-categories/${id}`);
+        return await adminGet<BackendEquipmentCategory>(`/api/equipment-categories/${encodeURIComponent(id)}`);
       } catch {
         return null;
       }
     },
     async create(payload: Record<string, unknown>): Promise<BackendEquipmentCategory> {
-      const res = await adminFetch('/api/equipment-categories', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      const res = await adminFetch('/api/equipment-categories', { method: 'POST', body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories`);
       return await res.json() as BackendEquipmentCategory;
     },
     async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipmentCategory> {
-      const res = await adminFetch(`/api/equipment-categories/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      });
+      const res = await adminFetch(`/api/equipment-categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories/${id}`);
       return await res.json() as BackendEquipmentCategory;
     },
     async remove(id: string): Promise<void> {
-      const res = await adminFetch(`/api/equipment-categories/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/equipment-categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories/${id}`);
     },
   },
@@ -618,29 +606,23 @@ export const adminApi = {
     },
     async getById(id: string): Promise<BackendEquipment | null> {
       try {
-        return await adminGet<BackendEquipment>(`/api/recommended-equipments/${id}`);
+        return await adminGet<BackendEquipment>(`/api/recommended-equipments/${encodeURIComponent(id)}`);
       } catch {
         return null;
       }
     },
     async create(payload: Record<string, unknown>): Promise<BackendEquipment> {
-      const res = await adminFetch('/api/recommended-equipments', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
+      const res = await adminFetch('/api/recommended-equipments', { method: 'POST', body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments`);
       return await res.json() as BackendEquipment;
     },
     async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipment> {
-      const res = await adminFetch(`/api/recommended-equipments/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      });
+      const res = await adminFetch(`/api/recommended-equipments/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
       if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
       return await res.json() as BackendEquipment;
     },
     async remove(id: string): Promise<void> {
-      const res = await adminFetch(`/api/recommended-equipments/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/recommended-equipments/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
     },
   },
