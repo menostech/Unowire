@@ -21,15 +21,7 @@ from app.schemas.upload import (
 
 router = APIRouter()
 
-MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
-MAX_WIDTH = 850  # px
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
-# Map content_type -> (PIL format, file extension)
-FORMAT_MAP = {
-    "image/jpeg": ("JPEG", ".jpg"),
-    "image/png": ("PNG", ".png"),
-    "image/webp": ("WEBP", ".webp"),
-}
+MAX_FILE_SIZE = 5 * 1024 * 1024
 
 
 @router.post("/", response_model=UploadRead, status_code=status.HTTP_201_CREATED)
@@ -39,53 +31,35 @@ async def upload_file(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("media")),
 ):
-    content_type = file.content_type or ""
-    if content_type not in ALLOWED_CONTENT_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail={"code": 400, "message": "Only JPG, PNG, and WebP formats are allowed"},
-        )
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail={"code": 400, "message": "File must be an image"})
 
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=413, detail={"code": 413, "message": "File too large (max 2MB)"})
+        raise HTTPException(status_code=413, detail={"code": 413, "message": "File too large (max 5MB)"})
 
     try:
         image = Image.open(BytesIO(content))
-        image.load()  # verify the image can be fully read
     except Exception as e:
         raise HTTPException(status_code=400, detail={"code": 400, "message": f"Invalid image file: {str(e)}"})
 
-    width, _ = image.size
-    if width > MAX_WIDTH:
-        raise HTTPException(
-            status_code=400,
-            detail={"code": 400, "message": f"Image width {width}px exceeds max {MAX_WIDTH}px"},
-        )
+    image = image.convert("RGB")
+    image.thumbnail((400, 400))
 
-    pil_format, ext = FORMAT_MAP[content_type]
-    original_name = file.filename or f"upload{ext}"
-    # Strip any path components from the uploaded filename (browsers send just the name)
-    original_name = os.path.basename(original_name)
-    # Ensure the extension matches the actual format
-    stem = os.path.splitext(original_name)[0] or "upload"
-    # Unique stored filename that preserves the original name for readability
-    stored_filename = f"{uuid.uuid4().hex[:8]}_{stem}{ext}"
-
+    filename = f"{uuid.uuid4().hex}.webp"
     media_dir = os.environ.get("MEDIA_DIR", "/app/media")
     uploads_dir = os.path.join(media_dir, "uploads")
     os.makedirs(uploads_dir, exist_ok=True)
-    file_path = os.path.join(uploads_dir, stored_filename)
+    file_path = os.path.join(uploads_dir, filename)
 
-    # Save in the original format without any conversion or resizing
-    image.save(file_path, format=pil_format)
+    image.save(file_path, format="WebP", quality=85)
     saved_size = os.path.getsize(file_path)
-    url_path = f"/media/uploads/{stored_filename}"
+    url_path = f"/media/uploads/{filename}"
 
     db_obj = Upload(
-        filename=stored_filename,
-        original_filename=original_name,
-        content_type=content_type,
+        filename=filename,
+        original_filename=file.filename or "",
+        content_type="image/webp",
         size_bytes=saved_size,
         url_path=url_path,
         folder_id=folder_id,
