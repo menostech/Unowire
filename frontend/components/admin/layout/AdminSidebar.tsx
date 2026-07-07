@@ -144,7 +144,7 @@ export function AdminSidebar() {
           </button>
           {isOpen && (item.children ?? []).length > 0 && (
             <div className="ml-4 mt-1 flex flex-col gap-1 border-l border-gray-700 pl-2">
-              {item.children.map((child) => renderItem(child))}
+              {item.children.map((child) => renderItem(child as MenuItemTree))}
             </div>
           )}
         </div>
