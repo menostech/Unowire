@@ -133,7 +133,8 @@ interface BackendEquipmentCategory {
   description: string | null;
   image_url: string | null;
   sort_order: number;
-  children: BackendEquipmentCategory[];
+  // Present on tree endpoints (list/get), absent on flat reads (POST/PUT/nested)
+  children?: BackendEquipmentCategory[];
 }
 
 interface BackendEquipment {

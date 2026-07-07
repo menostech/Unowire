@@ -142,7 +142,9 @@ export interface EquipmentCategory {
   slug: string;
   description: string | null;
   image_url: string | null;
-  children: EquipmentCategory[];
+  // `children` is present on the tree endpoint (list), absent on flat reads
+  // (e.g. nested category inside RecommendedEquipment). Always use `?? []`.
+  children?: EquipmentCategory[];
 }
 
 export interface RecommendedEquipment {

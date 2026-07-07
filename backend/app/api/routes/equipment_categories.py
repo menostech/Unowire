@@ -7,18 +7,19 @@ from app.crud.equipment import crud_equipment_category
 from app.schemas.equipment import (
     EquipmentCategoryCreate,
     EquipmentCategoryRead,
+    EquipmentCategoryTreeRead,
     EquipmentCategoryUpdate,
 )
 
 router = APIRouter()
 
 
-@router.get("", response_model=list[EquipmentCategoryRead])
+@router.get("", response_model=list[EquipmentCategoryTreeRead])
 async def list_equipment_categories(db: AsyncSession = Depends(get_db)):
     return await crud_equipment_category.get_all_top_level_with_children(db)
 
 
-@router.get("/{id}", response_model=EquipmentCategoryRead)
+@router.get("/{id}", response_model=EquipmentCategoryTreeRead)
 async def get_equipment_category(id: str, db: AsyncSession = Depends(get_db)):
     obj = await crud_equipment_category.get_with_children(db, id)
     if not obj:

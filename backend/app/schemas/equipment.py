@@ -55,6 +55,8 @@ class EquipmentManufacturerUpdate(BaseModel):
 
 
 class EquipmentCategoryRead(BaseModel):
+    """Flat category schema. Safe for async serialization — no recursive children."""
+
     id: str
     parent_id: str | None = None
     label: str
@@ -62,7 +64,24 @@ class EquipmentCategoryRead(BaseModel):
     description: str | None = None
     image_url: str | None = None
     sort_order: int = 0
-    children: list["EquipmentCategoryRead"] = []
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class EquipmentCategoryTreeRead(BaseModel):
+    """Two-level tree schema. `children` uses the flat schema to avoid recursive
+    lazy-loading of grandchildren in async contexts (MissingGreenlet)."""
+
+    id: str
+    parent_id: str | None = None
+    label: str
+    slug: str
+    description: str | None = None
+    image_url: str | None = None
+    sort_order: int = 0
+    children: list[EquipmentCategoryRead] = []
     created_at: datetime
     updated_at: datetime
 

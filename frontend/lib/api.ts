@@ -184,7 +184,7 @@ interface BackendEquipment {
   category_id: string;
   model: string;
   slug: string;
-  applicable_specs: Record<string, unknown>[];
+  applicable_specs: ApplicableSpecRule[];
   description: string | null;
   image_url: string | null;
   external_url: string | null;
@@ -376,7 +376,7 @@ function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
     category_id: e.category_id,
     model: e.model,
     slug: e.slug,
-    applicable_specs: (e.applicable_specs ?? []) as ApplicableSpecRule[],
+    applicable_specs: e.applicable_specs ?? [],
     description: e.description ?? null,
     image_url: e.image_url ?? null,
     external_url: e.external_url ?? null,
