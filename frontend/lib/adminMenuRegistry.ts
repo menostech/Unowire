@@ -16,6 +16,8 @@ export const ADMIN_PAGES: PageRegistryEntry[] = [
   { pageId: "equipment-list", href: "/admin/equipment",                    defaultLabel: "Equipment",        defaultIcon: "Wrench" },
   { pageId: "media",          href: "/admin/media",                        defaultLabel: "Media",            defaultIcon: "Image" },
   { pageId: "menu-config",    href: "/admin/menu",                         defaultLabel: "Menu Config",      defaultIcon: "Settings" },
+  { pageId: "users",          href: "/admin/users",                        defaultLabel: "Users",            defaultIcon: "Users" },
+  { pageId: "roles",          href: "/admin/roles",                        defaultLabel: "Roles",            defaultIcon: "Shield" },
 ];
 
 export const PAGE_BY_ID: Record<string, PageRegistryEntry> = Object.fromEntries(

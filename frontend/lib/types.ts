@@ -262,3 +262,43 @@ export interface MenuItem {
 export interface MenuItemTree extends MenuItem {
   children: MenuItem[];
 }
+
+// === RBAC ===
+export interface Role {
+  id: string;
+  name: string;
+  description: string | null;
+  scope_type: string | null;
+  is_system: boolean;
+  sort_order: number;
+  permissions: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminUserExtended {
+  id: number;
+  email: string;
+  role_id: string;
+  scope_id: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  role_name: string | null;
+  role_scope_type: string | null;
+}
+
+export interface UserPermissions {
+  user_id: number;
+  email: string;
+  role_id: string;
+  role_name: string;
+  scope_type: string | null;
+  scope_id: string | null;
+  allowed_modules: string[];
+}
+
+export interface ScopeOption {
+  id: string;
+  name: string;
+}

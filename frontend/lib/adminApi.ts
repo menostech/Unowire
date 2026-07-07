@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
-import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree } from './types';
+import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption } from './types';
+import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
 
@@ -663,6 +664,127 @@ export const adminApi = {
       });
       if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu/${id}/sort`);
       return await res.json() as MenuItem;
+    },
+  },
+
+  roles: {
+    async all(): Promise<Role[]> {
+      return adminGet<Role[]>("/api/admin/roles");
+    },
+    async getById(id: string): Promise<Role | null> {
+      try {
+        return await adminGet<Role>(`/api/admin/roles/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async modules(): Promise<AdminModule[]> {
+      return adminGet<AdminModule[]>("/api/admin/roles/modules");
+    },
+    async create(payload: {
+      id: string;
+      name: string;
+      description?: string;
+      scope_type?: string | null;
+      sort_order?: number;
+      permissions: string[];
+    }): Promise<Role> {
+      const res = await adminFetch("/api/admin/roles", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async update(id: string, payload: {
+      name?: string;
+      description?: string;
+      scope_type?: string | null;
+      sort_order?: number;
+      permissions?: string[];
+    }): Promise<Role> {
+      const res = await adminFetch(`/api/admin/roles/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/admin/roles/${id}`, { method: "DELETE" });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+  },
+
+  users: {
+    async all(): Promise<AdminUserExtended[]> {
+      return adminGet<AdminUserExtended[]>("/api/admin/users");
+    },
+    async getById(id: number): Promise<AdminUserExtended | null> {
+      try {
+        return await adminGet<AdminUserExtended>(`/api/admin/users/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: {
+      email: string;
+      password: string;
+      role_id: string;
+      scope_id?: string | null;
+      is_active?: boolean;
+    }): Promise<AdminUserExtended> {
+      const res = await adminFetch("/api/admin/users", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async update(id: number, payload: {
+      email?: string;
+      password?: string;
+      role_id?: string;
+      scope_id?: string | null;
+      is_active?: boolean;
+    }): Promise<AdminUserExtended> {
+      const res = await adminFetch(`/api/admin/users/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      const res = await adminFetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+    async scopes(scopeType: string): Promise<ScopeOption[]> {
+      return adminGet<ScopeOption[]>(`/api/admin/users/scopes/${scopeType}`);
+    },
+  },
+
+  me: {
+    async permissions(): Promise<UserPermissions> {
+      return adminGet<UserPermissions>("/api/auth/me/permissions");
     },
   },
 };
