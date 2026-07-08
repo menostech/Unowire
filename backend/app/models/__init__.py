@@ -2,6 +2,7 @@ from app.models.brand import Brand
 from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.equipment import RecommendedEquipment
 from app.models.folder import Folder
+from app.models.inquiry import Inquiry
 from app.models.manufacturer import Manufacturer
 from app.models.member import Member
 from app.models.menu import AdminMenuItem
@@ -19,6 +20,7 @@ __all__ = [
     "Category",
     "Folder",
     "Industry",
+    "Inquiry",
     "Manufacturer",
     "Member",
     "ProductType",
