@@ -31,6 +31,33 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _cleanup_test_data():
+    """Clean up test-created data before the test session to avoid 409 conflicts
+    from previous test runs (tests don't clean up after themselves)."""
+    import asyncio
+    from sqlalchemy import text
+
+    async def _cleanup():
+        async with _test_engine.begin() as conn:
+            await conn.execute(text(
+                "DELETE FROM role_permissions WHERE role_id IN "
+                "('viewer', 'editor_v2', 'temp', 'bad')"
+            ))
+            await conn.execute(text(
+                "DELETE FROM roles WHERE id IN "
+                "('viewer', 'editor_v2', 'temp', 'bad')"
+            ))
+            await conn.execute(text(
+                "DELETE FROM users WHERE email != 'admin@unowire.com'"
+            ))
+            await conn.execute(text(
+                "DELETE FROM brands WHERE slug = 'test-brand-rbac'"
+            ))
+
+    asyncio.run(_cleanup())
+
+
 @pytest.fixture
 def client():
     return TestClient(app)

@@ -6,9 +6,8 @@ class TestMenuTree:
         res = client.get("/api/admin/menu/tree")
         assert res.status_code == 200
         data = res.json()
-        # 8 top-level items (dashboard, cables, brands, manufacturers,
-        # industries, equipment, media, menu-config)
-        assert len(data) == 8
+        # 5 top-level items (dashboard, Cable group, equipment group, media, settings group)
+        assert len(data) == 5
         # Equipment group has 3 children
         equipment = next(i for i in data if i["id"] == "equipment")
         assert equipment["type"] == "group"
@@ -44,7 +43,7 @@ class TestMenuFlat:
         res = client.get("/api/admin/menu", headers=admin_headers)
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 11  # all seed items
+        assert len(data) == 14  # all seed items
 
 
 class TestMenuCreate:
@@ -163,25 +162,26 @@ class TestMenuCreate:
 
 class TestMenuSort:
     def test_move_up(self, client, admin_headers):
-        # 'cables' is at sort_order=1, 'brands' at 2.
-        # Moving 'brands' up should swap with 'cables'.
+        # 'equipment-cats' and 'equipment-mfrs' are children of 'equipment' group.
+        # equipment-mfrs has sort_order=0, equipment-cats has sort_order=1.
+        # Moving 'equipment-cats' up should swap with 'equipment-mfrs'.
         res = client.put(
-            "/api/admin/menu/brands/sort",
+            "/api/admin/menu/equipment-cats/sort",
             json={"direction": "up"},
             headers=admin_headers,
         )
         assert res.status_code == 200
-        # 'brands' now has sort_order=1
-        assert res.json()["sort_order"] == 1
+        # 'equipment-cats' now has sort_order=0
+        assert res.json()["sort_order"] == 0
         # Restore
         client.put(
-            "/api/admin/menu/brands/sort",
+            "/api/admin/menu/equipment-cats/sort",
             json={"direction": "down"},
             headers=admin_headers,
         )
 
     def test_move_down_at_boundary_returns_400(self, client, admin_headers):
-        # 'menu-config' is the last top-level item (sort_order=7).
+        # 'menu-config' is the last child of 'settings' group (sort_order=1).
         res = client.put(
             "/api/admin/menu/menu-config/sort",
             json={"direction": "down"},

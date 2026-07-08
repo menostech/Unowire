@@ -100,7 +100,6 @@ class CRUDRole(CRUDBase[Role, RoleCreate, RoleUpdate]):
             for module in new_permissions:
                 db.add(RolePermission(role_id=db_obj.id, module=module))
 
-        db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
         return db_obj

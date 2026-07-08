@@ -181,9 +181,13 @@ class CRUDMenuItem(CRUDBase[AdminMenuItem, MenuItemCreate, MenuItemUpdate]):
                 detail={"code": 404, "message": "Menu item not found"},
             )
         # Find siblings (same parent_id), ordered by sort_order.
+        if item.parent_id is None:
+            parent_filter = AdminMenuItem.parent_id.is_(None)
+        else:
+            parent_filter = AdminMenuItem.parent_id == item.parent_id
         stmt = (
             select(AdminMenuItem)
-            .where(AdminMenuItem.parent_id.is_(item.parent_id))
+            .where(parent_filter)
             .order_by(AdminMenuItem.sort_order)
         )
         result = await db.execute(stmt)
