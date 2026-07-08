@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Cable, Tag, Factory, FolderOpen, Image,
   Wrench, Settings, ExternalLink, LogOut, Circle,
-  ChevronDown, ChevronRight,
+  ChevronDown, ChevronRight, Users, Shield,
   type LucideIcon,
 } from 'lucide-react';
 import { ADMIN_PAGES, PAGE_BY_ID } from '@/lib/adminMenuRegistry';
@@ -15,6 +15,7 @@ import type { MenuItemTree } from '@/lib/types';
 // Fallback icon mapping for sidebar rendering.
 const FALLBACK_ICONS: Record<string, LucideIcon> = {
   LayoutDashboard, Cable, Tag, Factory, FolderOpen, Image, Wrench, Settings,
+  Users, Shield,
 };
 
 function getIcon(name: string | null): LucideIcon {
