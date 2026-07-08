@@ -1,5 +1,6 @@
 from app.models.brand import Brand
 from app.models.cable import Cable, CableVariant, SpecItem
+from app.models.email_config import EmailConfig, EmailTemplate
 from app.models.equipment import RecommendedEquipment
 from app.models.folder import Folder
 from app.models.inquiry import Inquiry
@@ -18,6 +19,8 @@ __all__ = [
     "Cable",
     "CableVariant",
     "Category",
+    "EmailConfig",
+    "EmailTemplate",
     "Folder",
     "Industry",
     "Inquiry",
