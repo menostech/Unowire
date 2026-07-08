@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.core.security import decode_access_token
+from app.core.security import decode_access_token, decode_member_token
+from app.models.member import Member
 from app.models.role import Role, RolePermission
 from app.models.user import User
 
@@ -62,3 +63,18 @@ def require_module(module: str):
         return user
 
     return checker
+
+
+async def get_current_member(
+    token: str | None = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Member:
+    if token is None:
+        raise HTTPException(status_code=401, detail={"code": 401, "message": "Not authenticated"})
+    payload = decode_member_token(token)
+    if payload is None:
+        raise HTTPException(status_code=401, detail={"code": 401, "message": "Not authenticated"})
+    member = await db.get(Member, int(payload["sub"]))
+    if member is None or not member.is_active:
+        raise HTTPException(status_code=401, detail={"code": 401, "message": "Not authenticated"})
+    return member
