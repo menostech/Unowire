@@ -201,12 +201,12 @@ All proxy routes read `admin_token` cookie and forward as `Authorization: Bearer
 ### Menu Item Insertion
 
 ```sql
-INSERT INTO admin_menu_items (id, parent_id, type, label, page_id, icon, sort_order, is_visible, created_at, updated_at)
-VALUES ('menu-members', 'menu-settings', 'page', 'Members', 'members', 'Users', 4, true, NOW(), NOW())
+INSERT INTO admin_menu_items (id, parent_id, type, page_id, url, label, icon, sort_order, is_visible, created_at, updated_at)
+VALUES ('menu-members', 'settings', 'page', 'members', NULL, 'Members', 'Users', 4, true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 ```
 
-- `parent_id='menu-settings'` (same group as Users, Roles, Email Config)
+- `parent_id='settings'` (the Settings group item, same parent as Users/Roles/Email Config)
 - `sort_order=4` (Email Config is 3, Members follows)
 - `icon='Users'` (shared with Users)
 - `is_visible=true`
@@ -214,11 +214,12 @@ ON CONFLICT (id) DO NOTHING;
 ### Admin Role Permission Grant
 
 ```sql
-INSERT INTO role_permissions (role_id, module_id)
-SELECT r.id, 'members' FROM roles r
-WHERE r.is_system = true AND r.name = 'admin'
+INSERT INTO role_permissions (role_id, module)
+VALUES ('admin', 'members')
 ON CONFLICT DO NOTHING;
 ```
+
+Note: `role_permissions` table uses `role_id` (string FK to `roles.id`, e.g. `'admin'`) and `module` (string, not `module_id`).
 
 ### Dependencies
 
@@ -228,7 +229,7 @@ ON CONFLICT DO NOTHING;
 ### Downgrade
 
 ```sql
-DELETE FROM role_permissions WHERE module_id = 'members';
+DELETE FROM role_permissions WHERE module = 'members';
 DELETE FROM admin_menu_items WHERE id = 'menu-members';
 ```
 
