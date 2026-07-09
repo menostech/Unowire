@@ -21,6 +21,8 @@ export const ADMIN_MODULES: AdminModule[] = [
   { id: "menu_config",     label: "Menu Config",     scopeAware: false, scopeType: null },
   { id: "users",           label: "Users",           scopeAware: false, scopeType: null },
   { id: "roles",           label: "Roles",           scopeAware: false, scopeType: null },
+  { id: "inquiries",    label: "Inquiries",   scopeAware: true,  scopeType: null },
+  { id: "email_config", label: "Email Config", scopeAware: false, scopeType: null },
 ];
 
 export const MODULE_BY_ID: Record<string, AdminModule> = Object.fromEntries(
