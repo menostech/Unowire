@@ -7,7 +7,8 @@ import Link from 'next/link';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get('from') || '/member/inbox';
+  const rawFrom = searchParams.get('from') || '/member/inbox';
+  const from = rawFrom.startsWith('/') && !rawFrom.startsWith('//') ? rawFrom : '/member/inbox';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,8 +45,9 @@ export default function LoginPage() {
       {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
+          <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -54,8 +56,9 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
+          <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}

@@ -1,11 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -60,8 +58,9 @@ export default function RegisterPage() {
       {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Name *</label>
+          <label htmlFor="name" className="block text-sm font-medium mb-1">Name *</label>
           <input
+            id="name"
             type="text"
             value={form.name}
             onChange={e => setForm({ ...form, name: e.target.value })}
@@ -70,8 +69,9 @@ export default function RegisterPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Email *</label>
+          <label htmlFor="email" className="block text-sm font-medium mb-1">Email *</label>
           <input
+            id="email"
             type="email"
             value={form.email}
             onChange={e => setForm({ ...form, email: e.target.value })}
@@ -80,8 +80,9 @@ export default function RegisterPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Password *</label>
+          <label htmlFor="password" className="block text-sm font-medium mb-1">Password *</label>
           <input
+            id="password"
             type="password"
             value={form.password}
             onChange={e => setForm({ ...form, password: e.target.value })}
@@ -91,8 +92,9 @@ export default function RegisterPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Company</label>
+          <label htmlFor="company" className="block text-sm font-medium mb-1">Company</label>
           <input
+            id="company"
             type="text"
             value={form.company}
             onChange={e => setForm({ ...form, company: e.target.value })}
@@ -100,8 +102,9 @@ export default function RegisterPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Phone</label>
+          <label htmlFor="phone" className="block text-sm font-medium mb-1">Phone</label>
           <input
+            id="phone"
             type="tel"
             value={form.phone}
             onChange={e => setForm({ ...form, phone: e.target.value })}
