@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption } from './types';
+import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember } from './types';
 import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -785,6 +785,63 @@ export const adminApi = {
   me: {
     async permissions(): Promise<UserPermissions> {
       return adminGet<UserPermissions>("/api/auth/me/permissions");
+    },
+  },
+
+  members: {
+    async all(filters?: { q?: string; is_verified?: boolean; is_active?: boolean }): Promise<AdminMember[]> {
+      const params = new URLSearchParams();
+      if (filters?.q) params.set('q', filters.q);
+      if (filters?.is_verified !== undefined) params.set('is_verified', String(filters.is_verified));
+      if (filters?.is_active !== undefined) params.set('is_active', String(filters.is_active));
+      const query = params.toString();
+      return adminGet<AdminMember[]>(`/api/admin/members${query ? `?${query}` : ''}`);
+    },
+    async getById(id: number): Promise<AdminMember | null> {
+      try {
+        return await adminGet<AdminMember>(`/api/admin/members/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async update(id: number, payload: { name: string; company?: string | null; phone?: string | null }): Promise<AdminMember> {
+      const res = await adminFetch(`/api/admin/members/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async activate(id: number, is_active: boolean): Promise<AdminMember> {
+      const res = await adminFetch(`/api/admin/members/${id}/activate`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async verify(id: number): Promise<AdminMember> {
+      const res = await adminFetch(`/api/admin/members/${id}/verify`, {
+        method: 'PUT',
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      const res = await adminFetch(`/api/admin/members/${id}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
     },
   },
 };
