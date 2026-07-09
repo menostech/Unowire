@@ -27,6 +27,7 @@ ALLOWED_PAGE_IDS = {
     "roles",
     "inquiries",
     "email_config",
+    "members",
 }
 
 # IDs that cannot be deleted (would lock admin out of menu editor).
