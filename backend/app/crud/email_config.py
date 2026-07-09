@@ -62,7 +62,8 @@ class CRUDEmailConfig:
         config.smtp_host = obj_in.smtp_host
         config.smtp_port = obj_in.smtp_port
         config.smtp_user = obj_in.smtp_user
-        config.smtp_password = encrypt_password(obj_in.smtp_password)
+        if obj_in.smtp_password:
+            config.smtp_password = encrypt_password(obj_in.smtp_password)
         config.from_name = obj_in.from_name
         config.from_email = obj_in.from_email
         config.use_tls = obj_in.use_tls

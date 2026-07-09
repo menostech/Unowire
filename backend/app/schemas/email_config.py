@@ -21,7 +21,7 @@ class EmailConfigUpdate(BaseModel):
     smtp_host: str = Field(min_length=1, max_length=200)
     smtp_port: int = Field(ge=1, le=65535)
     smtp_user: str = Field(min_length=1, max_length=200)
-    smtp_password: str = Field(min_length=1, max_length=200)  # plain text from form, encrypted on save
+    smtp_password: str = Field(min_length=0, max_length=200)  # empty = keep existing; plain text from form, encrypted on save
     from_name: str = Field(min_length=1, max_length=100)
     from_email: EmailStr
     use_tls: bool = True
