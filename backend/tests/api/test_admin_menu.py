@@ -43,7 +43,7 @@ class TestMenuFlat:
         res = client.get("/api/admin/menu", headers=admin_headers)
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 17  # all seed items (12 original + roles + users + inquiries + email-config)
+        assert len(data) == 18  # all seed items (12 original + roles + users + inquiries + email-config + members)
 
 
 class TestMenuCreate:
@@ -181,9 +181,9 @@ class TestMenuSort:
         )
 
     def test_move_down_at_boundary_returns_400(self, client, admin_headers):
-        # 'menu-email-config' is the last child of 'settings' group (sort_order=3).
+        # 'menu-members' is the last child of 'settings' group (sort_order=4).
         res = client.put(
-            "/api/admin/menu/menu-email-config/sort",
+            "/api/admin/menu/menu-members/sort",
             json={"direction": "down"},
             headers=admin_headers,
         )
