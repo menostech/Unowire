@@ -6,8 +6,8 @@ class TestMenuTree:
         res = client.get("/api/admin/menu/tree")
         assert res.status_code == 200
         data = res.json()
-        # 5 top-level items (dashboard, Cable group, equipment group, media, settings group)
-        assert len(data) == 5
+        # 6 top-level items (dashboard, cable, equipment, media, settings, inquiries)
+        assert len(data) == 6
         # Equipment group has 3 children
         equipment = next(i for i in data if i["id"] == "equipment")
         assert equipment["type"] == "group"
@@ -43,7 +43,7 @@ class TestMenuFlat:
         res = client.get("/api/admin/menu", headers=admin_headers)
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 15  # all seed items (12 original + roles + users)
+        assert len(data) == 17  # all seed items (12 original + roles + users + inquiries + email-config)
 
 
 class TestMenuCreate:
@@ -181,9 +181,9 @@ class TestMenuSort:
         )
 
     def test_move_down_at_boundary_returns_400(self, client, admin_headers):
-        # 'menu-users' is the last child of 'settings' group (sort_order=2).
+        # 'menu-email-config' is the last child of 'settings' group (sort_order=3).
         res = client.put(
-            "/api/admin/menu/menu-users/sort",
+            "/api/admin/menu/menu-email-config/sort",
             json={"direction": "down"},
             headers=admin_headers,
         )
