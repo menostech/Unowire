@@ -27,7 +27,7 @@ export default async function MyInquiriesPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="font-medium text-sm">{i.subject}</p>
-                  <p className="text-xs text-gray-500 mt-1">{i.body.slice(0, 80)}...</p>
+                  <p className="text-xs text-gray-500 mt-1">{i.body?.slice(0, 80) || ''}...</p>
                 </div>
                 <div className="text-right">
                   <span className={`text-xs px-2 py-0.5 rounded ${i.reply_body ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>

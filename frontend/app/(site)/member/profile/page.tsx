@@ -7,10 +7,14 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     fetch('/api/member/auth/me')
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) throw new Error('fetch failed');
+        return res.json();
+      })
       .then(data => {
         setForm({
           name: data.name || '',
@@ -18,6 +22,10 @@ export default function ProfilePage() {
           phone: data.phone || '',
         });
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setLoadError(true);
       });
   }, []);
 
@@ -31,6 +39,7 @@ export default function ProfilePage() {
     setSaving(false);
   }
 
+  if (loadError) return <p className="text-sm text-red-600">Failed to load profile.</p>;
   if (loading) return <p className="text-sm text-gray-500">Loading...</p>;
 
   return (
