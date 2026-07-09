@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function MemberLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawFrom = searchParams.get('from') || '/member/inbox';
@@ -78,5 +78,13 @@ export default function LoginPage() {
         Don&apos;t have an account? <Link href="/register" className="text-blue-600">Register</Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <MemberLoginForm />
+    </Suspense>
   );
 }
