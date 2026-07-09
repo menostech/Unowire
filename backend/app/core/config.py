@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     jwt_expiry_hours: int = 8
     admin_email: str = "admin@unowire.com"
     admin_password: str = ""
+    public_base_url: str = "https://www.unowire.com"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

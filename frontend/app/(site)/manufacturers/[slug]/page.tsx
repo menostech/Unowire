@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
@@ -76,6 +77,9 @@ export default async function ManufacturerDetailPage({
   const { slug } = await params;
   const manufacturer = await api.manufacturers.getBySlug(slug);
   if (!manufacturer) notFound();
+
+  const memberToken = (await cookies()).get('member_token')?.value;
+  const isMember = !!memberToken;
 
   const allManufacturers = await api.manufacturers.all();
   const allBrands = await api.brands.all();
@@ -175,11 +179,20 @@ export default async function ManufacturerDetailPage({
                   )}
                 </div>
                 <div className="mt-4">
-                  <InquiryFormModal
-                    recipientType="manufacturer"
-                    recipientId={manufacturer.id}
-                    manufacturerName={manufacturer.name}
-                  />
+                  {isMember ? (
+                    <InquiryFormModal
+                      recipientType="manufacturer"
+                      recipientId={manufacturer.id}
+                      manufacturerName={manufacturer.name}
+                    />
+                  ) : (
+                    <Link
+                      href={`/login?from=/manufacturers/${manufacturer.slug}`}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium inline-block"
+                    >
+                      Login to Contact
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

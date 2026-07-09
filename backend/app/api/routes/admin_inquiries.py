@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_module
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.email import send_email_background
 from app.crud.inquiry import crud_inquiry
@@ -86,7 +87,7 @@ async def reply_inquiry(
     # Notify member (best-effort)
     member = await db.get(Member, inquiry.sender_id)
     if member is not None:
-        inquiry_url = f"https://www.unowire.com/member/inquiries/{inquiry.id}"
+        inquiry_url = f"{settings.public_base_url}/member/inquiries/{inquiry.id}"
         send_email_background(
             member.email,
             "inquiry_replied",

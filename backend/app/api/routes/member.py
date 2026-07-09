@@ -33,7 +33,7 @@ async def register(body: MemberRegister, request: Request, db: AsyncSession = De
     member = await crud_member.create(db, obj_in=body)
 
     # Send verification email (best-effort)
-    verify_url = f"https://www.unowire.com/verify?token={member.verification_token}"
+    verify_url = f"{settings.public_base_url}/verify?token={member.verification_token}"
     send_email_background(
         member.email,
         "verify_email",
@@ -144,7 +144,7 @@ async def _notify_staff_of_inquiry(db: AsyncSession, inquiry: Inquiry, member: M
     result = await db.execute(stmt)
     staff_users = list(result.scalars().all())
 
-    inquiry_url = f"https://www.unowire.com/admin/inquiries/{inquiry.id}"
+    inquiry_url = f"{settings.public_base_url}/admin/inquiries/{inquiry.id}"
     for staff in staff_users:
         send_email_background(
             staff.email,

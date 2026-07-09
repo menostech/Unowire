@@ -96,3 +96,46 @@ def test_login_invalid_password(client):
         json={"email": "eve@test-member.com", "password": "wrongpassword"},
     )
     assert res.status_code == 401
+
+
+def test_member_token_cannot_access_admin_endpoint(client):
+    """A member JWT must not authenticate admin endpoints (token confusion fix).
+
+    Member tokens carry type='member'; decode_access_token must reject them so a
+    member with id=1 cannot impersonate admin user id=1.
+    """
+    # Register + verify + login a member
+    client.post(
+        "/api/member/register",
+        json={"email": "frank@test-member.com", "password": "password123", "name": "Frank"},
+    )
+    from app.core.database import async_session
+    from app.models.member import Member
+    from sqlalchemy import select
+    import asyncio
+
+    async def get_token():
+        async with async_session() as db:
+            result = await db.execute(select(Member).where(Member.email == "frank@test-member.com"))
+            m = result.scalar_one()
+            return m.verification_token
+
+    token = asyncio.run(get_token())
+    client.post("/api/member/verify", json={"token": token})
+
+    res = client.post(
+        "/api/member/login",
+        json={"email": "frank@test-member.com", "password": "password123"},
+    )
+    assert res.status_code == 200
+    # Extract the member JWT from the cookie set by login
+    member_token = res.cookies.get("member_token")
+    assert member_token is not None
+
+    # Attempt to access an admin endpoint using the member token as a Bearer token.
+    # Must be rejected with 401, not accepted as an admin user.
+    res = client.get(
+        "/api/admin/inquiries",
+        headers={"Authorization": f"Bearer {member_token}"},
+    )
+    assert res.status_code == 401
