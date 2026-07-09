@@ -302,3 +302,15 @@ export interface ScopeOption {
   id: string;
   name: string;
 }
+
+export interface AdminMember {
+  id: number;
+  email: string;
+  name: string;
+  company: string | null;
+  phone: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  inquiry_count: number;
+}
