@@ -837,7 +837,7 @@ export const adminApi = {
       return res.json();
     },
     async remove(id: number): Promise<void> {
-      const res = await adminFetch(`/api/admin/members/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/admin/members/${id}/delete`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `API ${res.status}`);
