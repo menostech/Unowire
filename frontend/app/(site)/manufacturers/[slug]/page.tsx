@@ -9,6 +9,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { api } from '@/lib/api';
 import type { Brand, Cable, Manufacturer } from '@/lib/types';
 import { InquiryFormModal } from '@/components/member/InquiryFormModal';
+import { ManufacturerRecommendations } from '@/components/shared/ManufacturerRecommendations';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,15 +86,6 @@ export default async function ManufacturerDetailPage({
   const allBrands = await api.brands.all();
   const allCables = await api.cables.all();
   const productTypeMap = await buildProductTypeMap();
-
-  // Recommendation lists (exclude current manufacturer)
-  const others = allManufacturers.filter(m => m.id !== manufacturer.id);
-  const featuredImage = others
-    .filter(m => m.featured_image)
-    .sort((a, b) => a.featured_image_sort - b.featured_image_sort);
-  const featuredText = others
-    .filter(m => m.featured_text)
-    .sort((a, b) => a.featured_text_sort - b.featured_text_sort);
 
   const brands = allBrands.filter(b => b.manufacturer_id === manufacturer.id);
   const brandIds = new Set(brands.map(b => b.id));
@@ -334,53 +326,7 @@ export default async function ManufacturerDetailPage({
 
         {/* Right sidebar: Recommendations */}
         <aside className="lg:col-span-1 space-y-6">
-          {featuredImage.length > 0 && (
-            <div className="border rounded-lg p-4 bg-white">
-              <h3 className="text-base font-bold mb-4 text-gray-800">Featured Manufacturers</h3>
-              <div className="space-y-4">
-                {featuredImage.map(m => (
-                  <Link
-                    key={m.id}
-                    href={`/manufacturers/${m.slug}`}
-                    className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded transition -mx-2"
-                  >
-                    {m.image_url ? (
-                      <div className="w-12 h-12 shrink-0 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
-                        <img
-                          src={m.image_url}
-                          alt={m.name}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 shrink-0 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs font-bold">
-                        {m.name.charAt(0)}
-                      </div>
-                    )}
-                    <span className="text-sm font-medium text-gray-800 truncate">{m.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {featuredText.length > 0 && (
-            <div className="border rounded-lg p-4 bg-white">
-              <h3 className="text-base font-bold mb-4 text-gray-800">Recommended Manufacturers</h3>
-              <ul className="space-y-2">
-                {featuredText.map(m => (
-                  <li key={m.id}>
-                    <Link
-                      href={`/manufacturers/${m.slug}`}
-                      className="text-sm text-blue-600 hover:underline"
-                    >
-                      {m.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <ManufacturerRecommendations manufacturers={allManufacturers} />
         </aside>
       </div>
     </Container>
