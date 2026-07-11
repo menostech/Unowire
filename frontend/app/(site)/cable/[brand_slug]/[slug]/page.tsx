@@ -12,6 +12,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { api, getCableUrl } from '@/lib/api';
 import { generateCableMetadata, buildCableJsonLd, buildBreadcrumbJsonLd } from '@/lib/seo';
 import { InquiryFormModal } from '@/components/member/InquiryFormModal';
+import { ManufacturerRecommendations } from '@/components/shared/ManufacturerRecommendations';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,7 @@ export default async function CableDetailPage({
   const matchedEquipment = await api.recommendedEquipments.byCable(cable.id);
   const recommended = matchedEquipment.map(equipment => ({ equipment, matched_variants: [], explanation: [] }));
   const similar = await api.cables.similar(cable, 4);
+  const allManufacturers = await api.manufacturers.all();
   const jsonUrl = `/api/cables/${brand_slug}/${slug}`;
   const memberToken = (await cookies()).get('member_token')?.value;
   const isMember = !!memberToken;
@@ -63,9 +65,9 @@ export default async function CableDetailPage({
         { name: cable.model, url: getCableUrl(cable) },
       ])} />
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* 主内容 */}
-        <div className="flex-1 min-w-0 space-y-8">
+        <div className="lg:col-span-3 space-y-8">
           {/* 标题 */}
           <div>
             <h1 className="mb-1">{cable.model}</h1>
@@ -105,7 +107,7 @@ export default async function CableDetailPage({
         </div>
 
         {/* 右侧栏 */}
-        <aside className="lg:w-64 shrink-0 space-y-6">
+        <aside className="lg:col-span-1 space-y-6">
           {/* Manufacturer */}
           {manufacturer && (
             <div>
@@ -142,6 +144,9 @@ export default async function CableDetailPage({
             </div>
           )}
 
+          {/* Recommended Manufacturers */}
+          <ManufacturerRecommendations manufacturers={allManufacturers} />
+
           {/* Categories */}
           {categories.length > 0 && (
             <div>
@@ -164,9 +169,9 @@ export default async function CableDetailPage({
               href={jsonUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline"
+              className="text-xs text-gray-400 hover:text-gray-600"
             >
-              View JSON →
+              View JSON
             </a>
           </div>
         </aside>
