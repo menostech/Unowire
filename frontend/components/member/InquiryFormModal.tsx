@@ -7,12 +7,13 @@ interface Props {
   recipientType: string;
   recipientId: string;
   manufacturerName: string;
+  defaultSubject?: string;
 }
 
-export function InquiryFormModal({ recipientType, recipientId, manufacturerName }: Props) {
+export function InquiryFormModal({ recipientType, recipientId, manufacturerName, defaultSubject }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [subject, setSubject] = useState('');
+  const [subject, setSubject] = useState(defaultSubject ?? '');
   const [body, setBody] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,7 @@ export function InquiryFormModal({ recipientType, recipientId, manufacturerName 
 
   function openModal() {
     setIsOpen(true);
-    setSubject('');
+    setSubject(defaultSubject ?? '');
     setBody('');
     setError('');
     setSuccess(false);
