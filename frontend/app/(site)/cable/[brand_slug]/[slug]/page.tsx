@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { CableSpecTable } from '@/components/cable/CableSpecTable';
@@ -10,6 +11,7 @@ import { SimilarCables } from '@/components/shared/SimilarCables';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { api, getCableUrl } from '@/lib/api';
 import { generateCableMetadata, buildCableJsonLd, buildBreadcrumbJsonLd } from '@/lib/seo';
+import { InquiryFormModal } from '@/components/member/InquiryFormModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +41,8 @@ export default async function CableDetailPage({
   const recommended = matchedEquipment.map(equipment => ({ equipment, matched_variants: [], explanation: [] }));
   const similar = await api.cables.similar(cable, 4);
   const jsonUrl = `/api/cables/${brand_slug}/${slug}`;
+  const memberToken = (await cookies()).get('member_token')?.value;
+  const isMember = !!memberToken;
 
   const breadcrumbItems = [
     { name: 'Home', url: '/' },
@@ -118,6 +122,23 @@ export default async function CableDetailPage({
                   Visit website →
                 </a>
               )}
+              <div className="mt-3">
+                {isMember ? (
+                  <InquiryFormModal
+                    recipientType="manufacturer"
+                    recipientId={manufacturer.id}
+                    manufacturerName={manufacturer.name}
+                    defaultSubject={`Inquiry about ${cable.model}`}
+                  />
+                ) : (
+                  <Link
+                    href={`/login?from=/cable/${brand_slug}/${slug}`}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium inline-block"
+                  >
+                    Login to Contact
+                  </Link>
+                )}
+              </div>
             </div>
           )}
 
