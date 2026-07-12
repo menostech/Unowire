@@ -9,6 +9,8 @@ import { api } from '@/lib/api';
 import { filterCables } from '@/lib/filter';
 import { generateProductTypeMetadata } from '@/lib/seo';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({
   params,
 }: { params: Promise<{ industry: string; category: string; 'product-type': string }> }): Promise<Metadata> {

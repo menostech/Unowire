@@ -50,7 +50,7 @@ def upgrade():
         ['parent_id', 'sort_order'],
     )
 
-    # Seed: 11 items matching current hardcoded sidebar + new menu-config.
+    # Seed: 12 items — top-level pages + Equipment group + Settings group.
     # Idempotent via ON CONFLICT (id) DO NOTHING.
     op.execute("""
         INSERT INTO admin_menu_items (id, parent_id, type, page_id, url, label, icon, sort_order, is_visible, created_at, updated_at)
@@ -65,7 +65,8 @@ def upgrade():
             ('equipment-cats',  'equipment', 'page',  'equipment-cats',  NULL, 'Equipment Cats', 'Wrench',          1, true, NOW(), NOW()),
             ('equipment-list',  'equipment', 'page',  'equipment-list',  NULL, 'Equipment',      'Wrench',          2, true, NOW(), NOW()),
             ('media',           NULL,        'page',  'media',           NULL, 'Media',          'Image',           6, true, NOW(), NOW()),
-            ('menu-config',     NULL,        'page',  'menu-config',     NULL, 'Menu Config',    'Settings',        7, true, NOW(), NOW())
+            ('settings',        NULL,        'group', NULL,              NULL, 'Settings',       'Settings',        7, true, NOW(), NOW()),
+            ('menu-config',     'settings',  'page',  'menu-config',     NULL, 'Menus',          'Settings',        0, true, NOW(), NOW())
         ON CONFLICT (id) DO NOTHING
     """)
 

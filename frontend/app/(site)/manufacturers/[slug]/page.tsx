@@ -132,7 +132,7 @@ export default async function ManufacturerDetailPage({
         ],
       }} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
         <div className="lg:col-span-3 space-y-0">
           {/* 1. Header Section */}
           <section className="mb-10">

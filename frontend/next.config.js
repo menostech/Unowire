@@ -16,6 +16,12 @@ const nextConfig = {
       { source: '/admin/taxonomy/product-types/:path*', destination: '/admin/industries/product-types/:path*', permanent: true },
     ];
   },
+  async rewrites() {
+    const backend = process.env.INTERNAL_API_BASE || 'http://backend:8000';
+    return [
+      { source: '/media/:path*', destination: `${backend}/media/:path*` },
+    ];
+  },
 };
 
 module.exports = nextConfig;

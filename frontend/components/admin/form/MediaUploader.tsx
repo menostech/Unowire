@@ -65,7 +65,8 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    const files = Array.from(e.dataTransfer.files).filter((f) => allowed.includes(f.type));
     if (files.length > 0) handleFiles(files);
   };
 
@@ -81,7 +82,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
           id="media-upload-input"
           type="file"
           multiple
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           className="hidden"
           onChange={(e) => {
             const files = Array.from(e.target.files || []);
@@ -90,7 +91,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
         />
         <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
         <p className="text-gray-600">Drop images here or click to select</p>
-        <p className="text-sm text-gray-400 mt-2">PNG, JPG, WebP — max 5MB per file</p>
+        <p className="text-sm text-gray-400 mt-2">JPG, PNG, WebP — max 2MB, max width 850px</p>
       </div>
 
       <div className="space-y-2">
@@ -135,7 +136,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
             <div className="flex items-center gap-2">
               {upload.status === 'success' && upload.url && (
                 <button
-                  onClick={() => copyUrl(upload.url)}
+                  onClick={() => copyUrl(upload.url!)}
                   className="p-2 text-gray-500 hover:text-blue-500 transition-colors"
                   title="Copy URL"
                 >

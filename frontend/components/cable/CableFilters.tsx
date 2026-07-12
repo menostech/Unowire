@@ -79,7 +79,7 @@ function CableFiltersInner({ facets, ptConfig }: CableFiltersProps) {
   for (const f of ptConfig.filters) filterLabelByKey.set(f.spec_key, f.label);
 
   return (
-    <aside className="w-52 shrink-0 space-y-5">
+    <aside className="w-[250px] shrink-0 space-y-5">
       {/* Manufacturer */}
       {facets.manufacturers.length > 0 && (
         <div>

@@ -33,6 +33,8 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Country</th>
               <th className="px-4 py-3 font-medium">Website</th>
+              <th className="px-4 py-3 font-medium">Img Rec</th>
+              <th className="px-4 py-3 font-medium">Text Rec</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
@@ -62,6 +64,12 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
                     '—'
                   )}
                 </td>
+                <td className="px-4 py-3 text-gray-600">
+                  {m.featured_image ? 'Yes' : 'No'}
+                </td>
+                <td className="px-4 py-3 text-gray-600">
+                  {m.featured_text ? 'Yes' : 'No'}
+                </td>
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/manufacturers/${m.id}`}
@@ -74,7 +82,7 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                   No manufacturers found.
                 </td>
               </tr>

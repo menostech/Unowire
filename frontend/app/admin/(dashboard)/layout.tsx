@@ -17,7 +17,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     redirect('/admin/login');
   }
   return (
-    <div className="flex min-h-screen">
+    <div className="admin-shell flex min-h-screen">
       <AdminSidebar />
       <div className="flex flex-1 flex-col">
         <main className="flex-1 bg-gray-50 p-6">{children}</main>

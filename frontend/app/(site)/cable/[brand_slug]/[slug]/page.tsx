@@ -65,9 +65,18 @@ export default async function CableDetailPage({
         { name: cable.model, url: getCableUrl(cable) },
       ])} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
         {/* 主内容 */}
         <div className="lg:col-span-3 space-y-8">
+          {/* 产品图片 */}
+          <div className="max-w-[300px] h-auto bg-gray-100 rounded-lg overflow-hidden">
+            <img
+              src={cable.image_url || '/cable-default.svg'}
+              alt={cable.model}
+              className="w-full h-auto"
+            />
+          </div>
+
           {/* 标题 */}
           <div>
             <h1 className="mb-1">{cable.model}</h1>

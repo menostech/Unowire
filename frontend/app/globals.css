@@ -49,6 +49,7 @@
 }
 
 :root {
+  --font-sans: Arial, Sans-serif;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -127,4 +128,28 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* === Global font sizes (site + admin) === */
+/* Unified with the admin dashboard sizes for consistent readability. */
+body {
+  font-size: 17px;
+}
+.text-xs {
+  font-size: 15px; /* was 12px */
+}
+.text-sm {
+  font-size: 17px; /* was 14px */
+}
+.text-base {
+  font-size: 19px; /* was 16px */
+}
+.text-lg {
+  font-size: 22px; /* was 18px */
+}
+.text-xl {
+  font-size: 26px; /* was 20px */
+}
+.text-2xl {
+  font-size: 30px; /* was 24px */
 }

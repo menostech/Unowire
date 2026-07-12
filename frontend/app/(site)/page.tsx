@@ -6,6 +6,8 @@ import { CableCard } from '@/components/cable/CableCard';
 import { api } from '@/lib/api';
 import { generateHomeMetadata } from '@/lib/seo';
 
+export const dynamic = 'force-dynamic';
+
 export function generateMetadata(): Metadata {
   return generateHomeMetadata();
 }

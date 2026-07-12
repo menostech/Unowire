@@ -263,7 +263,7 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="sticky top-0 z-40 flex h-screen w-56 shrink-0 flex-col bg-gray-900 p-4 text-gray-100">
+    <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-gray-900 p-4 text-gray-100">
       <div className="mb-6 px-2 text-lg font-bold tracking-tight">
         Unowire <span className="text-gray-400">Admin</span>
       </div>
