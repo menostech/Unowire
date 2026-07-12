@@ -37,7 +37,10 @@ export async function uploadFile(file: File, folderId?: number): Promise<Backend
     method: 'POST',
     body: formData,
   });
-  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Upload failed: ${res.status}`);
+  }
   return res.json();
 }
 

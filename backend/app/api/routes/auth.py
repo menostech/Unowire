@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_access_token, verify_password
@@ -46,11 +46,11 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
         _login_attempts.setdefault(ip, []).append(time.time())
         raise HTTPException(status_code=401, detail={"code": 401, "message": "Invalid email or password"})
 
-    token = create_access_token(user.id, user.email, user.role)
+    token = create_access_token(user.id, user.email, user.role_id)
     _login_attempts.pop(ip, None)
 
     response = JSONResponse(
-        content={"user": {"id": user.id, "email": user.email, "role": user.role}, "token": token}
+        content={"user": {"id": user.id, "email": user.email, "role": user.role_id}, "token": token}
     )
     response.set_cookie(
         "admin_token",
@@ -72,5 +72,26 @@ async def logout():
 
 
 @router.get("/me")
-async def me(admin: dict = Depends(get_current_admin)):
-    return {"id": admin["id"], "email": admin["email"], "role": admin["role"]}
+async def me(user: User = Depends(get_current_user)):
+    return {
+        "id": user.id,
+        "email": user.email,
+        "role_id": user.role_id,
+        "role_name": user.role.name if user.role else None,
+        "scope_type": user.role.scope_type if user.role else None,
+        "scope_id": user.scope_id,
+    }
+
+
+@router.get("/me/permissions")
+async def my_permissions(user: User = Depends(get_current_user)):
+    """Return the current user's role + allowed modules. Used by frontend sidebar."""
+    return {
+        "user_id": user.id,
+        "email": user.email,
+        "role_id": user.role_id,
+        "role_name": user.role.name if user.role else None,
+        "scope_type": user.role.scope_type if user.role else None,
+        "scope_id": user.scope_id,
+        "allowed_modules": sorted(getattr(user, "role_permissions", set())),
+    }

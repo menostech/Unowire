@@ -25,6 +25,7 @@ export interface Brand {
   manufacturer_id: string;
   country: string;
   website: string;
+  image_url: string | null;
 }
 
 export interface Category {
@@ -111,6 +112,7 @@ export interface Cable {
   base_description: string;
   meta_title: string | null;
   meta_description: string | null;
+  image_url: string | null;
   common_specs: SpecItem[];
   variants: CableVariant[];
 }
@@ -123,14 +125,41 @@ export interface ApplicableSpecRule {
   allowed_values?: (string | number)[];
 }
 
+export interface EquipmentManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+}
+
+export interface EquipmentCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  // `children` is present on the tree endpoint (list), absent on flat reads
+  // (e.g. nested category inside RecommendedEquipment). Always use `?? []`.
+  children?: EquipmentCategory[];
+}
+
 export interface RecommendedEquipment {
   id: string;
-  brand: string;
+  manufacturer_id: string;
+  category_id: string;
   model: string;
-  type: string;
-  description: string;
+  slug: string;
   applicable_specs: ApplicableSpecRule[];
-  external_url: string;
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: EquipmentManufacturer | null;
+  category: EquipmentCategory | null;
 }
 
 export interface RecommendedEquipmentResult {
@@ -211,4 +240,77 @@ export interface ValidationError {
   cable_id?: string;
   message: string;
   severity: "error" | "warning";
+}
+
+// === Admin Menu ===
+export type MenuItemType = "page" | "link" | "group";
+
+export interface MenuItem {
+  id: string;
+  parent_id: string | null;
+  type: MenuItemType;
+  page_id: string | null;
+  url: string | null;
+  label: string;
+  icon: string | null;
+  sort_order: number;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MenuItemTree extends MenuItem {
+  children: MenuItem[];
+}
+
+// === RBAC ===
+export interface Role {
+  id: string;
+  name: string;
+  description: string | null;
+  scope_type: string | null;
+  is_system: boolean;
+  sort_order: number;
+  permissions: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminUserExtended {
+  id: number;
+  email: string;
+  role_id: string;
+  scope_id: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  role_name: string | null;
+  role_scope_type: string | null;
+}
+
+export interface UserPermissions {
+  user_id: number;
+  email: string;
+  role_id: string;
+  role_name: string;
+  scope_type: string | null;
+  scope_id: string | null;
+  allowed_modules: string[];
+}
+
+export interface ScopeOption {
+  id: string;
+  name: string;
+}
+
+export interface AdminMember {
+  id: number;
+  email: string;
+  name: string;
+  company: string | null;
+  phone: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  inquiry_count: number;
 }

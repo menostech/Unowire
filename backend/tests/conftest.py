@@ -1,0 +1,77 @@
+import os
+import sys
+from pathlib import Path
+
+# Add backend to path so tests can import app
+backend_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(backend_dir))
+
+# asyncpg + SQLAlchemy's AsyncAdaptedQueuePool + Starlette TestClient are
+# incompatible: pooled asyncpg connections end up in a stuck protocol state
+# between in-process requests ("cannot perform operation: another operation is
+# in progress"). Switching the test engine to NullPool (no connection reuse)
+# eliminates the stale-connection problem without touching production code.
+# `get_db` resolves `async_session` as a module global at call time, so
+# reassigning it here is picked up by every route that depends on get_db.
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
+
+import app.core.database as _db_module
+from app.core.config import settings
+
+_test_engine = create_async_engine(settings.database_url, poolclass=NullPool)
+_db_module.engine = _test_engine
+_db_module.async_session = async_sessionmaker(
+    _test_engine, class_=AsyncSession, expire_on_commit=False
+)
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _cleanup_test_data():
+    """Clean up test-created data before the test session to avoid 409 conflicts
+    from previous test runs (tests don't clean up after themselves)."""
+    import asyncio
+    from sqlalchemy import text
+
+    async def _cleanup():
+        async with _test_engine.begin() as conn:
+            await conn.execute(text(
+                "DELETE FROM role_permissions WHERE role_id IN "
+                "('viewer', 'editor_v2', 'temp', 'bad')"
+            ))
+            await conn.execute(text(
+                "DELETE FROM roles WHERE id IN "
+                "('viewer', 'editor_v2', 'temp', 'bad')"
+            ))
+            await conn.execute(text(
+                "DELETE FROM users WHERE email != 'admin@unowire.com'"
+            ))
+            await conn.execute(text(
+                "DELETE FROM brands WHERE slug = 'test-brand-rbac'"
+            ))
+            await conn.execute(text("DELETE FROM inquiries WHERE sender_id IN (SELECT id FROM members WHERE email LIKE '%@test-member.com')"))
+            await conn.execute(text("DELETE FROM members WHERE email LIKE '%@test-member.com'"))
+
+    asyncio.run(_cleanup())
+
+
+@pytest.fixture
+def client():
+    return TestClient(app)
+
+
+@pytest.fixture
+def admin_headers(client):
+    """Login as admin and return auth headers."""
+    res = client.post(
+        "/api/auth/login",
+        json={"email": "admin@unowire.com", "password": "admin123456"},
+    )
+    assert res.status_code == 200, f"Login failed: {res.text}"
+    token = res.json()["token"]
+    return {"Authorization": f"Bearer {token}"}

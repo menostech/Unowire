@@ -19,6 +19,7 @@ class ProductTypeRead(BaseModel):
     size_system: str
     filters: list[TaxonomyFilterSchema] = []
     sort_order: int = 0
+    image_url: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -33,6 +34,7 @@ class CategoryRead(BaseModel):
     description: str | None = None
     product_types: list[ProductTypeRead] = []
     sort_order: int = 0
+    image_url: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -46,6 +48,7 @@ class IndustryRead(BaseModel):
     description: str | None = None
     categories: list[CategoryRead] = []
     sort_order: int = 0
+    image_url: str | None = None
     created_at: datetime
     updated_at: datetime
 

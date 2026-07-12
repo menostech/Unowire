@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { CableSpecTable } from '@/components/cable/CableSpecTable';
@@ -9,10 +10,11 @@ import { RecommendedEquipmentCard } from '@/components/equipment/RecommendedEqui
 import { SimilarCables } from '@/components/shared/SimilarCables';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { api, getCableUrl } from '@/lib/api';
-import { recommendEquipments } from '@/lib/equipment-recommend';
 import { generateCableMetadata, buildCableJsonLd, buildBreadcrumbJsonLd } from '@/lib/seo';
+import { InquiryFormModal } from '@/components/member/InquiryFormModal';
+import { ManufacturerRecommendations } from '@/components/shared/ManufacturerRecommendations';
 
-export const revalidate = 3600; // ISR 1h
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -36,9 +38,13 @@ export default async function CableDetailPage({
   const categories = cable.category_ids
     ? await api.categories.getByIds(cable.category_ids)
     : [];
-  const recommended = recommendEquipments(cable, await api.recommendedEquipments.all());
+  const matchedEquipment = await api.recommendedEquipments.byCable(cable.id);
+  const recommended = matchedEquipment.map(equipment => ({ equipment, matched_variants: [], explanation: [] }));
   const similar = await api.cables.similar(cable, 4);
+  const allManufacturers = await api.manufacturers.all();
   const jsonUrl = `/api/cables/${brand_slug}/${slug}`;
+  const memberToken = (await cookies()).get('member_token')?.value;
+  const isMember = !!memberToken;
 
   const breadcrumbItems = [
     { name: 'Home', url: '/' },
@@ -59,9 +65,18 @@ export default async function CableDetailPage({
         { name: cable.model, url: getCableUrl(cable) },
       ])} />
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
         {/* 主内容 */}
-        <div className="flex-1 min-w-0 space-y-8">
+        <div className="lg:col-span-3 space-y-8">
+          {/* 产品图片 */}
+          <div className="max-w-[300px] h-auto bg-gray-100 rounded-lg overflow-hidden">
+            <img
+              src={cable.image_url || '/cable-default.svg'}
+              alt={cable.model}
+              className="w-full h-auto"
+            />
+          </div>
+
           {/* 标题 */}
           <div>
             <h1 className="mb-1">{cable.model}</h1>
@@ -101,7 +116,7 @@ export default async function CableDetailPage({
         </div>
 
         {/* 右侧栏 */}
-        <aside className="lg:w-64 shrink-0 space-y-6">
+        <aside className="lg:col-span-1 space-y-6">
           {/* Manufacturer */}
           {manufacturer && (
             <div>
@@ -118,8 +133,28 @@ export default async function CableDetailPage({
                   Visit website →
                 </a>
               )}
+              <div className="mt-3">
+                {isMember ? (
+                  <InquiryFormModal
+                    recipientType="manufacturer"
+                    recipientId={manufacturer.id}
+                    manufacturerName={manufacturer.name}
+                    defaultSubject={`Inquiry about ${cable.model}`}
+                  />
+                ) : (
+                  <Link
+                    href={`/login?from=/cable/${brand_slug}/${slug}`}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium inline-block"
+                  >
+                    Login to Contact
+                  </Link>
+                )}
+              </div>
             </div>
           )}
+
+          {/* Recommended Manufacturers */}
+          <ManufacturerRecommendations manufacturers={allManufacturers} />
 
           {/* Categories */}
           {categories.length > 0 && (
@@ -143,9 +178,9 @@ export default async function CableDetailPage({
               href={jsonUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline"
+              className="text-xs text-gray-400 hover:text-gray-600"
             >
-              View JSON →
+              View JSON
             </a>
           </div>
         </aside>

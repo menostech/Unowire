@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.manufacturer import crud_manufacturer
 from app.schemas.common import PaginatedResponse
@@ -39,20 +40,41 @@ async def get_manufacturer(id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=ManufacturerRead, status_code=201)
-async def create_manufacturer(obj_in: ManufacturerCreate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def create_manufacturer(obj_in: ManufacturerCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("manufacturers"))):
+    # Scope check: cable_manager can only manage their own manufacturer
+    if user.role and user.role.scope_type == "manufacturer":
+        if obj_in.id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot create manufacturer outside your scope"},
+            )
     return await crud_manufacturer.create(db, obj_in=obj_in)
 
 
 @router.put("/{id}", response_model=ManufacturerRead)
-async def update_manufacturer(id: str, obj_in: ManufacturerUpdate, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def update_manufacturer(id: str, obj_in: ManufacturerUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("manufacturers"))):
     obj = await crud_manufacturer.get(db, id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Manufacturer not found"})
+    # Scope check
+    if user.role and user.role.scope_type == "manufacturer":
+        if id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot modify manufacturer outside your scope"},
+            )
     return await crud_manufacturer.update(db, db_obj=obj, obj_in=obj_in)
 
 
 @router.delete("/{id}", response_model=ManufacturerRead)
-async def delete_manufacturer(id: str, db: AsyncSession = Depends(get_db), _: dict = Depends(get_current_admin)):
+async def delete_manufacturer(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("manufacturers"))):
+    # Scope check
+    if user.role and user.role.scope_type == "manufacturer":
+        if id != user.scope_id:
+            raise HTTPException(
+                status_code=403,
+                detail={"code": 403, "message": "Cannot delete manufacturer outside your scope"},
+            )
     obj = await crud_manufacturer.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Manufacturer not found"})

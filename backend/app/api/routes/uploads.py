@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_admin
+from app.api.deps import require_module
+from app.models.user import User
 from app.core.database import get_db
 from app.crud.upload import crud_upload
 from app.models.upload import Upload
@@ -28,7 +29,7 @@ async def upload_file(
     file: UploadFile,
     folder_id: int | None = Form(default=None),
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail={"code": 400, "message": "File must be an image"})
@@ -76,7 +77,7 @@ async def list_uploads(
     page_size: int = 20,
     folder_id: int | Literal["none"] | None = None,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     items, total = await crud_upload.list_paginated(
         db, page=page, page_size=page_size, folder_id=folder_id
@@ -94,7 +95,7 @@ async def rename_upload(
     id: int,
     body: UploadRename,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     upload = await crud_upload.get(db, id=id)
     if not upload:
@@ -111,7 +112,7 @@ async def move_upload(
     id: int,
     body: UploadMove,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin),
+    user: User = Depends(require_module("media")),
 ):
     upload = await crud_upload.get(db, id=id)
     if not upload:
@@ -132,7 +133,7 @@ async def move_upload(
 async def delete_upload(
     id: int,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_admin)
+    user: User = Depends(require_module("media"))
 ):
     upload = await crud_upload.get(db, id=id)
     if not upload:

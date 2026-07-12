@@ -18,3 +18,13 @@ coverage/
 __writetest.txt
 backend/pip_packages/
 backend/fix_files.py
+
+# Runtime uploads (user-uploaded media, not source code)
+backend/media/uploads/
+
+# Python virtual env
+backend/venv/
+
+# Misc local files
+cookies.txt
+industries.json

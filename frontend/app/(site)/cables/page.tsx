@@ -10,6 +10,8 @@ import { filterCablesByText } from '@/lib/filter';
 import { generateCablesListMetadata } from '@/lib/seo';
 import type { TaxonomyIndustry, TaxonomyCategory, ProductTypeConfig } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export function generateMetadata(): Metadata {
   return generateCablesListMetadata();
 }

@@ -41,6 +41,7 @@ class CableRead(BaseModel):
     base_description: str | None = None
     meta_title: str | None = None
     meta_description: str | None = None
+    image_url: str | None = None
     brand: BrandRead | None = None
     common_specs: list[SpecItemRead] = []
     variants: list[CableVariantRead] = []
@@ -136,6 +137,7 @@ class CableCreate(BaseModel):
     base_description: str | None = None
     meta_title: str | None = None
     meta_description: str | None = None
+    image_url: str | None = None
     category_ids: list[str] = []
     common_specs: list[SpecItemCreate] = []
     variants: list[CableVariantCreate] = []
@@ -158,6 +160,7 @@ class CableUpdate(BaseModel):
     base_description: str | None = None
     meta_title: str | None = None
     meta_description: str | None = None
+    image_url: str | None = None
     category_ids: list[str] | None = None
     common_specs: list[SpecItemCreate] | None = None
     variants: list[CableVariantUpdate] | None = None

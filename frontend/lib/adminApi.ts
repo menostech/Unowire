@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
-import type { Manufacturer, Brand, Cable } from './types';
+import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember } from './types';
+import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
 
@@ -64,6 +65,7 @@ interface BackendCable {
   base_description: string | null;
   meta_title: string | null;
   meta_description: string | null;
+  image_url: string | null;
   category_ids?: string[];
   brand?: BackendBrand | null;
   common_specs?: BackendSpecItem[];
@@ -107,6 +109,48 @@ interface BackendProductType {
   filters: BackendTaxonomyFilter[];
   sort_order: number;
   image_url: string | null;
+}
+
+interface BackendEquipmentManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+}
+
+interface BackendEquipmentCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  // Present on tree endpoints (list/get), absent on flat reads (POST/PUT/nested)
+  children?: BackendEquipmentCategory[];
+}
+
+interface BackendEquipment {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: Record<string, unknown>[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: BackendEquipmentManufacturer | null;
+  category: BackendEquipmentCategory | null;
 }
 
 interface ListResponse<T> {
@@ -153,6 +197,7 @@ function adaptBrand(b: BackendBrand): Brand {
     manufacturer_id: b.manufacturer_id,
     country: b.manufacturer?.country ?? '',
     website: b.manufacturer?.website ?? '',
+    image_url: b.image_url,
   };
 }
 
@@ -182,6 +227,7 @@ function adaptCable(c: BackendCable): Cable {
     base_description: c.base_description ?? '',
     meta_title: c.meta_title,
     meta_description: c.meta_description,
+    image_url: c.image_url,
     common_specs: (c.common_specs ?? []).map(adaptSpecItem),
     variants: (c.variants ?? []).map(v => ({ slug: v.slug, specs: (v.specs ?? []).map(adaptSpecItem) })),
   };
@@ -492,6 +538,310 @@ export const adminApi = {
         const res = await adminFetch(`/api/industries/${encodeURIComponent(industryId)}/categories/${encodeURIComponent(catSlug)}/product-types/${encodeURIComponent(ptSlug)}`, { method: 'DELETE' });
         if (!res.ok) throw new Error(`API ${res.status}: product-types delete ${id}`);
       },
+    },
+  },
+
+  equipmentManufacturers: {
+    async all(page = 1, page_size = 20): Promise<{ items: BackendEquipmentManufacturer[]; total: number }> {
+      const data = await adminGet<ListResponse<BackendEquipmentManufacturer>>(
+        `/api/equipment-manufacturers?page=${page}&page_size=${page_size}`
+      );
+      return { items: data.items, total: data.total };
+    },
+    async getById(id: string): Promise<BackendEquipmentManufacturer | null> {
+      try {
+        return await adminGet<BackendEquipmentManufacturer>(`/api/equipment-manufacturers/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendEquipmentManufacturer> {
+      const res = await adminFetch('/api/equipment-manufacturers', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers`);
+      return await res.json() as BackendEquipmentManufacturer;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipmentManufacturer> {
+      const res = await adminFetch(`/api/equipment-manufacturers/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers/${id}`);
+      return await res.json() as BackendEquipmentManufacturer;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/equipment-manufacturers/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-manufacturers/${id}`);
+    },
+  },
+
+  equipmentCategories: {
+    async all(): Promise<BackendEquipmentCategory[]> {
+      return await adminGet<BackendEquipmentCategory[]>('/api/equipment-categories');
+    },
+    async getById(id: string): Promise<BackendEquipmentCategory | null> {
+      try {
+        return await adminGet<BackendEquipmentCategory>(`/api/equipment-categories/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendEquipmentCategory> {
+      const res = await adminFetch('/api/equipment-categories', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories`);
+      return await res.json() as BackendEquipmentCategory;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipmentCategory> {
+      const res = await adminFetch(`/api/equipment-categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories/${id}`);
+      return await res.json() as BackendEquipmentCategory;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/equipment-categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/equipment-categories/${id}`);
+    },
+  },
+
+  equipment: {
+    async all(page = 1, page_size = 20, filters?: { category_id?: string; manufacturer_id?: string }): Promise<{ items: BackendEquipment[]; total: number }> {
+      const params = new URLSearchParams({ page: String(page), page_size: String(page_size) });
+      if (filters?.category_id) params.set('category_id', filters.category_id);
+      if (filters?.manufacturer_id) params.set('manufacturer_id', filters.manufacturer_id);
+      const data = await adminGet<ListResponse<BackendEquipment>>(`/api/recommended-equipments?${params.toString()}`);
+      return { items: data.items, total: data.total };
+    },
+    async getById(id: string): Promise<BackendEquipment | null> {
+      try {
+        return await adminGet<BackendEquipment>(`/api/recommended-equipments/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendEquipment> {
+      const res = await adminFetch('/api/recommended-equipments', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments`);
+      return await res.json() as BackendEquipment;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendEquipment> {
+      const res = await adminFetch(`/api/recommended-equipments/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
+      return await res.json() as BackendEquipment;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/recommended-equipments/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
+    },
+  },
+
+  adminMenu: {
+    async tree(): Promise<MenuItemTree[]> {
+      return await adminGet<MenuItemTree[]>('/api/admin/menu/tree');
+    },
+    async all(): Promise<MenuItem[]> {
+      return await adminGet<MenuItem[]>('/api/admin/menu');
+    },
+    async getById(id: string): Promise<MenuItem | null> {
+      try {
+        return await adminGet<MenuItem>(`/api/admin/menu/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<MenuItem> {
+      const res = await adminFetch('/api/admin/menu', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu`);
+      return await res.json() as MenuItem;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<MenuItem> {
+      const res = await adminFetch(`/api/admin/menu/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu/${id}`);
+      return await res.json() as MenuItem;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/admin/menu/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu/${id}`);
+    },
+    async sort(id: string, direction: 'up' | 'down'): Promise<MenuItem> {
+      const res = await adminFetch(`/api/admin/menu/${encodeURIComponent(id)}/sort`, {
+        method: 'PUT',
+        body: JSON.stringify({ direction }),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/admin/menu/${id}/sort`);
+      return await res.json() as MenuItem;
+    },
+  },
+
+  roles: {
+    async all(): Promise<Role[]> {
+      return adminGet<Role[]>("/api/admin/roles");
+    },
+    async getById(id: string): Promise<Role | null> {
+      try {
+        return await adminGet<Role>(`/api/admin/roles/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async modules(): Promise<AdminModule[]> {
+      return adminGet<AdminModule[]>("/api/admin/roles/modules");
+    },
+    async create(payload: {
+      id: string;
+      name: string;
+      description?: string;
+      scope_type?: string | null;
+      sort_order?: number;
+      permissions: string[];
+    }): Promise<Role> {
+      const res = await adminFetch("/api/admin/roles", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async update(id: string, payload: {
+      name?: string;
+      description?: string;
+      scope_type?: string | null;
+      sort_order?: number;
+      permissions?: string[];
+    }): Promise<Role> {
+      const res = await adminFetch(`/api/admin/roles/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/admin/roles/${id}`, { method: "DELETE" });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+  },
+
+  users: {
+    async all(): Promise<AdminUserExtended[]> {
+      return adminGet<AdminUserExtended[]>("/api/admin/users");
+    },
+    async getById(id: number): Promise<AdminUserExtended | null> {
+      try {
+        return await adminGet<AdminUserExtended>(`/api/admin/users/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: {
+      email: string;
+      password: string;
+      role_id: string;
+      scope_id?: string | null;
+      is_active?: boolean;
+    }): Promise<AdminUserExtended> {
+      const res = await adminFetch("/api/admin/users", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async update(id: number, payload: {
+      email?: string;
+      password?: string;
+      role_id?: string;
+      scope_id?: string | null;
+      is_active?: boolean;
+    }): Promise<AdminUserExtended> {
+      const res = await adminFetch(`/api/admin/users/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      const res = await adminFetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+    async scopes(scopeType: string): Promise<ScopeOption[]> {
+      return adminGet<ScopeOption[]>(`/api/admin/users/scopes/${scopeType}`);
+    },
+  },
+
+  me: {
+    async permissions(): Promise<UserPermissions> {
+      return adminGet<UserPermissions>("/api/auth/me/permissions");
+    },
+  },
+
+  members: {
+    async all(filters?: { q?: string; is_verified?: boolean; is_active?: boolean }): Promise<AdminMember[]> {
+      const params = new URLSearchParams();
+      if (filters?.q) params.set('q', filters.q);
+      if (filters?.is_verified !== undefined) params.set('is_verified', String(filters.is_verified));
+      if (filters?.is_active !== undefined) params.set('is_active', String(filters.is_active));
+      const query = params.toString();
+      return adminGet<AdminMember[]>(`/api/admin/members${query ? `?${query}` : ''}`);
+    },
+    async getById(id: number): Promise<AdminMember | null> {
+      try {
+        return await adminGet<AdminMember>(`/api/admin/members/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async update(id: number, payload: { name: string; company?: string | null; phone?: string | null }): Promise<AdminMember> {
+      const res = await adminFetch(`/api/admin/members/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async activate(id: number, is_active: boolean): Promise<AdminMember> {
+      const res = await adminFetch(`/api/admin/members/${id}/activate`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async verify(id: number): Promise<AdminMember> {
+      const res = await adminFetch(`/api/admin/members/${id}/verify`, {
+        method: 'PUT',
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      const res = await adminFetch(`/api/admin/members/${id}/delete`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
     },
   },
 };

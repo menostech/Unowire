@@ -1,31 +1,36 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, CheckConstraint, ForeignKey, String
+from sqlalchemy import BigInteger, Boolean, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = (
-        CheckConstraint("role IN ('admin','editor')", name="ck_users_role"),
-    )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     password_hash: Mapped[str | None] = mapped_column(String(200))
-    role: Mapped[str] = mapped_column(String(20), nullable=False, default="admin")
+    role_id: Mapped[str] = mapped_column(
+        String(100),
+        ForeignKey("roles.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    scope_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    role: Mapped["Role"] = relationship("Role", lazy="selectin")
 
 
 class AuditLog(Base):
     __tablename__ = "audit_log"
     __table_args__ = (
-        CheckConstraint("action IN ('CREATE','UPDATE','DELETE')", name="ck_audit_log_action"),
+        # Note: this CHECK constraint is preserved from the original schema.
+        # Alembic will drop + recreate it in the migration; keep it here for new installs.
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)

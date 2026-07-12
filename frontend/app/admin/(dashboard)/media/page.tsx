@@ -23,7 +23,7 @@ export default function MediaPage() {
     }
   }, []);
 
-  const handleUploaded = useCallback(() => {
+  const handleUploaded = useCallback((_urlPath: string) => {
     refreshFolders();
     setGridRefreshKey(k => k + 1);
   }, [refreshFolders]);
