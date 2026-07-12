@@ -123,4 +123,4 @@ git push -u origin feat/media-picker-modal
 2. `git log origin/master` matches local `master`
 3. `git log origin/feat/media-picker-modal` matches local `feat/media-picker-modal`
 4. GitHub repo does not contain `node_modules/`, `backend/venv/`, `backend/media/uploads/`, `cookies.txt`, or `industries.json`
-5. All 29 pending changes (22 modified + 7 untracked) are committed and pushed
+5. All pending code changes are committed and pushed (22 modified files + 3 new untracked files: `docs/PROJECT_STRUCTURE.md`, `docs/PROJECT_STRUCTURE.zh-CN.md`, `frontend/public/cable-default.svg`. The other 4 untracked files — `cookies.txt`, `industries.json`, `backend/media/uploads/*.webp` — are excluded by .gitignore)
