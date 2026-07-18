@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { api, getCableUrl } from '@/lib/api';
+import { fetchPagesForSitemap } from '@/lib/api/pages';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.unowire.com';
 
@@ -55,5 +56,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...taxonomyPages, ...cablePages, ...manufacturerPages];
+  // CMS pages (published + visible only)
+  let cmsPages: MetadataRoute.Sitemap = [];
+  try {
+    const pageList = await fetchPagesForSitemap();
+    cmsPages = pageList.map((p) => ({
+      url: `${SITE_URL}/${p.slug}`,
+      lastModified: new Date(p.updated_at),
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }));
+  } catch {
+    // Backend unavailable — skip CMS pages
+  }
+
+  return [...staticPages, ...taxonomyPages, ...cablePages, ...manufacturerPages, ...cmsPages];
 }
