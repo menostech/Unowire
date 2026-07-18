@@ -78,3 +78,14 @@ async def get_current_member(
     if member is None or not member.is_active:
         raise HTTPException(status_code=401, detail={"code": 401, "message": "Not authenticated"})
     return member
+
+
+def get_media_scope(user: User = Depends(get_current_user)) -> tuple[str | None, str | None]:
+    """Returns (scope_type, scope_id) for media filtering.
+
+    - Global admin/role (scope_type=None): returns (None, None) -> sees all folders
+    - Scoped role (manufacturer/equipment_manufacturer): returns (role.scope_type, user.scope_id)
+    """
+    if user.role and user.role.scope_type in ("manufacturer", "equipment_manufacturer"):
+        return (user.role.scope_type, user.scope_id)
+    return (None, None)
