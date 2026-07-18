@@ -7,10 +7,11 @@ from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import get_media_scope, require_module
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.upload import crud_upload
+from app.crud.folder import crud_folder
 from app.models.upload import Upload
 from app.schemas.upload import (
     UploadListResponse,
@@ -30,7 +31,17 @@ async def upload_file(
     folder_id: int | None = Form(default=None),
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("media")),
+    scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
+    # Scoped users must upload to a specific folder in their scope
+    if scope[0] is not None:
+        if folder_id is None:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Scoped users must upload to a specific folder"},
+            )
+        await crud_folder.assert_folder_in_scope(db, folder_id, scope[0], scope[1])
+
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail={"code": 400, "message": "File must be an image"})
 
@@ -78,9 +89,11 @@ async def list_uploads(
     folder_id: int | Literal["none"] | None = None,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("media")),
+    scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     items, total = await crud_upload.list_paginated(
-        db, page=page, page_size=page_size, folder_id=folder_id
+        db, page=page, page_size=page_size, folder_id=folder_id,
+        scope_type=scope[0], scope_id=scope[1],
     )
     return {
         "items": items,
@@ -96,10 +109,16 @@ async def rename_upload(
     body: UploadRename,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("media")),
+    scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     upload = await crud_upload.get(db, id=id)
     if not upload:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Upload not found"})
+    # Scope check: if scoped user, upload must be in their folders
+    if scope[0] is not None and upload.folder_id is not None:
+        await crud_folder.assert_folder_in_scope(db, upload.folder_id, scope[0], scope[1])
+    elif scope[0] is not None and upload.folder_id is None:
+        raise HTTPException(status_code=403, detail={"code": 403, "message": "Upload outside your scope"})
     upload.original_filename = body.original_filename
     db.add(upload)
     await db.commit()
@@ -113,15 +132,25 @@ async def move_upload(
     body: UploadMove,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_module("media")),
+    scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     upload = await crud_upload.get(db, id=id)
     if not upload:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Upload not found"})
+    # Scope check on source upload
+    if scope[0] is not None:
+        if upload.folder_id is None:
+            raise HTTPException(status_code=403, detail={"code": 403, "message": "Upload outside your scope"})
+        await crud_folder.assert_folder_in_scope(db, upload.folder_id, scope[0], scope[1])
+    # Validate target folder
     if body.folder_id is not None:
         from app.models.folder import Folder
-        folder = await db.get(Folder, body.folder_id)
-        if not folder:
-            raise HTTPException(status_code=404, detail={"code": 404, "message": "Target folder not found"})
+        if scope[0] is not None:
+            await crud_folder.assert_folder_in_scope(db, body.folder_id, scope[0], scope[1])
+        else:
+            folder = await db.get(Folder, body.folder_id)
+            if not folder:
+                raise HTTPException(status_code=404, detail={"code": 404, "message": "Target folder not found"})
     upload.folder_id = body.folder_id
     db.add(upload)
     await db.commit()
@@ -133,11 +162,17 @@ async def move_upload(
 async def delete_upload(
     id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media"))
+    user: User = Depends(require_module("media")),
+    scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     upload = await crud_upload.get(db, id=id)
     if not upload:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Upload not found"})
+    # Scope check
+    if scope[0] is not None:
+        if upload.folder_id is None:
+            raise HTTPException(status_code=403, detail={"code": 403, "message": "Upload outside your scope"})
+        await crud_folder.assert_folder_in_scope(db, upload.folder_id, scope[0], scope[1])
 
     if upload.entity_id is not None:
         raise HTTPException(status_code=409, detail={"code": 409, "message": "Cannot delete: still associated with an entity"})
