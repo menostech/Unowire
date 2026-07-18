@@ -4,7 +4,7 @@ import io
 from PIL import Image
 
 
-def _valid_png() -> bytes:
+def _valid_png() -> io.BytesIO:
     """Generate a valid 10x10 red PNG image for upload tests."""
     img = Image.new("RGB", (10, 10), color="red")
     buf = io.BytesIO()

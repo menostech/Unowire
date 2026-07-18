@@ -5,7 +5,6 @@ from app.api.deps import get_media_scope, require_module
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.folder import crud_folder
-from app.models.folder import Folder
 from app.schemas.folder import (
     FolderCreate,
     FolderRead,
