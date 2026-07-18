@@ -58,8 +58,6 @@ export async function filterEquipment(
     api.equipmentCategories.tree(),
   ]);
 
-  const manufacturerMap = new Map(allManufacturers.map((m) => [m.id, m]));
-
   // Flatten category tree for id->category lookup
   const categoryMap = new Map<string, EquipmentCategory>();
   for (const top of categoryTree) {
