@@ -314,3 +314,40 @@ export interface AdminMember {
   created_at: string;
   inquiry_count: number;
 }
+
+// === CMS Pages ===
+export interface Page {
+  id: string;
+  slug: string;
+  title: string;
+  content: string;
+  status: "draft" | "published";
+  is_visible: boolean;
+  sort_order: number;
+  published_at: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PageListItem {
+  id: string;
+  slug: string;
+  title: string;
+  status: "draft" | "published";
+  is_visible: boolean;
+  sort_order: number;
+  published_at: string | null;
+  updated_at: string;
+}
+
+export interface PagePublicRead {
+  slug: string;
+  title: string;
+  content: string;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+}

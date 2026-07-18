@@ -21,6 +21,7 @@ export const ADMIN_PAGES: PageRegistryEntry[] = [
   { pageId: "inquiries",   href: "/admin/inquiries",                       defaultLabel: "Inquiries",    defaultIcon: "Mail" },
   { pageId: "email_config", href: "/admin/settings/email",                 defaultLabel: "Email Config", defaultIcon: "Mail" },
   { pageId: "members",      href: "/admin/members",                        defaultLabel: "Members",      defaultIcon: "Users" },
+  { pageId: "pages",        href: "/admin/pages",                          defaultLabel: "Pages",        defaultIcon: "FileText" },
 ];
 
 export const PAGE_BY_ID: Record<string, PageRegistryEntry> = Object.fromEntries(

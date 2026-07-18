@@ -40,6 +40,8 @@ def _cleanup_test_data():
 
     async def _cleanup():
         async with _test_engine.begin() as conn:
+            # Clean up test pages
+            await conn.execute(text("DELETE FROM pages WHERE id LIKE 'page-test-%' OR slug LIKE 'test-%'"))
             # Clean up test-scoped media folders + uploads (scoped media folders feature)
             await conn.execute(text(
                 "DELETE FROM uploads WHERE folder_id IN (SELECT id FROM media_folders "

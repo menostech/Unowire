@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember } from './types';
+import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem } from './types';
 import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -838,6 +838,52 @@ export const adminApi = {
     },
     async remove(id: number): Promise<void> {
       const res = await adminFetch(`/api/admin/members/${id}/delete`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+  },
+
+  pages: {
+    async all(page = 1, pageSize = 20, statusFilter?: string): Promise<{ items: PageListItem[]; total: number; page: number; page_size: number }> {
+      const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+      if (statusFilter) params.set('status', statusFilter);
+      return adminGet<{ items: PageListItem[]; total: number; page: number; page_size: number }>(
+        `/api/admin/pages?${params}`
+      );
+    },
+    async getById(id: string): Promise<Page | null> {
+      try {
+        return await adminGet<Page>(`/api/admin/pages/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: { id: string; slug: string; title: string; content?: string; status?: string; is_visible?: boolean; sort_order?: number; meta_title?: string | null; meta_description?: string | null; og_image_url?: string | null }): Promise<Page> {
+      const res = await adminFetch('/api/admin/pages', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/pages`);
+      }
+      return res.json();
+    },
+    async update(id: string, payload: Partial<Page>): Promise<Page> {
+      const res = await adminFetch(`/api/admin/pages/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/pages/${id}`);
+      }
+      return res.json();
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/admin/pages/${id}`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `API ${res.status}`);
