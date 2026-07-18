@@ -28,10 +28,23 @@ class CRUDUpload(CRUDBase[Upload, UploadCreate, UploadUpdate]):
         page: int = 1,
         page_size: int = 20,
         folder_id: int | None | Literal["none"] = None,
+        *,
+        scope_type: str | None = None,
+        scope_id: str | None = None,
     ) -> tuple[list[Upload], int]:
         offset = (page - 1) * page_size
         base = select(Upload)
         count_base = select(func.count()).select_from(Upload)
+
+        # Scope filtering: scoped users only see uploads in their folders
+        if scope_type is not None:
+            from app.models.folder import Folder
+            folder_ids_subq = select(Folder.id).where(
+                Folder.scope_type == scope_type,
+                Folder.scope_id == scope_id,
+            )
+            base = base.where(Upload.folder_id.in_(folder_ids_subq))
+            count_base = count_base.where(Upload.folder_id.in_(folder_ids_subq))
 
         if folder_id == "none":
             base = base.where(Upload.folder_id.is_(None))
