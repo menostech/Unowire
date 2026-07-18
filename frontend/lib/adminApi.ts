@@ -890,4 +890,69 @@ export const adminApi = {
       }
     },
   },
+
+  siteMenu: {
+    async all(locationFilter?: 'header' | 'footer'): Promise<SiteMenuItem[]> {
+      const params = locationFilter ? `?location=${locationFilter}` : '';
+      return adminGet<SiteMenuItem[]>(`/api/admin/site-menu${params}`);
+    },
+    async getById(id: string): Promise<SiteMenuItem | null> {
+      try {
+        return await adminGet<SiteMenuItem>(`/api/admin/site-menu/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async getTree(location: 'header' | 'footer'): Promise<SiteMenuItem[]> {
+      return adminGet<SiteMenuItem[]>(`/api/admin/site-menu/tree?location=${location}`);
+    },
+    async create(payload: {
+      id: string;
+      location: 'header' | 'footer';
+      parent_id?: string | null;
+      type: 'link' | 'group';
+      label: string;
+      url?: string | null;
+      sort_order?: number;
+      is_visible?: boolean;
+    }): Promise<SiteMenuItem> {
+      const res = await adminFetch('/api/admin/site-menu', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/site-menu`);
+      }
+      return res.json();
+    },
+    async update(id: string, payload: Partial<SiteMenuItem>): Promise<SiteMenuItem> {
+      const res = await adminFetch(`/api/admin/site-menu/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/site-menu/${id}`);
+      }
+      return res.json();
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/admin/site-menu/${id}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+    async sort(id: string, direction: 'up' | 'down'): Promise<void> {
+      const res = await adminFetch(`/api/admin/site-menu/${id}/sort`, {
+        method: 'PUT',
+        body: JSON.stringify({ direction }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+  },
 };
