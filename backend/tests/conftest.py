@@ -40,16 +40,33 @@ def _cleanup_test_data():
 
     async def _cleanup():
         async with _test_engine.begin() as conn:
+            # Clean up test-scoped media folders + uploads (scoped media folders feature)
+            await conn.execute(text(
+                "DELETE FROM uploads WHERE folder_id IN (SELECT id FROM media_folders "
+                "WHERE scope_id IN ('mfr-1', 'em-1', 'mfr-test-provision', 'mfr-test-idem', "
+                "'mfr-test-delete', 'mfr-test-rename'))"
+            ))
+            await conn.execute(text(
+                "DELETE FROM media_folders WHERE scope_id IN "
+                "('mfr-1', 'em-1', 'mfr-test-provision', 'mfr-test-idem', "
+                "'mfr-test-delete', 'mfr-test-rename')"
+            ))
+            # Clean up test manufacturers created by test_media_scope.py
+            await conn.execute(text(
+                "DELETE FROM manufacturers WHERE id IN "
+                "('mfr-test-provision', 'mfr-test-idem', 'mfr-test-delete', 'mfr-test-rename')"
+            ))
+            # Delete non-admin users BEFORE roles (users.role_id -> roles.id FK is ON DELETE RESTRICT)
+            await conn.execute(text(
+                "DELETE FROM users WHERE email != 'admin@unowire.com'"
+            ))
             await conn.execute(text(
                 "DELETE FROM role_permissions WHERE role_id IN "
-                "('viewer', 'editor_v2', 'temp', 'bad')"
+                "('viewer', 'editor_v2', 'temp', 'bad', 'cable_manager_test', 'equip_manager_test')"
             ))
             await conn.execute(text(
                 "DELETE FROM roles WHERE id IN "
-                "('viewer', 'editor_v2', 'temp', 'bad')"
-            ))
-            await conn.execute(text(
-                "DELETE FROM users WHERE email != 'admin@unowire.com'"
+                "('viewer', 'editor_v2', 'temp', 'bad', 'cable_manager_test', 'equip_manager_test')"
             ))
             await conn.execute(text(
                 "DELETE FROM brands WHERE slug = 'test-brand-rbac'"
@@ -71,6 +88,92 @@ def admin_headers(client):
     res = client.post(
         "/api/auth/login",
         json={"email": "admin@unowire.com", "password": "admin123456"},
+    )
+    assert res.status_code == 200, f"Login failed: {res.text}"
+    token = res.json()["token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def cable_manager_headers(client):
+    """Login as a cable_manager (scoped to mfr-1) and return auth headers.
+    Creates the role + user + media folders if they don't exist (idempotent).
+    """
+    import asyncio
+    from sqlalchemy import text
+    from app.core.security import hash_password
+    from app.core.database import async_session
+    from app.crud.folder import crud_folder
+
+    async def _setup():
+        async with _test_engine.begin() as conn:
+            await conn.execute(text(
+                "INSERT INTO roles (id, name, scope_type, is_system) "
+                "VALUES ('cable_manager_test', 'Cable Manager Test', 'manufacturer', false) "
+                "ON CONFLICT (id) DO NOTHING"
+            ))
+            for mod in ("media", "manufacturers"):
+                await conn.execute(text(
+                    "INSERT INTO role_permissions (role_id, module) "
+                    "VALUES ('cable_manager_test', :mod) ON CONFLICT DO NOTHING"
+                ), {"mod": mod})
+            await conn.execute(text(
+                "INSERT INTO users (email, password_hash, role_id, scope_id, is_active, created_at, updated_at) "
+                "VALUES ('cable_manager@test.com', :ph, 'cable_manager_test', 'mfr-1', true, NOW(), NOW()) "
+                "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash"
+            ), {"ph": hash_password("test123456")})
+        # Ensure media folders exist for this scope (idempotent)
+        async with async_session() as s:
+            await crud_folder.provision_for_manufacturer(
+                s, scope_type="manufacturer", scope_id="mfr-1", name="Test Cable Mfr"
+            )
+
+    asyncio.run(_setup())
+    res = client.post(
+        "/api/auth/login",
+        json={"email": "cable_manager@test.com", "password": "test123456"},
+    )
+    assert res.status_code == 200, f"Login failed: {res.text}"
+    token = res.json()["token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def equipment_manager_headers(client):
+    """Login as an equipment_manager (scoped to em-1) and return auth headers."""
+    import asyncio
+    from sqlalchemy import text
+    from app.core.security import hash_password
+    from app.core.database import async_session
+    from app.crud.folder import crud_folder
+
+    async def _setup():
+        async with _test_engine.begin() as conn:
+            await conn.execute(text(
+                "INSERT INTO roles (id, name, scope_type, is_system) "
+                "VALUES ('equip_manager_test', 'Equipment Manager Test', 'equipment_manufacturer', false) "
+                "ON CONFLICT (id) DO NOTHING"
+            ))
+            for mod in ("media", "equipment_mfrs"):
+                await conn.execute(text(
+                    "INSERT INTO role_permissions (role_id, module) "
+                    "VALUES ('equip_manager_test', :mod) ON CONFLICT DO NOTHING"
+                ), {"mod": mod})
+            await conn.execute(text(
+                "INSERT INTO users (email, password_hash, role_id, scope_id, is_active, created_at, updated_at) "
+                "VALUES ('equip_manager@test.com', :ph, 'equip_manager_test', 'em-1', true, NOW(), NOW()) "
+                "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash"
+            ), {"ph": hash_password("test123456")})
+        # Ensure media folders exist for this scope (idempotent)
+        async with async_session() as s:
+            await crud_folder.provision_for_manufacturer(
+                s, scope_type="equipment_manufacturer", scope_id="em-1", name="Test Equip Mfr"
+            )
+
+    asyncio.run(_setup())
+    res = client.post(
+        "/api/auth/login",
+        json={"email": "equip_manager@test.com", "password": "test123456"},
     )
     assert res.status_code == 200, f"Login failed: {res.text}"
     token = res.json()["token"]

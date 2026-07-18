@@ -16,7 +16,7 @@ ADMIN_MODULES = [
     {"id": "equipment_mfrs",  "label": "Equipment Mfrs",  "scope_aware": True,  "scope_type": "equipment_manufacturer"},
     {"id": "equipment_cats",  "label": "Equipment Cats",  "scope_aware": False, "scope_type": None},
     {"id": "equipment_list",  "label": "Equipment List",  "scope_aware": True,  "scope_type": "equipment_manufacturer"},
-    {"id": "media",           "label": "Media",           "scope_aware": False, "scope_type": None},
+    {"id": "media",           "label": "Media",           "scope_aware": True,  "scope_type": None},
     {"id": "menu_config",     "label": "Menu Config",     "scope_aware": False, "scope_type": None},
     {"id": "users",           "label": "Users",           "scope_aware": False, "scope_type": None},
     {"id": "roles",           "label": "Roles",           "scope_aware": False, "scope_type": None},
