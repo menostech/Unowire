@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Cable, Tag, Factory, FolderOpen, Image,
   Wrench, Settings, ExternalLink, LogOut, Circle,
-  ChevronDown, ChevronRight, Users, Shield,
+  ChevronDown, ChevronRight, Users, Shield, Menu,
   type LucideIcon,
 } from 'lucide-react';
 import { ADMIN_PAGES, PAGE_BY_ID } from '@/lib/adminMenuRegistry';
