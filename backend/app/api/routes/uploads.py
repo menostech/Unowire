@@ -142,6 +142,12 @@ async def move_upload(
         if upload.folder_id is None:
             raise HTTPException(status_code=403, detail={"code": 403, "message": "Upload outside your scope"})
         await crud_folder.assert_folder_in_scope(db, upload.folder_id, scope[0], scope[1])
+    # Scoped users cannot move uploads to NULL (would orphan outside their scope)
+    if scope[0] is not None and body.folder_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": 400, "message": "Scoped users must move to a specific folder"},
+        )
     # Validate target folder
     if body.folder_id is not None:
         from app.models.folder import Folder

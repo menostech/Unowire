@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +8,8 @@ from app.crud.base import CRUDBase
 from app.models.folder import Folder
 from app.models.upload import Upload
 from app.schemas.folder import FolderCreate, FolderUpdate
+
+logger = logging.getLogger(__name__)
 
 MAX_FOLDER_DEPTH = 5
 
@@ -230,8 +234,8 @@ class CRUDFolder(CRUDBase[Folder, FolderCreate, FolderUpdate]):
             if os.path.exists(file_path):
                 try:
                     os.remove(file_path)
-                except OSError:
-                    pass
+                except OSError as e:
+                    logger.warning("Failed to delete manufacturer media file %s: %s", file_path, e)
 
         # Delete uploads (DB records)
         for upload in uploads:

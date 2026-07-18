@@ -268,3 +268,135 @@ class TestLifecycle:
 
         # Cleanup
         client.delete("/api/manufacturers/mfr-test-rename", headers=admin_headers)
+
+
+class TestUploadVisibility:
+    def test_global_admin_sees_all_uploads(self, client, admin_headers):
+        """Global admin can list uploads across all scopes."""
+        res = client.get("/api/uploads/", headers=admin_headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert "items" in data
+        assert isinstance(data["items"], list)
+
+    def test_cable_manager_sees_only_own_scope_uploads(self, client, cable_manager_headers):
+        """Cable manager sees only uploads whose folder_id belongs to their scope."""
+        # Fetch the set of folder IDs visible to cable_manager
+        folders_res = client.get("/api/admin/folders", headers=cable_manager_headers)
+        assert folders_res.status_code == 200
+        allowed_folder_ids = {f["id"] for f in folders_res.json()["folders"]}
+        assert len(allowed_folder_ids) > 0, "Fixture should have provisioned folders"
+
+        # Upload a few images to an own folder (products)
+        products_id = _get_folder_id_by_name(folders_res, "products")
+        assert products_id is not None
+        for _ in range(2):
+            img = _valid_png()
+            res = client.post(
+                "/api/uploads/",
+                headers=cable_manager_headers,
+                files={"file": ("test.png", img, "image/png")},
+                data={"folder_id": products_id},
+            )
+            assert res.status_code == 201, f"Upload failed: {res.text}"
+
+        # List uploads as cable_manager — every returned folder_id must be in allowed set
+        res = client.get("/api/uploads/", headers=cable_manager_headers)
+        assert res.status_code == 200
+        items = res.json()["items"]
+        assert len(items) > 0, "Expected at least the uploads we just created"
+        for item in items:
+            assert item["folder_id"] in allowed_folder_ids, (
+                f"Upload {item['id']} has folder_id {item['folder_id']} outside scope"
+            )
+
+    def test_cable_manager_cannot_see_orphan_uploads(self, client, admin_headers, cable_manager_headers):
+        """Uploads with folder_id=NULL must NOT appear in a scoped user's list."""
+        # Admin creates an orphan upload (no folder_id)
+        img = _valid_png()
+        res = client.post(
+            "/api/uploads/",
+            headers=admin_headers,
+            files={"file": ("test.png", img, "image/png")},
+        )
+        assert res.status_code == 201, f"Admin orphan upload failed: {res.text}"
+        orphan_id = res.json()["id"]
+
+        try:
+            # As cable_manager, list uploads — orphan must NOT be visible
+            res = client.get("/api/uploads/", headers=cable_manager_headers)
+            assert res.status_code == 200
+            items = res.json()["items"]
+            for item in items:
+                assert item["folder_id"] is not None, (
+                    f"Orphan upload {item['id']} leaked into scoped user's list"
+                )
+            # Sanity: the specific orphan we just created is not in the scoped list
+            assert all(item["id"] != orphan_id for item in items), (
+                "Orphan upload leaked into scoped user's list"
+            )
+        finally:
+            # Cleanup the orphan upload (conftest _cleanup_test_data does not handle folder_id=NULL)
+            client.delete(f"/api/uploads/{orphan_id}", headers=admin_headers)
+
+
+class TestUploadMoveGuards:
+    def test_cable_manager_can_move_upload_to_own_folder(self, client, cable_manager_headers):
+        """Cable manager can move an upload between folders in their own scope."""
+        folders_res = client.get("/api/admin/folders", headers=cable_manager_headers)
+        products_id = _get_folder_id_by_name(folders_res, "products")
+        docs_id = _get_folder_id_by_name(folders_res, "docs")
+        assert products_id is not None
+        assert docs_id is not None
+
+        # Upload to products folder
+        img = _valid_png()
+        res = client.post(
+            "/api/uploads/",
+            headers=cable_manager_headers,
+            files={"file": ("test.png", img, "image/png")},
+            data={"folder_id": products_id},
+        )
+        assert res.status_code == 201, f"Upload failed: {res.text}"
+        upload_id = res.json()["id"]
+
+        # Move to docs folder (same scope)
+        res = client.patch(
+            f"/api/uploads/{upload_id}",
+            headers=cable_manager_headers,
+            json={"folder_id": docs_id},
+        )
+        assert res.status_code == 200, f"Move failed: {res.text}"
+        assert res.json()["folder_id"] == docs_id
+
+    def test_cable_manager_cannot_move_upload_to_other_scope_folder(
+        self, client, cable_manager_headers, equipment_manager_headers
+    ):
+        """Cable manager cannot move an upload into equipment_manager's folder."""
+        # Upload to cable_manager's products folder
+        cable_folders_res = client.get("/api/admin/folders", headers=cable_manager_headers)
+        products_id = _get_folder_id_by_name(cable_folders_res, "products")
+        assert products_id is not None
+
+        img = _valid_png()
+        res = client.post(
+            "/api/uploads/",
+            headers=cable_manager_headers,
+            files={"file": ("test.png", img, "image/png")},
+            data={"folder_id": products_id},
+        )
+        assert res.status_code == 201, f"Upload failed: {res.text}"
+        upload_id = res.json()["id"]
+
+        # Fetch equipment_manager's folder id (different scope)
+        em_folders_res = client.get("/api/admin/folders", headers=equipment_manager_headers)
+        em_products_id = _get_folder_id_by_name(em_folders_res, "products")
+        assert em_products_id is not None
+
+        # Attempt move to equipment_manager's folder — must be rejected
+        res = client.patch(
+            f"/api/uploads/{upload_id}",
+            headers=cable_manager_headers,
+            json={"folder_id": em_products_id},
+        )
+        assert res.status_code == 403, f"Expected 403, got {res.status_code}: {res.text}"
