@@ -5,6 +5,7 @@ from app.api.deps import require_module
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.equipment import crud_equipment_manufacturer
+from app.crud.folder import crud_folder
 from app.schemas.common import PaginatedResponse
 from app.schemas.equipment import (
     EquipmentManufacturerCreate,
@@ -44,7 +45,12 @@ async def create_equipment_manufacturer(
                 status_code=403,
                 detail={"code": 403, "message": "Cannot create equipment manufacturer outside your scope"},
             )
-    return await crud_equipment_manufacturer.create(db, obj_in=obj_in)
+    obj = await crud_equipment_manufacturer.create(db, obj_in=obj_in)
+    # Auto-provision media folder tree
+    await crud_folder.provision_for_manufacturer(
+        db, scope_type="equipment_manufacturer", scope_id=obj.id, name=obj.name
+    )
+    return obj
 
 
 @router.put("/{id}", response_model=EquipmentManufacturerRead)
@@ -64,7 +70,14 @@ async def update_equipment_manufacturer(
                 status_code=403,
                 detail={"code": 403, "message": "Cannot modify equipment manufacturer outside your scope"},
             )
-    return await crud_equipment_manufacturer.update(db, db_obj=obj, obj_in=obj_in)
+    old_name = obj.name
+    obj = await crud_equipment_manufacturer.update(db, db_obj=obj, obj_in=obj_in)
+    # Rename manufacturer root folder if name changed
+    if obj_in.name and obj_in.name != old_name:
+        await crud_folder.rename_manufacturer_root(
+            db, scope_type="equipment_manufacturer", scope_id=id, new_name=obj_in.name
+        )
+    return obj
 
 
 @router.delete("/{id}", response_model=EquipmentManufacturerRead)
@@ -80,6 +93,10 @@ async def delete_equipment_manufacturer(
                 status_code=403,
                 detail={"code": 403, "message": "Cannot delete equipment manufacturer outside your scope"},
             )
+    # Cleanup media folders + uploads before deleting manufacturer
+    await crud_folder.cleanup_for_manufacturer(
+        db, scope_type="equipment_manufacturer", scope_id=id
+    )
     obj = await crud_equipment_manufacturer.remove(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Equipment manufacturer not found"})
