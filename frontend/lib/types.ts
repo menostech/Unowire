@@ -351,3 +351,28 @@ export interface PagePublicRead {
   meta_description: string | null;
   og_image_url: string | null;
 }
+
+// === Site Menu ===
+export type SiteMenuLocation = "header" | "footer";
+export type SiteMenuItemType = "link" | "group";
+
+export interface SiteMenuItem {
+  id: string;
+  location: SiteMenuLocation;
+  parent_id: string | null;
+  type: SiteMenuItemType;
+  label: string;
+  url: string | null;
+  sort_order: number;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SiteMenuTreeNode {
+  id: string;
+  type: SiteMenuItemType;
+  label: string;
+  url: string | null;
+  children: SiteMenuTreeNode[];
+}
