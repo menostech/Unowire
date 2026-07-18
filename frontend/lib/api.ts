@@ -196,7 +196,7 @@ interface BackendEquipment {
   image_url: string | null;
   external_url: string | null;
   sort_order: number;
-  manufacturer: { id: string; name: string; slug: string; country: string | null; website: string | null; image_url: string | null; description: string | null } | null;
+  manufacturer: BackendEquipmentManufacturer | null;
   category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
 }
 
@@ -395,15 +395,7 @@ function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
     image_url: e.image_url ?? null,
     external_url: e.external_url ?? null,
     sort_order: e.sort_order ?? 0,
-    manufacturer: e.manufacturer ? {
-      id: e.manufacturer.id,
-      name: e.manufacturer.name,
-      slug: e.manufacturer.slug,
-      country: e.manufacturer.country,
-      website: e.manufacturer.website,
-      image_url: e.manufacturer.image_url,
-      description: e.manufacturer.description,
-    } : null,
+    manufacturer: adaptEquipmentManufacturer(e.manufacturer),
     category: e.category ? {
       id: e.category.id,
       parent_id: e.category.parent_id,

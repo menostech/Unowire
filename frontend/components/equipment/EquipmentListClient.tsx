@@ -69,7 +69,7 @@ export function EquipmentListClient({
             if (!specFilters[specKey]) specFilters[specKey] = {};
             if (field === 'values') {
               specFilters[specKey]!.values = value.split(',').filter(Boolean);
-            } else {
+            } else if (field === 'min' || field === 'max') {
               specFilters[specKey]![field] = Number(value);
             }
           }
