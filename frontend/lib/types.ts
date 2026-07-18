@@ -133,6 +133,13 @@ export interface EquipmentManufacturer {
   website: string | null;
   image_url: string | null;
   description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EquipmentCategory {
@@ -375,4 +382,30 @@ export interface SiteMenuTreeNode {
   label: string;
   url: string | null;
   children: SiteMenuTreeNode[];
+}
+
+// === Equipment Filters ===
+export interface EquipmentFilterParams {
+  q?: string;
+  category_ids?: string[];
+  manufacturer_ids?: string[];
+  spec_filters?: Record<string, { min?: number; max?: number; values?: string[] }>;
+}
+
+export interface EquipmentFilterFacets {
+  manufacturers: { id: string; name: string; count: number }[];
+  categories: { id: string; label: string; parent_id: string | null; count: number }[];
+  spec_facets: Record<string, {
+    type: "range" | "enum";
+    min?: number; max?: number;
+    values?: { value: string; count: number }[];
+  }>;
+}
+
+export interface EquipmentListResponse {
+  items: RecommendedEquipment[];
+  total: number;
+  page: number;
+  page_size: number;
+  facets: EquipmentFilterFacets;
 }
