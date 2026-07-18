@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { EquipmentFilterFacets } from '@/lib/types';
 
 interface Props {
@@ -17,6 +17,8 @@ interface Props {
 export function EquipmentFilters({ facets, allCategoryTree }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
 
   const [keyword, setKeyword] = useState(searchParams.get('q') ?? '');
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
@@ -51,8 +53,14 @@ export function EquipmentFilters({ facets, allCategoryTree }: Props) {
   // Debounced keyword update
   useEffect(() => {
     const t = setTimeout(() => {
-      if (keyword !== (searchParams.get('q') ?? '')) {
-        updateUrl({ q: keyword || undefined });
+      const currentParams = searchParamsRef.current;
+      if (keyword !== (currentParams.get('q') ?? '')) {
+        // Build URL params from the CURRENT (ref) searchParams, not the stale closure
+        const params = new URLSearchParams(currentParams.toString());
+        if (keyword) params.set('q', keyword);
+        else params.delete('q');
+        params.delete('page');
+        router.push(`/equipment?${params.toString()}#equipment-list`);
       }
     }, 300);
     return () => clearTimeout(t);
@@ -86,13 +94,20 @@ export function EquipmentFilters({ facets, allCategoryTree }: Props) {
   }
 
   function toggleSpecValue(specKey: string, value: string) {
-    setSpecFilters((prev) => {
-      const current = prev[specKey] ?? { values: new Set<string>() };
-      const values = new Set(current.values ?? new Set<string>());
-      if (values.has(value)) values.delete(value);
-      else values.add(value);
-      return { ...prev, [specKey]: { ...current, values } };
-    });
+    const current = specFilters[specKey] ?? { values: new Set<string>() };
+    const values = new Set(current.values ?? new Set<string>());
+    if (values.has(value)) values.delete(value);
+    else values.add(value);
+    setSpecFilters((prev) => ({
+      ...prev,
+      [specKey]: { ...prev[specKey], values },
+    }));
+    // Commit to URL with freshly computed values (avoids stale-closure lag)
+    const updates: Record<string, string | undefined> = {};
+    updates[`spec.${specKey}.min`] = current.min || undefined;
+    updates[`spec.${specKey}.max`] = current.max || undefined;
+    updates[`spec.${specKey}.values`] = values.size > 0 ? Array.from(values).join(',') : undefined;
+    updateUrl(updates);
   }
 
   function commitSpecFilter(specKey: string) {
@@ -265,7 +280,6 @@ export function EquipmentFilters({ facets, allCategoryTree }: Props) {
                         type="checkbox"
                         checked={checked}
                         onChange={() => toggleSpecValue(specKey, v.value)}
-                        onClick={() => setTimeout(() => commitSpecFilter(specKey), 0)}
                         className="rounded"
                       />
                       <span className="flex-1">{v.value}</span>
