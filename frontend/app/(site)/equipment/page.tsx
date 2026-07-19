@@ -45,20 +45,24 @@ export default async function EquipmentListPage({ searchParams }: PageProps) {
     }
   }
 
-  // Load initial filtered response + all data for the client wrapper
-  const [initialResponse, allEquipment, allManufacturers, categoryTree] = await Promise.all([
-    filterEquipment({
+  // Load all data once, then filter in-memory
+  const [allEquipment, allManufacturers, categoryTree] = await Promise.all([
+    api.recommendedEquipments.all(),
+    api.equipmentManufacturers.all(),
+    api.equipmentCategories.tree(),
+  ]);
+
+  const initialResponse = filterEquipment(
+    {
       q: sp.q,
       category_ids: categoryIds.length > 0 ? categoryIds : undefined,
       manufacturer_ids: manufacturerIds.length > 0 ? manufacturerIds : undefined,
       spec_filters: Object.keys(specFilters).length > 0 ? specFilters : undefined,
       page,
       page_size: 12,
-    }),
-    api.recommendedEquipments.all(),
-    api.equipmentManufacturers.all(),
-    api.equipmentCategories.tree(),
-  ]);
+    },
+    { allEquipment, allManufacturers, categoryTree }
+  );
 
   const activeCategoryId = categoryIds[0];
 

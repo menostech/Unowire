@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type {
   EquipmentCategory,
-  EquipmentFilterFacets,
   EquipmentFilterParams,
   EquipmentListResponse,
   EquipmentManufacturer,
@@ -31,7 +30,6 @@ export function EquipmentListClient({
 }: Props) {
   const searchParams = useSearchParams();
   const [response, setResponse] = useState<EquipmentListResponse>(initialResponse);
-  const [loading, setLoading] = useState(false);
 
   // Build a simplified category tree for the filter component
   const filterCategoryTree = categoryTree.map((top) => ({
@@ -45,52 +43,44 @@ export function EquipmentListClient({
   }));
 
   useEffect(() => {
-    let cancelled = false;
+    const params: EquipmentFilterParams & { page?: number; page_size?: number } = {
+      q: searchParams.get('q') ?? undefined,
+      category_ids: (searchParams.get('category') ?? '').split(',').filter(Boolean),
+      manufacturer_ids: (searchParams.get('manufacturer') ?? '').split(',').filter(Boolean),
+      page: Number(searchParams.get('page') ?? '1') || 1,
+      page_size: 12,
+    };
 
-    async function refilter() {
-      setLoading(true);
-      const params: EquipmentFilterParams & { page?: number; page_size?: number } = {
-        q: searchParams.get('q') ?? undefined,
-        category_ids: (searchParams.get('category') ?? '').split(',').filter(Boolean),
-        manufacturer_ids: (searchParams.get('manufacturer') ?? '').split(',').filter(Boolean),
-        page: Number(searchParams.get('page') ?? '1') || 1,
-        page_size: 12,
-      };
-
-      // Parse spec filters from URL
-      const specFilters: EquipmentFilterParams['spec_filters'] = {};
-      for (const key of searchParams.keys()) {
-        if (key.startsWith('spec.')) {
-          const match = key.match(/^spec\.([^.]+)\.(min|max|values)$/);
-          if (match) {
-            const [, specKey, field] = match;
-            const value = searchParams.get(key);
-            if (!value) continue;
-            if (!specFilters[specKey]) specFilters[specKey] = {};
-            if (field === 'values') {
-              specFilters[specKey]!.values = value.split(',').filter(Boolean);
-            } else if (field === 'min' || field === 'max') {
-              specFilters[specKey]![field] = Number(value);
-            }
+    // Parse spec filters from URL
+    const specFilters: EquipmentFilterParams['spec_filters'] = {};
+    for (const key of searchParams.keys()) {
+      if (key.startsWith('spec.')) {
+        const match = key.match(/^spec\.([^.]+)\.(min|max|values)$/);
+        if (match) {
+          const [, specKey, field] = match;
+          const value = searchParams.get(key);
+          if (!value) continue;
+          if (!specFilters[specKey]) specFilters[specKey] = {};
+          if (field === 'values') {
+            specFilters[specKey]!.values = value.split(',').filter(Boolean);
+          } else if (field === 'min' || field === 'max') {
+            specFilters[specKey]![field] = Number(value);
           }
         }
       }
-      if (Object.keys(specFilters).length > 0) {
-        params.spec_filters = specFilters;
-      }
-
-      const result = await filterEquipment(params);
-      if (!cancelled) {
-        setResponse(result);
-        setLoading(false);
-      }
+    }
+    if (Object.keys(specFilters).length > 0) {
+      params.spec_filters = specFilters;
     }
 
-    refilter();
-    return () => {
-      cancelled = true;
-    };
-  }, [searchParams]);
+    // Pure in-memory filtering — no network calls
+    const result = filterEquipment(params, {
+      allEquipment,
+      allManufacturers,
+      categoryTree,
+    });
+    setResponse(result);
+  }, [searchParams, allEquipment, allManufacturers, categoryTree]);
 
   const activeCategoryId = searchParams.get('category')?.split(',')[0];
 
@@ -108,9 +98,6 @@ export function EquipmentListClient({
 
       {/* Center column: equipment list */}
       <div className="lg:col-span-2" id="equipment-list">
-        {loading && (
-          <div className="mb-4 text-sm text-gray-500">Loading…</div>
-        )}
         {response.items.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500">
             No equipment found. Try adjusting your filters.

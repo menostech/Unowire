@@ -1,4 +1,3 @@
-import { api } from './api';
 import type {
   ApplicableSpecRule,
   EquipmentCategory,
@@ -45,18 +44,19 @@ function isEnumMatch(
   return selectedValues.some((v) => allowed.includes(v));
 }
 
-/** Main filter function. Loads all data, applies filters, builds facets, paginates. */
-export async function filterEquipment(
-  params: EquipmentFilterParams & { page?: number; page_size?: number }
-): Promise<EquipmentListResponse> {
+/** Main filter function. Pure in-memory — accepts pre-loaded data, no network calls. */
+export function filterEquipment(
+  params: EquipmentFilterParams & { page?: number; page_size?: number },
+  data: {
+    allEquipment: RecommendedEquipment[];
+    allManufacturers: EquipmentManufacturer[];
+    categoryTree: EquipmentCategory[];
+  }
+): EquipmentListResponse {
   const page = Math.max(1, params.page ?? 1);
   const page_size = params.page_size ?? 12;
 
-  const [allEquipment, allManufacturers, categoryTree] = await Promise.all([
-    api.recommendedEquipments.all(),
-    api.equipmentManufacturers.all(),
-    api.equipmentCategories.tree(),
-  ]);
+  const { allEquipment, allManufacturers, categoryTree } = data;
 
   // Flatten category tree for id->category lookup
   const categoryMap = new Map<string, EquipmentCategory>();
