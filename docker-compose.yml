@@ -23,13 +23,14 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
       - INTERNAL_API_BASE=http://backend:8000
     env_file:
       - ./frontend/.env.production
     networks:
       - unowire-net
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000"]
       interval: 10s
       timeout: 5s
       retries: 5
