@@ -8,6 +8,7 @@ from app.models.manufacturer import Manufacturer
 from app.models.member import Member
 from app.models.menu import AdminMenuItem
 from app.models.role import Role, RolePermission
+from app.models.system_message import SystemMessage, SystemMessageRead
 from app.models.taxonomy import Category, Industry, ProductType
 from app.models.upload import Upload
 from app.models.user import AuditLog, User
@@ -31,6 +32,8 @@ __all__ = [
     "Role",
     "RolePermission",
     "SpecItem",
+    "SystemMessage",
+    "SystemMessageRead",
     "Upload",
     "User",
 ]
