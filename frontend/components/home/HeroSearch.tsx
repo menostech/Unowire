@@ -93,7 +93,7 @@ export function HeroSearch() {
         {/* Search bar */}
         <form
           onSubmit={handleSubmit}
-          className="mx-auto flex max-w-xl overflow-hidden rounded-b-lg rounded-tr-lg border-2 border-white"
+          className="mx-auto flex max-w-6xl overflow-hidden rounded-b-lg rounded-tr-lg border-2 border-white"
         >
           <label htmlFor="hero-search" className="sr-only">
             Search {currentTab.label.toLowerCase()}
