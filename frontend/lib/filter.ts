@@ -101,11 +101,19 @@ export async function filterCables(params: CableQueryParams): Promise<CableListR
   // 2. Keyword search
   if (filterParams.q) {
     const q = filterParams.q.toLowerCase();
-    filtered = filtered.filter(c =>
-      c.model.toLowerCase().includes(q) ||
-      c.base_description.toLowerCase().includes(q) ||
-      c.variants.some(v => v.specs.some(s => String(s.value).toLowerCase().includes(q)))
-    );
+    filtered = filtered.filter(c => {
+      if (c.model.toLowerCase().includes(q)) return true;
+      if (c.base_description.toLowerCase().includes(q)) return true;
+      if (c.variants.some(v => v.specs.some(s => String(s.value).toLowerCase().includes(q)))) return true;
+      if (c.common_specs.some(s => String(s.value).toLowerCase().includes(q))) return true;
+      const brand = brandMap.get(c.brand_id);
+      if (brand && brand.name.toLowerCase().includes(q)) return true;
+      if (brand) {
+        const mfr = manufacturerMap.get(brand.manufacturer_id);
+        if (mfr && mfr.name.toLowerCase().includes(q)) return true;
+      }
+      return false;
+    });
   }
 
   // 3. Manufacturer filter
