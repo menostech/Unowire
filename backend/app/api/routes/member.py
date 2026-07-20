@@ -12,12 +12,18 @@ from app.core.email import send_email_background
 from app.core.security import create_member_token, hash_password, verify_password
 from app.crud.inquiry import crud_inquiry
 from app.crud.member import crud_member
+from app.crud.system_message import crud_system_message
 from app.models.equipment import EquipmentManufacturer
 from app.models.inquiry import Inquiry
 from app.models.manufacturer import Manufacturer
 from app.models.member import Member
 from app.schemas.inquiry import InquiryCreate, InquiryRead
 from app.schemas.member import MemberLogin, MemberRead, MemberRegister, MemberVerify
+from app.schemas.system_message import (
+    MemberMessageListResponse,
+    MemberMessageRead,
+    UnreadCountResponse,
+)
 
 router = APIRouter(prefix="/api/member", tags=["member"])
 
@@ -190,3 +196,70 @@ async def get_inquiry(
     if inquiry.reply_body is not None and not inquiry.is_member_read:
         await crud_inquiry.mark_read_for_member(db, inquiry)
     return inquiry
+
+
+# --- System message endpoints (member-side) ---
+
+@router.get("/messages", response_model=MemberMessageListResponse)
+async def list_my_messages(
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+    page: int = 1,
+    page_size: int = 20,
+):
+    items, total = await crud_system_message.list_for_member(
+        db, member_id=member.id, page=page, page_size=page_size
+    )
+    return MemberMessageListResponse(
+        items=[
+            MemberMessageRead(
+                id=msg.id,
+                title=msg.title,
+                body=msg.body,
+                created_at=msg.created_at,
+                is_read=is_read,
+            )
+            for msg, is_read in items
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/messages/unread-count", response_model=UnreadCountResponse)
+async def my_messages_unread_count(
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    count = await crud_system_message.unread_count_for_member(db, member.id)
+    return UnreadCountResponse(unread=count)
+
+
+@router.get("/messages/{message_id}", response_model=MemberMessageRead)
+async def get_my_message(
+    message_id: int,
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await crud_system_message.get_for_member(
+        db, member_id=member.id, message_id=message_id
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": 404, "message": "Message not found"},
+        )
+    msg, is_read = result
+    # Mark as read on first view (idempotent)
+    if not is_read:
+        await crud_system_message.mark_read(
+            db, member_id=member.id, message_id=message_id
+        )
+    return MemberMessageRead(
+        id=msg.id,
+        title=msg.title,
+        body=msg.body,
+        created_at=msg.created_at,
+        is_read=True,
+    )
