@@ -22,7 +22,7 @@ def upgrade() -> None:
         sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column('title', sa.String(length=200), nullable=False),
         sa.Column('body', sa.Text(), nullable=False),
-        sa.Column('created_by', sa.BigInteger(), nullable=False),
+        sa.Column('created_by', sa.BigInteger(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
         sa.ForeignKeyConstraint(
