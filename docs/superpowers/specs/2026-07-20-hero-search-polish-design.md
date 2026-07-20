@@ -149,24 +149,25 @@ let filtered = allCables.filter(c =>
 
 **New predicate:**
 ```ts
-// Build id → name maps for O(1) lookup per cable (avoid O(n*m) find() per predicate call)
-const manufacturerNameById = new Map(manufacturers.map(m => [m.id, m.name.toLowerCase()]));
-const brandNameById = new Map(brands.map(b => [b.id, b.name.toLowerCase()]));
-
 let filtered = allCables.filter(c => {
   if (c.model.toLowerCase().includes(q)) return true;
   if (c.base_description.toLowerCase().includes(q)) return true;
   if (c.variants.some(v => v.specs.some(s => String(s.value).toLowerCase().includes(q)))) return true;
   if (c.common_specs.some(s => String(s.value).toLowerCase().includes(q))) return true;
-  const mfrName = manufacturerNameById.get(c.manufacturer_id);
-  if (mfrName && mfrName.includes(q)) return true;
-  const brandName = brandNameById.get(c.brand_id);
-  if (brandName && brandName.includes(q)) return true;
+  const brand = brandMap.get(c.brand_id);
+  if (brand && brand.name.toLowerCase().includes(q)) return true;
+  if (brand) {
+    const mfr = manufacturerMap.get(brand.manufacturer_id);
+    if (mfr && mfr.name.toLowerCase().includes(q)) return true;
+  }
   return false;
 });
 ```
 
-Rationale for the maps: the previous predicate was O(n) per cable for variant specs, but adding two more `find()` calls per cable would push it to O(n*m) where m is manufacturers + brands length. The Map lookups keep it O(n) total.
+Notes:
+- `brandMap` and `manufacturerMap` are already built at lines 187-188 as `Map<id, Brand>` and `Map<id, Manufacturer>` — reuse them directly (no new maps needed).
+- Cables link to manufacturers via `brand.manufacturer_id` (two hops: cable → brand → manufacturer), per the `Cable` and `Brand` type definitions in `frontend/lib/types.ts:103,25`.
+- This mirrors the existing facet-enrichment pattern at filter.ts:204.
 
 #### 2b. `filterCables` (scoped cable search, lines 83-177)
 
@@ -185,24 +186,28 @@ if (q) {
 
 **New predicate:**
 ```ts
-if (q) {
-  const manufacturerNameById = new Map(manufacturers.map(m => [m.id, m.name.toLowerCase()]));
-  const brandNameById = new Map(brands.map(b => [b.id, b.name.toLowerCase()]));
+if (filterParams.q) {
+  const q = filterParams.q.toLowerCase();
   filtered = filtered.filter(c => {
     if (c.model.toLowerCase().includes(q)) return true;
     if (c.base_description.toLowerCase().includes(q)) return true;
     if (c.variants.some(v => v.specs.some(s => String(s.value).toLowerCase().includes(q)))) return true;
     if (c.common_specs.some(s => String(s.value).toLowerCase().includes(q))) return true;
-    const mfrName = manufacturerNameById.get(c.manufacturer_id);
-    if (mfrName && mfrName.includes(q)) return true;
-    const brandName = brandNameById.get(c.brand_id);
-    if (brandName && brandName.includes(q)) return true;
+    const brand = brandMap.get(c.brand_id);
+    if (brand && brand.name.toLowerCase().includes(q)) return true;
+    if (brand) {
+      const mfr = manufacturerMap.get(brand.manufacturer_id);
+      if (mfr && mfr.name.toLowerCase().includes(q)) return true;
+    }
     return false;
   });
 }
 ```
 
-The `manufacturers` and `brands` arrays are already parameters to `filterCables` (verified at filter.ts signature).
+Notes:
+- `brandMap` and `manufacturerMap` are already built at lines 91-92 — reuse them directly.
+- Same two-hop lookup as `filterCablesByText` (cable → brand → manufacturer).
+- The `q` variable is already declared inside the `if (filterParams.q)` block at line 103 — kept that pattern.
 
 ### 3. `equipmentFilter.ts` — extend equipment search predicate
 
