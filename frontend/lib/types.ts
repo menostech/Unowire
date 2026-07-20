@@ -409,3 +409,40 @@ export interface EquipmentListResponse {
   page_size: number;
   facets: EquipmentFilterFacets;
 }
+
+// === System Messages ===
+export interface AdminMessage {
+  id: number;
+  title: string;
+  body: string;
+  created_by: number;
+  created_by_email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminMessageListResponse {
+  items: AdminMessage[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface MemberMessage {
+  id: number;
+  title: string;
+  body: string;
+  created_at: string;
+  is_read: boolean;
+}
+
+export interface MemberMessageListResponse {
+  items: MemberMessage[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface UnreadCount {
+  unread: number;
+}

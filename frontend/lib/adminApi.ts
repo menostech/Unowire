@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem } from './types';
+import type { AdminMessage, AdminMessageListResponse, Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem } from './types';
 import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -838,6 +838,41 @@ export const adminApi = {
     },
     async remove(id: number): Promise<void> {
       const res = await adminFetch(`/api/admin/members/${id}/delete`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+  },
+
+  messages: {
+    async all(page = 1, page_size = 20): Promise<AdminMessageListResponse> {
+      return adminGet<AdminMessageListResponse>(
+        `/api/admin/messages?page=${page}&page_size=${page_size}`
+      );
+    },
+    async getById(id: number): Promise<AdminMessage | null> {
+      try {
+        return await adminGet<AdminMessage>(`/api/admin/messages/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: { title: string; body: string }): Promise<AdminMessage> {
+      const res = await adminFetch(`/api/admin/messages`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      const res = await adminFetch(`/api/admin/messages/${id}`, {
+        method: 'DELETE',
+      });
       if (!res.ok && res.status !== 204) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `API ${res.status}`);
