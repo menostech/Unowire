@@ -50,7 +50,7 @@ export function HeroSearch() {
         backgroundPosition: 'center',
       }}
     >
-      <div className="mx-auto w-full max-w-screen-2xl px-6 py-20 text-center">
+      <div className="w-full px-8 md:px-12 py-20 text-center">
         <h1 className="mb-3 text-4xl font-bold">
           Cable &amp; Equipment Specs Database
         </h1>
