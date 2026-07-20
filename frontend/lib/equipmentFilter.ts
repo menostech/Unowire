@@ -71,11 +71,22 @@ export function filterEquipment(
   let filtered = allEquipment;
   if (params.q) {
     const q = params.q.toLowerCase();
-    filtered = filtered.filter(
-      (e) =>
-        e.model.toLowerCase().includes(q) ||
-        (e.description ?? '').toLowerCase().includes(q)
-    );
+    filtered = filtered.filter((e) => {
+      if (e.model.toLowerCase().includes(q)) return true;
+      if ((e.description ?? '').toLowerCase().includes(q)) return true;
+      if (e.manufacturer && e.manufacturer.name.toLowerCase().includes(q)) return true;
+      if (e.category && e.category.label.toLowerCase().includes(q)) return true;
+      if (
+        e.applicable_specs.some((spec) => {
+          if (spec.spec_key.toLowerCase().includes(q)) return true;
+          if (spec.min !== undefined && String(spec.min).includes(q)) return true;
+          if (spec.max !== undefined && String(spec.max).includes(q)) return true;
+          if (spec.allowed_values && spec.allowed_values.some((v) => String(v).toLowerCase().includes(q))) return true;
+          return false;
+        })
+      ) return true;
+      return false;
+    });
   }
 
   // 2. Category filter
