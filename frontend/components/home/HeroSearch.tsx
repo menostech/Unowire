@@ -104,7 +104,7 @@ export function HeroSearch() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={currentTab.placeholder}
-            className="flex-1 border-0 px-4 py-3 text-sm text-slate-900 outline-none"
+            className="flex-1 border-0 px-4 py-3 text-sm text-white outline-none placeholder:text-white/70"
           />
           <button
             type="submit"
