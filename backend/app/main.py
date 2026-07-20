@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members
+from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -105,6 +105,7 @@ app.include_router(member.router)
 app.include_router(admin_inquiries.router)
 app.include_router(admin_email.router)
 app.include_router(admin_members.router)
+app.include_router(admin_messages.router)
 app.include_router(pages.router, prefix=f"{settings.api_prefix}/admin/pages", tags=["admin-pages"])
 app.include_router(pages.public_router, prefix=f"{settings.api_prefix}/pages", tags=["public-pages"])
 app.include_router(site_menu.admin_router, prefix=f"{settings.api_prefix}/admin/site-menu", tags=["admin-site-menu"])
