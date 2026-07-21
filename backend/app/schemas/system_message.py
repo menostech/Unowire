@@ -12,7 +12,7 @@ class AdminMessageRead(BaseModel):
     id: int
     title: str
     body: str
-    created_by: int
+    created_by: int | None = None
     created_by_email: str | None = None
     created_at: datetime
     updated_at: datetime

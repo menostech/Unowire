@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import and_, func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -147,21 +148,15 @@ class CRUDSystemMessage(
         self, db: AsyncSession, *, member_id: int, message_id: int
     ) -> None:
         """Idempotently mark a message as read by a member."""
-        existing = await db.execute(
-            select(SystemMessageRead).where(
-                SystemMessageRead.member_id == member_id,
-                SystemMessageRead.message_id == message_id,
-            )
+        stmt = pg_insert(SystemMessageRead).values(
+            member_id=member_id,
+            message_id=message_id,
+            read_at=datetime.utcnow(),
+        ).on_conflict_do_nothing(
+            index_elements=["member_id", "message_id"],
         )
-        if existing.scalar_one_or_none() is None:
-            db.add(
-                SystemMessageRead(
-                    member_id=member_id,
-                    message_id=message_id,
-                    read_at=datetime.utcnow(),
-                )
-            )
-            await db.commit()
+        await db.execute(stmt)
+        await db.commit()
 
 
 crud_system_message = CRUDSystemMessage(SystemMessage)

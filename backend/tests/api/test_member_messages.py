@@ -136,3 +136,42 @@ def test_member_get_message_not_found(client, admin_headers):
         "/api/member/messages/999999", headers=member_headers
     )
     assert res.status_code == 404
+
+
+def test_member_inactive_account(client, admin_headers):
+    from app.core.database import async_session
+    from app.models.member import Member
+    from sqlalchemy import select
+    import asyncio
+
+    # Register + verify + login a member
+    client.post(
+        "/api/member/register",
+        json={
+            "email": "inactive-msg@test-member.com",
+            "password": "password123",
+            "name": "Inactive",
+        },
+    )
+
+    async def get_token_and_deactivate():
+        async with async_session() as db:
+            result = await db.execute(select(Member).where(Member.email == "inactive-msg@test-member.com"))
+            m = result.scalar_one()
+            token = m.verification_token
+            m.is_active = False
+            await db.commit()
+            return token
+
+    token = asyncio.run(get_token_and_deactivate())
+    client.post("/api/member/verify", json={"token": token})
+
+    # Login should fail or token should be invalid for inactive member
+    client.post("/api/member/login", json={"email": "inactive-msg@test-member.com", "password": "password123"})
+    member_token = client.cookies.get("member_token")
+
+    res = client.get(
+        "/api/member/messages",
+        headers={"Authorization": f"Bearer {member_token}"},
+    )
+    assert res.status_code == 401

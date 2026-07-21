@@ -82,3 +82,92 @@ def test_delete_message(client, admin_headers):
 def test_delete_message_not_found(client, admin_headers):
     res = client.delete("/api/admin/messages/999999", headers=admin_headers)
     assert res.status_code == 404
+
+
+def test_list_messages_without_permission(client):
+    # A member token (not admin) should be forbidden from admin endpoints
+    client.post(
+        "/api/member/register",
+        json={
+            "email": "msg-noperm@test-member.com",
+            "password": "password123",
+            "name": "NoPerm",
+        },
+    )
+    # Member login sets member_token cookie, but admin endpoints need admin_token
+    client.post("/api/member/login", json={"email": "msg-noperm@test-member.com", "password": "password123"})
+    member_token = client.cookies.get("member_token")
+    res = client.get(
+        "/api/admin/messages",
+        headers={"Authorization": f"Bearer {member_token}"},
+    )
+    assert res.status_code in (401, 403)
+
+
+def test_delete_message_cascades_reads(client, admin_headers):
+    from app.core.database import async_session
+    from app.models.member import Member
+    from app.models.system_message import SystemMessageRead
+    from sqlalchemy import select
+    import asyncio
+
+    # Create a message
+    create_res = client.post(
+        "/api/admin/messages",
+        json={"title": "Cascade Test", "body": "Will be deleted"},
+        headers=admin_headers,
+    )
+    msg_id = create_res.json()["id"]
+
+    # Register a member, verify email, and login so we can mark the message read
+    client.post(
+        "/api/member/register",
+        json={
+            "email": "cascade@test-member.com",
+            "password": "password123",
+            "name": "Cascade",
+        },
+    )
+
+    async def get_verification_token():
+        async with async_session() as db:
+            result = await db.execute(
+                select(Member).where(Member.email == "cascade@test-member.com")
+            )
+            m = result.scalar_one()
+            return m.verification_token
+
+    verify_token = asyncio.run(get_verification_token())
+    client.post("/api/member/verify", json={"token": verify_token})
+    client.post(
+        "/api/member/login",
+        json={"email": "cascade@test-member.com", "password": "password123"},
+    )
+    member_token = client.cookies.get("member_token")
+
+    # Mark the message as read by viewing it
+    client.get(
+        f"/api/member/messages/{msg_id}",
+        headers={"Authorization": f"Bearer {member_token}"},
+    )
+
+    # Verify read record exists
+    async def get_read_count():
+        async with async_session() as db:
+            result = await db.execute(
+                select(SystemMessageRead).where(
+                    SystemMessageRead.message_id == msg_id
+                )
+            )
+            return len(result.all())
+
+    count_before = asyncio.run(get_read_count())
+    assert count_before == 1
+
+    # Delete the message as admin
+    res = client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+    assert res.status_code == 204
+
+    # Verify read record is gone (cascade)
+    count_after = asyncio.run(get_read_count())
+    assert count_after == 0
