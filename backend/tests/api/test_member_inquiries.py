@@ -132,3 +132,137 @@ def test_member_cannot_view_others_inquiry(client, admin_headers):
 
     # Cleanup
     client.delete("/api/manufacturers/mfr-test-own", headers=admin_headers)
+
+
+def test_list_inquiries_includes_recipient_name(client, admin_headers):
+    """Member list endpoint should populate recipient_name from the JOIN."""
+    client.post(
+        "/api/manufacturers",
+        json={"id": "mfr-name-list", "name": "Name List Factory", "slug": "mfr-name-list"},
+        headers=admin_headers,
+    )
+    _create_verified_member(client, "name-list@test-member.com")
+    member_token = client.cookies.get("member_token")
+    headers = {"Authorization": f"Bearer {member_token}"}
+
+    client.post(
+        "/api/member/inquiries",
+        json={"recipient_type": "manufacturer", "recipient_id": "mfr-name-list", "subject": "NameListQ", "body": "B"},
+        headers=headers,
+    )
+
+    res = client.get("/api/member/inquiries", headers=headers)
+    assert res.status_code == 200
+    items = res.json()
+    matched = [i for i in items if i.get("subject") == "NameListQ"]
+    assert len(matched) == 1
+    assert matched[0]["recipient_name"] == "Name List Factory"
+
+    # Cleanup
+    client.delete("/api/manufacturers/mfr-name-list", headers=admin_headers)
+
+
+def test_get_inquiry_includes_recipient_name(client, admin_headers):
+    """Member detail endpoint should populate recipient_name."""
+    client.post(
+        "/api/manufacturers",
+        json={"id": "mfr-name-get", "name": "Name Get Factory", "slug": "mfr-name-get"},
+        headers=admin_headers,
+    )
+    _create_verified_member(client, "name-get@test-member.com")
+    member_token = client.cookies.get("member_token")
+    headers = {"Authorization": f"Bearer {member_token}"}
+
+    create_res = client.post(
+        "/api/member/inquiries",
+        json={"recipient_type": "manufacturer", "recipient_id": "mfr-name-get", "subject": "NameGetQ", "body": "B"},
+        headers=headers,
+    )
+    inquiry_id = create_res.json()["id"]
+
+    res = client.get(f"/api/member/inquiries/{inquiry_id}", headers=headers)
+    assert res.status_code == 200
+    assert res.json()["recipient_name"] == "Name Get Factory"
+
+    # Cleanup
+    client.delete("/api/manufacturers/mfr-name-get", headers=admin_headers)
+
+
+def test_inquiry_to_equipment_manufacturer_resolves_name(client, admin_headers):
+    """recipient_type='equipment_manufacturer' should resolve via the EquipmentManufacturer JOIN branch."""
+    # NOTE: substitute the actual equipment-manufacturer API path if different (see Task 5 Step 1).
+    client.post(
+        "/api/equipment-manufacturers",
+        json={"id": "em-name-test", "name": "Equip Name Factory", "slug": "em-name-test"},
+        headers=admin_headers,
+    )
+    _create_verified_member(client, "em-name@test-member.com")
+    member_token = client.cookies.get("member_token")
+    headers = {"Authorization": f"Bearer {member_token}"}
+
+    create_res = client.post(
+        "/api/member/inquiries",
+        json={
+            "recipient_type": "equipment_manufacturer",
+            "recipient_id": "em-name-test",
+            "subject": "EquipNameQ",
+            "body": "B",
+        },
+        headers=headers,
+    )
+    assert create_res.status_code == 201, create_res.text
+    inquiry_id = create_res.json()["id"]
+
+    res = client.get(f"/api/member/inquiries/{inquiry_id}", headers=headers)
+    assert res.status_code == 200
+    assert res.json()["recipient_name"] == "Equip Name Factory"
+
+
+def test_inquiry_to_deleted_manufacturer_returns_none_name(client, admin_headers):
+    """If the manufacturer is deleted, recipient_name should be None (no 500)."""
+    client.post(
+        "/api/manufacturers",
+        json={"id": "mfr-del-test", "name": "Will Be Deleted", "slug": "mfr-del-test"},
+        headers=admin_headers,
+    )
+    _create_verified_member(client, "del-name@test-member.com")
+    member_token = client.cookies.get("member_token")
+    headers = {"Authorization": f"Bearer {member_token}"}
+
+    create_res = client.post(
+        "/api/member/inquiries",
+        json={"recipient_type": "manufacturer", "recipient_id": "mfr-del-test", "subject": "DelQ", "body": "B"},
+        headers=headers,
+    )
+    inquiry_id = create_res.json()["id"]
+
+    # Delete the manufacturer via admin API
+    client.delete("/api/manufacturers/mfr-del-test", headers=admin_headers)
+
+    # Re-query — should NOT 500, recipient_name should be None
+    res = client.get(f"/api/member/inquiries/{inquiry_id}", headers=headers)
+    assert res.status_code == 200
+    assert res.json()["recipient_name"] is None
+
+
+def test_create_inquiry_response_includes_recipient_name(client, admin_headers):
+    """POST /api/member/inquiries response should include recipient_name (re-query path)."""
+    client.post(
+        "/api/manufacturers",
+        json={"id": "mfr-create-name", "name": "Create Name Factory", "slug": "mfr-create-name"},
+        headers=admin_headers,
+    )
+    _create_verified_member(client, "create-name@test-member.com")
+    member_token = client.cookies.get("member_token")
+    headers = {"Authorization": f"Bearer {member_token}"}
+
+    res = client.post(
+        "/api/member/inquiries",
+        json={"recipient_type": "manufacturer", "recipient_id": "mfr-create-name", "subject": "CreateNameQ", "body": "B"},
+        headers=headers,
+    )
+    assert res.status_code == 201
+    assert res.json()["recipient_name"] == "Create Name Factory"
+
+    # Cleanup
+    client.delete("/api/manufacturers/mfr-create-name", headers=admin_headers)

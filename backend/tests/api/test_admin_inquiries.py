@@ -91,3 +91,18 @@ def test_admin_unread_count(client, admin_headers):
     assert after == initial + 1
     # Cleanup
     client.delete("/api/manufacturers/mfr-adm-cnt", headers=admin_headers)
+
+
+def test_admin_list_includes_recipient_name(client, admin_headers):
+    """Admin list endpoint should populate recipient_name from the JOIN."""
+    inquiry_id = _setup_member_with_inquiry(
+        client, admin_headers, "adm-name@test-member.com", "mfr-adm-name"
+    )
+    res = client.get("/api/admin/inquiries", headers=admin_headers)
+    assert res.status_code == 200
+    matched = [i for i in res.json() if i["id"] == inquiry_id]
+    assert len(matched) == 1
+    # _setup_member_with_inquiry creates manufacturer with name = mfr_id.title() = "Mfr-Adm-Name"
+    assert matched[0]["recipient_name"] == "Mfr-Adm-Name"
+    # Cleanup
+    client.delete("/api/manufacturers/mfr-adm-name", headers=admin_headers)
