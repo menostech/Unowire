@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { recipientDisplayName } from '@/lib/utils';
 
 export default async function AdminInquiriesPage() {
   const cookieStore = await cookies();
@@ -37,7 +38,7 @@ export default async function AdminInquiriesPage() {
                     {!i.is_read && <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>}
                     {i.subject}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{i.recipient_type}: {i.recipient_id}</td>
+                  <td className="px-4 py-3 text-gray-600">{recipientDisplayName(i.recipient_name)}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded ${i.reply_body ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                       {i.reply_body ? 'Replied' : 'Pending'}
