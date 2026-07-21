@@ -15,6 +15,13 @@ from sqlalchemy import select
 router = APIRouter(prefix="/api/admin/inquiries", tags=["admin-inquiries"])
 
 
+def _attach_recipient_name(inquiry: Inquiry, name: str | None) -> Inquiry:
+    """Attach the resolved recipient name to an Inquiry instance so
+    Pydantic's from_attributes=True can read it during serialization."""
+    inquiry.recipient_name = name
+    return inquiry
+
+
 def _check_scope_access(user: User, inquiry: Inquiry) -> None:
     """Raise 403 if user's scope does not cover this inquiry."""
     if user.role is None:
@@ -33,9 +40,10 @@ async def list_inquiries(
 ):
     scope_type = user.role.scope_type if user.role else None
     scope_id = user.scope_id
-    return await crud_inquiry.list_for_staff(
+    rows = await crud_inquiry.list_for_staff(
         db, scope_type=scope_type, scope_id=scope_id
     )
+    return [_attach_recipient_name(inq, name) for inq, name in rows]
 
 
 @router.get("/unread-count")
@@ -55,14 +63,15 @@ async def get_inquiry(
     user: User = Depends(require_module("inquiries")),
     db: AsyncSession = Depends(get_db),
 ):
-    inquiry = await crud_inquiry.get(db, inquiry_id)
-    if inquiry is None:
+    row = await crud_inquiry.get_with_recipient_name(db, inquiry_id)
+    if row is None:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Inquiry not found"})
+    inquiry, name = row
     _check_scope_access(user, inquiry)
     # Mark as read by staff
     if not inquiry.is_read:
         await crud_inquiry.mark_read_for_staff(db, inquiry)
-    return inquiry
+    return _attach_recipient_name(inquiry, name)
 
 
 @router.post("/{inquiry_id}/reply", response_model=InquiryRead)
@@ -99,4 +108,10 @@ async def reply_inquiry(
             },
         )
 
-    return inquiry
+    # Re-query to attach the resolved recipient name
+    row = await crud_inquiry.get_with_recipient_name(db, inquiry.id)
+    if row is None:
+        # Should not happen — we just replied to it
+        raise HTTPException(status_code=500, detail={"code": 500, "message": "Inquiry disappeared after reply"})
+    inquiry, name = row
+    return _attach_recipient_name(inquiry, name)
