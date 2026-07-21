@@ -86,3 +86,11 @@ export function formatSpecValue(spec: SpecItem): string {
   const valueStr = String(spec.value);
   return spec.unit ? `${valueStr} ${spec.unit}` : valueStr;
 }
+
+/**
+ * Display name for an inquiry recipient. Falls back to a generic label
+ * when the manufacturer has been deleted (recipient_name is null).
+ */
+export function recipientDisplayName(name: string | null): string {
+  return name ?? 'Unknown manufacturer';
+}

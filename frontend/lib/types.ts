@@ -446,3 +446,20 @@ export interface MemberMessageListResponse {
 export interface UnreadCount {
   unread: number;
 }
+
+// === Inquiries ===
+export interface InquiryRead {
+  id: number;
+  sender_id: number;
+  recipient_type: string;
+  recipient_id: string;
+  recipient_name: string | null;  // resolved at query time; null if manufacturer deleted
+  subject: string;
+  body: string;
+  reply_body: string | null;
+  replied_at: string | null;
+  replied_by: number | null;
+  is_read: boolean;
+  is_member_read: boolean;
+  created_at: string;
+}
