@@ -15,6 +15,7 @@ class InquiryRead(BaseModel):
     sender_id: int
     recipient_type: str
     recipient_id: str
+    recipient_name: str | None = None  # resolved at query time via polymorphic JOIN
     subject: str
     body: str
     reply_body: str | None = None
