@@ -1,11 +1,48 @@
 from datetime import datetime
 
-from sqlalchemy import select, func, and_
+from sqlalchemy import case, select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.crud.base import CRUDBase
+from app.models.equipment import EquipmentManufacturer
 from app.models.inquiry import Inquiry
+from app.models.manufacturer import Manufacturer
 from app.schemas.inquiry import InquiryCreate, InquiryReply
+
+
+# Polymorphic recipient-name resolution: LEFT JOIN both manufacturer tables
+# and select the name via a CASE expression based on recipient_type.
+# If the manufacturer has been deleted, both joins miss and name is None.
+_MfrAlias = aliased(Manufacturer)
+_EquipMfrAlias = aliased(EquipmentManufacturer)
+
+_RECIPIENT_NAME_EXPR = case(
+    (Inquiry.recipient_type == "manufacturer", _MfrAlias.name),
+    (Inquiry.recipient_type == "equipment_manufacturer", _EquipMfrAlias.name),
+    else_=None,
+)
+
+
+def _with_recipient_joins(stmt):
+    """Apply both polymorphic LEFT JOINs to a select statement on Inquiry."""
+    return (
+        stmt
+        .outerjoin(
+            _MfrAlias,
+            and_(
+                Inquiry.recipient_type == "manufacturer",
+                Inquiry.recipient_id == _MfrAlias.id,
+            ),
+        )
+        .outerjoin(
+            _EquipMfrAlias,
+            and_(
+                Inquiry.recipient_type == "equipment_manufacturer",
+                Inquiry.recipient_id == _EquipMfrAlias.id,
+            ),
+        )
+    )
 
 
 class CRUDInquiry(CRUDBase[Inquiry, InquiryCreate, InquiryReply]):
@@ -19,15 +56,34 @@ class CRUDInquiry(CRUDBase[Inquiry, InquiryCreate, InquiryReply]):
         await db.refresh(db_obj)
         return db_obj
 
+    async def get_with_recipient_name(
+        self, db: AsyncSession, inquiry_id: int
+    ) -> tuple[Inquiry, str | None] | None:
+        """Fetch a single inquiry with its resolved recipient name.
+
+        Returns (inquiry, recipient_name) or None if not found. If the
+        manufacturer has been deleted, recipient_name is None.
+        """
+        stmt = _with_recipient_joins(
+            select(Inquiry, _RECIPIENT_NAME_EXPR).where(Inquiry.id == inquiry_id)
+        )
+        result = await db.execute(stmt)
+        row = result.first()
+        if row is None:
+            return None
+        return row[0], row[1]
+
     async def list_by_member(
         self, db: AsyncSession, member_id: int
-    ) -> list[Inquiry]:
-        result = await db.execute(
-            select(Inquiry)
+    ) -> list[tuple[Inquiry, str | None]]:
+        """List inquiries sent by a member, each with its resolved recipient name."""
+        stmt = _with_recipient_joins(
+            select(Inquiry, _RECIPIENT_NAME_EXPR)
             .where(Inquiry.sender_id == member_id)
             .order_by(Inquiry.created_at.desc())
         )
-        return list(result.scalars().all())
+        result = await db.execute(stmt)
+        return [(row[0], row[1]) for row in result.all()]
 
     async def list_for_staff(
         self,
@@ -35,9 +91,11 @@ class CRUDInquiry(CRUDBase[Inquiry, InquiryCreate, InquiryReply]):
         *,
         scope_type: str | None,
         scope_id: str | None,
-    ) -> list[Inquiry]:
-        """List inquiries filtered by staff scope."""
-        stmt = select(Inquiry).order_by(Inquiry.created_at.desc())
+    ) -> list[tuple[Inquiry, str | None]]:
+        """List inquiries filtered by staff scope, each with its resolved recipient name."""
+        stmt = _with_recipient_joins(
+            select(Inquiry, _RECIPIENT_NAME_EXPR).order_by(Inquiry.created_at.desc())
+        )
         if scope_type == "manufacturer":
             stmt = stmt.where(
                 and_(
@@ -54,7 +112,7 @@ class CRUDInquiry(CRUDBase[Inquiry, InquiryCreate, InquiryReply]):
             )
         # else: admin/global — no scope filter
         result = await db.execute(stmt)
-        return list(result.scalars().all())
+        return [(row[0], row[1]) for row in result.all()]
 
     async def unread_count_for_staff(
         self, db: AsyncSession, scope_type: str | None, scope_id: str | None
