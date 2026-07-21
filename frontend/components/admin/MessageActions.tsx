@@ -22,11 +22,11 @@ export function MessageActions({ messageId }: { messageId: number }) {
       }
       router.push('/admin/messages');
       router.refresh();
+      setConfirming(false);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setDeleting(false);
-      setConfirming(false);
     }
   }
 
