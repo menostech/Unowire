@@ -22,6 +22,7 @@ async def get_current_user(
     payload = decode_access_token(token)
     if payload is None:
         raise HTTPException(status_code=401, detail={"code": 401, "message": "Not authenticated"})
+    # Eager-load role + role.permissions to avoid async MissingGreenlet errors.
     stmt = (
         select(User)
         .where(User.id == int(payload["sub"]))
@@ -31,6 +32,7 @@ async def get_current_user(
     user = result.scalar_one_or_none()
     if user is None or not user.is_active:
         raise HTTPException(status_code=401, detail={"code": 401, "message": "Not authenticated"})
+    # Populate a convenience set of allowed module IDs for O(1) lookup.
     user.role_permissions = {rp.module for rp in user.role.permissions}
     return user
 
