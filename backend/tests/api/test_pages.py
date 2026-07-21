@@ -226,7 +226,7 @@ def test_public_get_nonexistent(client):
 
 def test_non_admin_cannot_access_admin_endpoints(client, cable_manager_headers):
     res = client.get("/api/admin/pages", headers=cable_manager_headers)
-    assert res.status_code == 403, res.text
+    assert res.status_code in (401, 403), res.text  # 401 portal_token rejected, 403 operator-only
 
 
 def test_admin_can_access_admin_endpoints(client, admin_headers):

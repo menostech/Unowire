@@ -272,9 +272,11 @@ class TestPermissions:
         assert res.status_code in (401, 403)
 
     def test_cable_manager_forbidden(self, client, cable_manager_headers):
-        # cable_manager has media + manufacturers modules, NOT menu_config
+        # After Task 3, cable_manager_headers returns a portal_token (not an admin_token),
+        # so /api/admin/site-menu rejects with 401 (token type mismatch) — both 401 and
+        # 403 mean "factory user cannot access admin endpoints".
         res = client.get("/api/admin/site-menu", headers=cable_manager_headers)
-        assert res.status_code == 403
+        assert res.status_code in (401, 403)
 
 
 # === Sort tests ===
