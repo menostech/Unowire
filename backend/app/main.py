@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages, portal_auth
+from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages, portal_auth, page_views
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -111,6 +111,7 @@ app.include_router(pages.public_router, prefix=f"{settings.api_prefix}/pages", t
 app.include_router(site_menu.admin_router, prefix=f"{settings.api_prefix}/admin/site-menu", tags=["admin-site-menu"])
 app.include_router(site_menu.public_router, prefix=f"{settings.api_prefix}/site-menu", tags=["public-site-menu"])
 app.include_router(portal_auth.router)
+app.include_router(page_views.router)
 
 # Mount media directory for static file serving
 media_dir = os.environ.get("MEDIA_DIR", "/app/media")

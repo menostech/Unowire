@@ -40,6 +40,9 @@ def _cleanup_test_data():
 
     async def _cleanup():
         async with _test_engine.begin() as conn:
+            # Truncate page_views (per-test cleanup also runs, but this ensures
+            # cross-session isolation for the page_views table)
+            await conn.execute(text("TRUNCATE TABLE page_views"))
             # Clean up test pages
             await conn.execute(text("DELETE FROM pages WHERE id LIKE 'page-test-%' OR slug LIKE 'test-%'"))
             # Clean up test site menu items
