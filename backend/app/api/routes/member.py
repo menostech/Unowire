@@ -111,6 +111,14 @@ async def me(member: Member = Depends(get_current_member)):
 
 # --- Inquiry endpoints (member-side) ---
 
+
+def _attach_recipient_name(inquiry: Inquiry, name: str | None) -> Inquiry:
+    """Attach the resolved recipient name to an Inquiry instance so
+    Pydantic's from_attributes=True can read it during serialization."""
+    inquiry.recipient_name = name
+    return inquiry
+
+
 @router.post("/inquiries", response_model=InquiryRead, status_code=201)
 async def create_inquiry(
     body: InquiryCreate,
@@ -132,7 +140,13 @@ async def create_inquiry(
     # Notify staff (best-effort)
     await _notify_staff_of_inquiry(db, inquiry, member)
 
-    return inquiry
+    # Re-query to attach the resolved recipient name
+    row = await crud_inquiry.get_with_recipient_name(db, inquiry.id)
+    if row is None:
+        # Should not happen — we just created it
+        raise HTTPException(status_code=500, detail={"code": 500, "message": "Inquiry disappeared after create"})
+    inquiry, name = row
+    return _attach_recipient_name(inquiry, name)
 
 
 async def _notify_staff_of_inquiry(db: AsyncSession, inquiry: Inquiry, member: Member):
@@ -171,7 +185,8 @@ async def list_my_inquiries(
     member: Member = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud_inquiry.list_by_member(db, member.id)
+    rows = await crud_inquiry.list_by_member(db, member.id)
+    return [_attach_recipient_name(inq, name) for inq, name in rows]
 
 
 @router.get("/inquiries/unread-count")
@@ -189,13 +204,16 @@ async def get_inquiry(
     member: Member = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    inquiry = await crud_inquiry.get(db, inquiry_id)
-    if inquiry is None or inquiry.sender_id != member.id:
+    row = await crud_inquiry.get_with_recipient_name(db, inquiry_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Inquiry not found"})
+    inquiry, name = row
+    if inquiry.sender_id != member.id:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Inquiry not found"})
     # Mark as read by member (if there's a reply)
     if inquiry.reply_body is not None and not inquiry.is_member_read:
         await crud_inquiry.mark_read_for_member(db, inquiry)
-    return inquiry
+    return _attach_recipient_name(inquiry, name)
 
 
 # --- System message endpoints (member-side) ---
