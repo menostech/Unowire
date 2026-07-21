@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.core.database import get_db
 from app.crud.site_menu import crud_site_menu
 from app.models.user import User
@@ -23,7 +23,7 @@ public_router = APIRouter()
 async def list_site_menu_items(
     location: str | None = Query(None, regex="^(header|footer)$"),
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     """Flat list of all items (including hidden), for editor."""
     return await crud_site_menu.get_flat(db, location=location)
@@ -33,7 +33,7 @@ async def list_site_menu_items(
 async def get_site_menu_tree_admin(
     location: str = Query(..., regex="^(header|footer)$"),
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     """Tree for admin editor (includes hidden)."""
     return await crud_site_menu.get_tree(db, location=location, include_hidden=True)
@@ -43,7 +43,7 @@ async def get_site_menu_tree_admin(
 async def get_site_menu_item(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     obj = await crud_site_menu.get(db, id)
     if not obj:
@@ -58,7 +58,7 @@ async def get_site_menu_item(
 async def create_site_menu_item(
     obj_in: SiteMenuItemCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     return await crud_site_menu.create(db, obj_in=obj_in)
 
@@ -68,7 +68,7 @@ async def update_site_menu_item(
     id: str,
     obj_in: SiteMenuItemUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     obj = await crud_site_menu.get(db, id)
     if not obj:
@@ -89,7 +89,7 @@ async def update_site_menu_item(
 async def delete_site_menu_item(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     obj = await crud_site_menu.get(db, id)
     if not obj:
@@ -108,7 +108,7 @@ async def sort_site_menu_item(
     id: str,
     body: SiteMenuSortRequest,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     return await crud_site_menu.move(db, id, body.direction)
 

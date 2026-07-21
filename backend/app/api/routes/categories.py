@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.taxonomy import crud_category
@@ -26,7 +26,7 @@ async def get_category(industry_id: str, id: str, db: AsyncSession = Depends(get
 
 
 @router.post("", response_model=CategoryRead, status_code=201)
-async def create_category(industry_id: str, obj_in: CategoryCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("industries"))):
+async def create_category(industry_id: str, obj_in: CategoryCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("industries"))):
     obj_in_data = obj_in.model_dump()
     obj_in_data["industry_id"] = industry_id
     from app.models.taxonomy import Category
@@ -38,7 +38,7 @@ async def create_category(industry_id: str, obj_in: CategoryCreate, db: AsyncSes
 
 
 @router.put("/{id}", response_model=CategoryRead)
-async def update_category(industry_id: str, id: str, obj_in: CategoryUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("industries"))):
+async def update_category(industry_id: str, id: str, obj_in: CategoryUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("industries"))):
     # DB stores composite ID "industry_id/category_slug"; path splits it into segments
     composite_id = f"{industry_id}/{id}"
     obj = await crud_category.get(db, composite_id)
@@ -48,7 +48,7 @@ async def update_category(industry_id: str, id: str, obj_in: CategoryUpdate, db:
 
 
 @router.delete("/{id}", response_model=CategoryRead)
-async def delete_category(industry_id: str, id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("industries"))):
+async def delete_category(industry_id: str, id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("industries"))):
     # DB stores composite ID "industry_id/category_slug"; path splits it into segments
     composite_id = f"{industry_id}/{id}"
     obj = await crud_category.get(db, composite_id)

@@ -3,7 +3,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.schemas.cable_import import ImportPreview, ImportResult
@@ -23,7 +23,7 @@ async def validate_import(
     file: UploadFile,
     format: Literal["csv", "json"] = Form(...),
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("cables")),
+    user: User = Depends(require_operator("cables")),
 ):
     content = await file.read()
     parsed = parse_file(content, format)
@@ -38,7 +38,7 @@ async def commit_import(
     file: UploadFile,
     format: Literal["csv", "json"] = Form(...),
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("cables")),
+    user: User = Depends(require_operator("cables")),
 ):
     content = await file.read()
     parsed = parse_file(content, format)

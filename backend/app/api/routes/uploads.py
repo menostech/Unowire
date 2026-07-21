@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_media_scope, require_module
+from app.api.deps import get_media_scope, require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.upload import crud_upload
@@ -30,7 +30,7 @@ async def upload_file(
     file: UploadFile,
     folder_id: int | None = Form(default=None),
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     # Scoped users must upload to a specific folder in their scope
@@ -88,7 +88,7 @@ async def list_uploads(
     page_size: int = 20,
     folder_id: int | Literal["none"] | None = None,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     items, total = await crud_upload.list_paginated(
@@ -108,7 +108,7 @@ async def rename_upload(
     id: int,
     body: UploadRename,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     upload = await crud_upload.get(db, id=id)
@@ -131,7 +131,7 @@ async def move_upload(
     id: int,
     body: UploadMove,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     upload = await crud_upload.get(db, id=id)
@@ -168,7 +168,7 @@ async def move_upload(
 async def delete_upload(
     id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     upload = await crud_upload.get(db, id=id)

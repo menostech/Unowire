@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.core.database import get_db
 from app.crud.member import crud_member
 from app.models.user import User
@@ -34,7 +34,7 @@ async def list_members(
     is_verified: bool | None = None,
     is_active: bool | None = None,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("members")),
+    user: User = Depends(require_operator("members")),
 ):
     members = await crud_member.list_with_filters(
         db, q=q, is_verified=is_verified, is_active=is_active
@@ -50,7 +50,7 @@ async def list_members(
 async def get_member(
     member_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("members")),
+    user: User = Depends(require_operator("members")),
 ):
     member = await crud_member.get(db, member_id)
     if member is None:
@@ -64,7 +64,7 @@ async def update_member(
     member_id: int,
     obj_in: AdminMemberUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("members")),
+    user: User = Depends(require_operator("members")),
 ):
     member = await crud_member.get(db, member_id)
     if member is None:
@@ -81,7 +81,7 @@ async def activate_member(
     member_id: int,
     obj_in: AdminMemberActivate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("members")),
+    user: User = Depends(require_operator("members")),
 ):
     member = await crud_member.get(db, member_id)
     if member is None:
@@ -95,7 +95,7 @@ async def activate_member(
 async def verify_member(
     member_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("members")),
+    user: User = Depends(require_operator("members")),
 ):
     member = await crud_member.get(db, member_id)
     if member is None:
@@ -109,7 +109,7 @@ async def verify_member(
 async def delete_member(
     member_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("members")),
+    user: User = Depends(require_operator("members")),
 ):
     member = await crud_member.get(db, member_id)
     if member is None:

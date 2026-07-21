@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.core.database import get_db
 from app.core.scope_resolvers import SCOPE_RESOLVERS
 from app.crud.user import crud_user
@@ -28,7 +28,7 @@ def _user_to_read(user) -> UserRead:
 @router.get("", response_model=list[UserRead])
 async def list_users(
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("users")),
+    user: User = Depends(require_operator("users")),
 ):
     users = await crud_user.get_all_with_roles(db)
     return [_user_to_read(u) for u in users]
@@ -38,7 +38,7 @@ async def list_users(
 async def get_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_module("users")),
+    current_user: User = Depends(require_operator("users")),
 ):
     user = await crud_user.get_with_role(db, user_id)
     if user is None:
@@ -50,7 +50,7 @@ async def get_user(
 async def create_user(
     obj_in: UserCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_module("users")),
+    current_user: User = Depends(require_operator("users")),
 ):
     user = await crud_user.create(db, obj_in=obj_in)
     user = await crud_user.get_with_role(db, user.id)
@@ -62,7 +62,7 @@ async def update_user(
     user_id: int,
     obj_in: UserUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_module("users")),
+    current_user: User = Depends(require_operator("users")),
 ):
     db_obj = await crud_user.get_with_role(db, user_id)
     if db_obj is None:
@@ -76,7 +76,7 @@ async def update_user(
 async def delete_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_module("users")),
+    current_user: User = Depends(require_operator("users")),
 ):
     if user_id == current_user.id:
         raise HTTPException(
@@ -93,7 +93,7 @@ async def delete_user(
 async def list_scopes(
     scope_type: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_module("users")),
+    current_user: User = Depends(require_operator("users")),
 ):
     """List entities for a scope_type (e.g., all manufacturers).
     Used by frontend user editor to populate the scope_id dropdown."""

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_media_scope, require_module
+from app.api.deps import get_media_scope, require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.folder import crud_folder
@@ -18,7 +18,7 @@ router = APIRouter()
 @router.get("", response_model=FolderTreeResponse)
 async def list_folders(
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     rows = await crud_folder.list_all_with_counts(
@@ -41,7 +41,7 @@ async def list_folders(
 async def create_folder(
     obj_in: FolderCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     # Scoped users must provide a parent_id within their scope
@@ -75,7 +75,7 @@ async def rename_folder(
     folder_id: int,
     obj_in: FolderUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     folder = await crud_folder.assert_folder_in_scope(db, folder_id, scope[0], scope[1])
@@ -96,7 +96,7 @@ async def rename_folder(
 async def delete_folder(
     folder_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("media")),
+    user: User = Depends(require_operator("media")),
     scope: tuple[str | None, str | None] = Depends(get_media_scope),
 ):
     folder = await crud_folder.assert_folder_in_scope(db, folder_id, scope[0], scope[1])

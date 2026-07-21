@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.manufacturer import crud_manufacturer
@@ -41,7 +41,7 @@ async def get_manufacturer(id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=ManufacturerRead, status_code=201)
-async def create_manufacturer(obj_in: ManufacturerCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("manufacturers"))):
+async def create_manufacturer(obj_in: ManufacturerCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("manufacturers"))):
     # Scope check: cable_manager can only manage their own manufacturer
     if user.role and user.role.scope_type == "manufacturer":
         if obj_in.id != user.scope_id:
@@ -58,7 +58,7 @@ async def create_manufacturer(obj_in: ManufacturerCreate, db: AsyncSession = Dep
 
 
 @router.put("/{id}", response_model=ManufacturerRead)
-async def update_manufacturer(id: str, obj_in: ManufacturerUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("manufacturers"))):
+async def update_manufacturer(id: str, obj_in: ManufacturerUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("manufacturers"))):
     obj = await crud_manufacturer.get(db, id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Manufacturer not found"})
@@ -80,7 +80,7 @@ async def update_manufacturer(id: str, obj_in: ManufacturerUpdate, db: AsyncSess
 
 
 @router.delete("/{id}", response_model=ManufacturerRead)
-async def delete_manufacturer(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("manufacturers"))):
+async def delete_manufacturer(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("manufacturers"))):
     # Scope check
     if user.role and user.role.scope_type == "manufacturer":
         if id != user.scope_id:

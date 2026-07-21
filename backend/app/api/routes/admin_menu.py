@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.menu import crud_menu_item
@@ -27,7 +27,7 @@ async def get_menu_tree(db: AsyncSession = Depends(get_db)):
 @router.get("", response_model=list[MenuItemRead])
 async def list_menu_items(
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     """Flat list of all items (including hidden), for editor."""
     return await crud_menu_item.get_flat(db)
@@ -37,7 +37,7 @@ async def list_menu_items(
 async def get_menu_item(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     obj = await crud_menu_item.get(db, id)
     if not obj:
@@ -52,7 +52,7 @@ async def get_menu_item(
 async def create_menu_item(
     obj_in: MenuItemCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     return await crud_menu_item.create(db, obj_in=obj_in)
 
@@ -62,7 +62,7 @@ async def update_menu_item(
     id: str,
     obj_in: MenuItemUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     obj = await crud_menu_item.get(db, id)
     if not obj:
@@ -83,7 +83,7 @@ async def update_menu_item(
 async def delete_menu_item(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     await crud_menu_item.assert_not_protected(id)
     obj = await crud_menu_item.get_with_children(db, id)
@@ -103,6 +103,6 @@ async def sort_menu_item(
     id: str,
     body: MenuItemSort,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("menu_config")),
+    user: User = Depends(require_operator("menu_config")),
 ):
     return await crud_menu_item.move(db, id, body.direction)

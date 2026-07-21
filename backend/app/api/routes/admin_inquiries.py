@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_module
+from app.api.deps import get_current_user, require_operator
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.email import send_email_background
@@ -35,7 +35,7 @@ def _check_scope_access(user: User, inquiry: Inquiry) -> None:
 
 @router.get("", response_model=list[InquiryRead])
 async def list_inquiries(
-    user: User = Depends(require_module("inquiries")),
+    user: User = Depends(require_operator("inquiries")),
     db: AsyncSession = Depends(get_db),
 ):
     scope_type = user.role.scope_type if user.role else None
@@ -48,7 +48,7 @@ async def list_inquiries(
 
 @router.get("/unread-count")
 async def unread_count(
-    user: User = Depends(require_module("inquiries")),
+    user: User = Depends(require_operator("inquiries")),
     db: AsyncSession = Depends(get_db),
 ):
     scope_type = user.role.scope_type if user.role else None
@@ -60,7 +60,7 @@ async def unread_count(
 @router.get("/{inquiry_id}", response_model=InquiryRead)
 async def get_inquiry(
     inquiry_id: int,
-    user: User = Depends(require_module("inquiries")),
+    user: User = Depends(require_operator("inquiries")),
     db: AsyncSession = Depends(get_db),
 ):
     row = await crud_inquiry.get_with_recipient_name(db, inquiry_id)
@@ -78,7 +78,7 @@ async def get_inquiry(
 async def reply_inquiry(
     inquiry_id: int,
     body: InquiryReply,
-    user: User = Depends(require_module("inquiries")),
+    user: User = Depends(require_operator("inquiries")),
     db: AsyncSession = Depends(get_db),
 ):
     inquiry = await crud_inquiry.get(db, inquiry_id)

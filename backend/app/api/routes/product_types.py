@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.taxonomy import crud_product_type
@@ -29,7 +29,7 @@ async def get_product_type(industry_id: str, category_id: str, id: str, db: Asyn
 
 
 @router.post("", response_model=ProductTypeRead, status_code=201)
-async def create_product_type(industry_id: str, category_id: str, obj_in: ProductTypeCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("industries"))):
+async def create_product_type(industry_id: str, category_id: str, obj_in: ProductTypeCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("industries"))):
     # Reconstruct composite category_id for DB storage
     composite_cat_id = f"{industry_id}/{category_id}"
     obj_in_data = obj_in.model_dump()
@@ -44,7 +44,7 @@ async def create_product_type(industry_id: str, category_id: str, obj_in: Produc
 
 @router.put("/{id}", response_model=ProductTypeRead)
 async def update_product_type(
-    industry_id: str, category_id: str, id: str, obj_in: ProductTypeUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("industries"))
+    industry_id: str, category_id: str, id: str, obj_in: ProductTypeUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("industries"))
 ):
     # DB stores composite IDs: category_id="ind/cat", product_type_id="ind/cat/pt"
     composite_cat_id = f"{industry_id}/{category_id}"
@@ -56,7 +56,7 @@ async def update_product_type(
 
 
 @router.delete("/{id}", response_model=ProductTypeRead)
-async def delete_product_type(industry_id: str, category_id: str, id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("industries"))):
+async def delete_product_type(industry_id: str, category_id: str, id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("industries"))):
     # DB stores composite IDs: category_id="ind/cat", product_type_id="ind/cat/pt"
     composite_cat_id = f"{industry_id}/{category_id}"
     composite_pt_id = f"{industry_id}/{category_id}/{id}"
