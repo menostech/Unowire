@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import case, select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -182,6 +182,79 @@ class CRUDInquiry(CRUDBase[Inquiry, InquiryCreate, InquiryReply]):
         await db.commit()
         await db.refresh(inquiry)
         return inquiry
+
+    async def count_for_staff(
+        self, db: AsyncSession, scope_type: str | None, scope_id: str | None
+    ) -> int:
+        """Count inquiries filtered by staff scope."""
+        stmt = select(func.count()).select_from(Inquiry)
+        if scope_type == "manufacturer":
+            stmt = stmt.where(
+                and_(Inquiry.recipient_type == "manufacturer", Inquiry.recipient_id == scope_id)
+            )
+        elif scope_type == "equipment_manufacturer":
+            stmt = stmt.where(
+                and_(Inquiry.recipient_type == "equipment_manufacturer", Inquiry.recipient_id == scope_id)
+            )
+        result = await db.execute(stmt)
+        return result.scalar() or 0
+
+    async def recent_for_staff(
+        self,
+        db: AsyncSession,
+        scope_type: str | None,
+        scope_id: str | None,
+        limit: int = 5,
+    ) -> list[Inquiry]:
+        """Return recent inquiries for portal dashboard, ordered by created_at DESC."""
+        stmt = select(Inquiry).order_by(Inquiry.created_at.desc()).limit(limit)
+        if scope_type == "manufacturer":
+            stmt = stmt.where(
+                and_(Inquiry.recipient_type == "manufacturer", Inquiry.recipient_id == scope_id)
+            )
+        elif scope_type == "equipment_manufacturer":
+            stmt = stmt.where(
+                and_(Inquiry.recipient_type == "equipment_manufacturer", Inquiry.recipient_id == scope_id)
+            )
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
+    async def daily_trend_for_staff(
+        self,
+        db: AsyncSession,
+        scope_type: str | None,
+        scope_id: str | None,
+        days: int = 30,
+    ) -> list[dict]:
+        """Return daily inquiry counts for the last N days, zero-filled."""
+        cutoff = datetime.utcnow() - timedelta(days=days)
+        stmt = (
+            select(
+                func.date(Inquiry.created_at).label("date"),
+                func.count().label("count"),
+            )
+            .where(Inquiry.created_at >= cutoff)
+            .group_by(func.date(Inquiry.created_at))
+            .order_by(func.date(Inquiry.created_at))
+        )
+        if scope_type == "manufacturer":
+            stmt = stmt.where(
+                and_(Inquiry.recipient_type == "manufacturer", Inquiry.recipient_id == scope_id)
+            )
+        elif scope_type == "equipment_manufacturer":
+            stmt = stmt.where(
+                and_(Inquiry.recipient_type == "equipment_manufacturer", Inquiry.recipient_id == scope_id)
+            )
+        result = await db.execute(stmt)
+        rows = {str(row.date): row.count for row in result.all()}
+
+        trend = []
+        today = datetime.utcnow().date()
+        for i in range(days - 1, -1, -1):
+            day = today - timedelta(days=i)
+            day_str = day.isoformat()
+            trend.append({"date": day_str, "count": rows.get(day_str, 0)})
+        return trend
 
 
 crud_inquiry = CRUDInquiry(Inquiry)

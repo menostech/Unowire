@@ -73,6 +73,29 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
         result = await db.execute(stmt)
         return list(result.scalars().all()), total
 
+    async def list_by_manufacturer(
+        self, db: AsyncSession, *, scope_id: str, skip: int = 0, limit: int = 50
+    ) -> list[RecommendedEquipment]:
+        """List equipment where manufacturer_id == scope_id. For portal routes."""
+        stmt = (
+            select(RecommendedEquipment)
+            .where(RecommendedEquipment.manufacturer_id == scope_id)
+            .order_by(RecommendedEquipment.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+        )
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
+    async def count_by_manufacturer(self, db: AsyncSession, *, scope_id: str) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(RecommendedEquipment)
+            .where(RecommendedEquipment.manufacturer_id == scope_id)
+        )
+        result = await db.execute(stmt)
+        return result.scalar() or 0
+
     async def get_matching_cable(self, db: AsyncSession, cable_id: str) -> list[RecommendedEquipment]:
         spec_stmt = select(SpecItem).where(
             SpecItem.cable_id == cable_id,
