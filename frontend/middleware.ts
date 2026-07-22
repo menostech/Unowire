@@ -17,6 +17,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Portal routes: skip login page
+  if (pathname.startsWith('/portal') && pathname === '/portal/login') {
+    return NextResponse.next();
+  }
+
   // Admin routes require admin_token
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('admin_token')?.value;
@@ -37,9 +42,19 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Portal routes require portal_token
+  if (pathname.startsWith('/portal')) {
+    const token = request.cookies.get('portal_token')?.value;
+    if (!token) {
+      const loginUrl = new URL('/portal/login', request.url);
+      loginUrl.searchParams.set('from', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/member/:path*'],
+  matcher: ['/admin/:path*', '/member/:path*', '/portal/:path*'],
 };
