@@ -89,6 +89,19 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
     (e) => e.manufacturer_id === equipment.manufacturer_id && e.id !== equipment.id
   );
 
+  // Fire-and-forget page view tracking. Errors are silently ignored.
+  if (equipment?.id) {
+    try {
+      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/page-views`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entity_type: 'equipment', entity_id: String(equipment.id) }),
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <Container className="py-8">
       <Breadcrumbs

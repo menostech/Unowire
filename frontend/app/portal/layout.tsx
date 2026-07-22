@@ -15,7 +15,12 @@ export default async function PortalLayout({ children }: { children: React.React
   }
   return (
     <div className="portal-shell flex min-h-screen">
-      <PortalSidebar user={user} />
+      <PortalSidebar
+        user={{
+          ...user,
+          scope_type: user.scope_type as 'manufacturer' | 'equipment_manufacturer',
+        }}
+      />
       <div className="flex flex-1 flex-col">
         <main className="flex-1 bg-gray-50 p-6">{children}</main>
       </div>

@@ -61,7 +61,14 @@ export const portalApi = {
       return portalGet<{
         factory_name: string;
         scope_type: string;
-        stats: Record<string, number>;
+        stats: {
+          cables_count?: number;
+          equipment_count?: number;
+          views_total: number;
+          views_trend_30d: number;
+          inquiries_total: number;
+          inquiries_unread: number;
+        };
         inquiry_trend: { date: string; count: number }[];
         views_trend: { date: string; count: number }[];
         recent_inquiries: {
