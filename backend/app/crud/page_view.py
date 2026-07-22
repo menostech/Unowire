@@ -31,9 +31,8 @@ class CRUDPageView(CRUDBase[PageView, PageViewCreate, PageViewCreate]):
         entity_id: str,
         request_ip: str,
     ) -> PageView | None:
-        """Record a page view. Returns None if deduplicated (same IP+entity within 1 min).
-        Always inserts a row (using a fallback scope of (entity_type, entity_id) if the
-        entity can't be resolved to a manufacturer scope) so the view is never lost."""
+        """Record a page view. Returns None if deduplicated (same IP+entity within 1 min)
+        or if the entity can't be resolved to a scope (entity not found — silently dropped)."""
         # Dedup check
         key = f"{request_ip}:{entity_type}:{entity_id}"
         now = time.time()
@@ -49,13 +48,10 @@ class CRUDPageView(CRUDBase[PageView, PageViewCreate, PageViewCreate]):
                 if _dedup_cache[k] < cutoff:
                     del _dedup_cache[k]
 
-        # Resolve scope_type + scope_id from the entity (best-effort)
+        # Resolve scope_type + scope_id from the entity
         scope_type, scope_id = await self._resolve_scope(db, entity_type, entity_id)
         if scope_type is None:
-            # Entity not found — still record the view with a fallback scope so it
-            # isn't lost. Falls back to (entity_type, entity_id) which keeps these
-            # views out of manufacturer-scoped aggregation.
-            scope_type, scope_id = entity_type, entity_id
+            return None  # entity not found — silently drop
 
         page_view = PageView(
             entity_type=entity_type,

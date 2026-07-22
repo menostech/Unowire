@@ -1,11 +1,7 @@
 """Tests for page view tracking: recording, dedup, aggregation."""
-import time
-from datetime import datetime, timedelta
-
 import pytest
 from app.core.database import async_session
 from app.models.page_view import PageView
-from sqlalchemy import delete
 
 
 @pytest.fixture(autouse=True)
@@ -21,6 +17,46 @@ def cleanup_page_views():
     asyncio.run(_clean())
     yield
     asyncio.run(_clean())
+
+
+@pytest.fixture
+def real_entity_ids():
+    """Return (cable_ids, equipment_id) for real entities that resolve to a
+    manufacturer scope. Tests that assert rows are inserted need real entity IDs
+    because record() silently drops views for entities that can't be resolved
+    (drop-on-not-found per spec)."""
+    import asyncio
+    from sqlalchemy import select
+    from app.models.cable import Cable
+    from app.models.brand import Brand
+    from app.models.equipment import EquipmentManufacturer, RecommendedEquipment
+    from app.models.manufacturer import Manufacturer
+
+    async def _fetch():
+        async with async_session() as db:
+            cable_stmt = (
+                select(Cable.id)
+                .select_from(Cable)
+                .join(Brand, Cable.brand_id == Brand.id)
+                .join(Manufacturer, Brand.manufacturer_id == Manufacturer.id)
+                .order_by(Cable.id)
+                .limit(3)
+            )
+            cable_ids = list((await db.execute(cable_stmt)).scalars().all())
+            eq_stmt = (
+                select(RecommendedEquipment.id)
+                .select_from(RecommendedEquipment)
+                .join(
+                    EquipmentManufacturer,
+                    RecommendedEquipment.manufacturer_id == EquipmentManufacturer.id,
+                )
+                .order_by(RecommendedEquipment.id)
+                .limit(1)
+            )
+            eq_id = (await db.execute(eq_stmt)).scalar_one_or_none()
+        return cable_ids, eq_id
+
+    return asyncio.run(_fetch())
 
 
 def test_record_page_view_cable(client, db_session):
@@ -42,12 +78,15 @@ def test_record_page_view_equipment(client):
     assert res.status_code == 200
 
 
-def test_dedup_same_ip_same_entity_within_1_minute(client):
+def test_dedup_same_ip_same_entity_within_1_minute(client, real_entity_ids):
     """Same IP + same entity within 1 minute only counts once."""
+    cable_ids, _ = real_entity_ids
+    assert cable_ids, "No real cables with manufacturer scope found in test DB"
+    cable_id = cable_ids[0]
     for _ in range(5):
         res = client.post(
             "/api/page-views",
-            json={"entity_type": "cable", "entity_id": "dedup-cable"},
+            json={"entity_type": "cable", "entity_id": cable_id},
         )
         assert res.status_code == 200
 
@@ -58,18 +97,21 @@ def test_dedup_same_ip_same_entity_within_1_minute(client):
     async def _count():
         async with async_session() as db:
             result = await db.execute(
-                select(PageView).where(PageView.entity_id == "dedup-cable")
+                select(PageView).where(PageView.entity_id == cable_id)
             )
             return len(result.scalars().all())
     count = asyncio.run(_count())
     assert count == 1
 
 
-def test_different_entities_not_deduped(client):
+def test_different_entities_not_deduped(client, real_entity_ids):
     """Different entity IDs are not deduped."""
-    client.post("/api/page-views", json={"entity_type": "cable", "entity_id": "cable-A"})
-    client.post("/api/page-views", json={"entity_type": "cable", "entity_id": "cable-B"})
-    client.post("/api/page-views", json={"entity_type": "equipment", "entity_id": "equip-A"})
+    cable_ids, eq_id = real_entity_ids
+    assert len(cable_ids) >= 3, "Need >=3 real cables in test DB"
+    assert eq_id, "No real equipment with manufacturer scope found in test DB"
+    client.post("/api/page-views", json={"entity_type": "cable", "entity_id": cable_ids[1]})
+    client.post("/api/page-views", json={"entity_type": "cable", "entity_id": cable_ids[2]})
+    client.post("/api/page-views", json={"entity_type": "equipment", "entity_id": eq_id})
 
     import asyncio
     from sqlalchemy import select
