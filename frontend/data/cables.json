@@ -1,7 +1,7 @@
 [
   {
     "id": "cable-model-1",
-    "brand_id": "brand-1",
+    "manufacturer_id": "mfr-1",
     "model": "UL1007",
     "slug": "ul1007",
     "type": "electronic_wire",
@@ -51,7 +51,7 @@
   },
   {
     "id": "cable-model-2",
-    "brand_id": "brand-1",
+    "manufacturer_id": "mfr-1",
     "model": "UL1015",
     "slug": "ul1015",
     "type": "electronic_wire",
@@ -83,7 +83,7 @@
   },
   {
     "id": "cable-model-3",
-    "brand_id": "brand-2",
+    "manufacturer_id": "mfr-2",
     "model": "AVSS",
     "slug": "avss",
     "type": "automotive_wire",
@@ -133,7 +133,7 @@
   },
   {
     "id": "cable-model-4",
-    "brand_id": "brand-1",
+    "manufacturer_id": "mfr-1",
     "model": "UL2468",
     "slug": "ul2468",
     "type": "multi_core_wire",
@@ -165,7 +165,7 @@
   },
   {
     "id": "cable-model-5",
-    "brand_id": "brand-1",
+    "manufacturer_id": "mfr-1",
     "model": "UL2517",
     "slug": "ul2517",
     "type": "electronic_wire",
@@ -197,7 +197,7 @@
   },
   {
     "id": "cable-model-6",
-    "brand_id": "brand-2",
+    "manufacturer_id": "mfr-2",
     "model": "AVSS Shielded",
     "slug": "avss-shielded",
     "type": "shielded_wire",

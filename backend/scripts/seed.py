@@ -20,7 +20,6 @@ from app.models import *  # noqa: F401, F403
 from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.equipment import RecommendedEquipment
 from app.models.manufacturer import Manufacturer
-from app.models.brand import Brand
 from app.models.taxonomy import Category, Industry, ProductType
 from app.models.user import User
 
@@ -43,7 +42,7 @@ async def truncate_all(db: AsyncSession):
     tables = [
         "spec_items", "cable_variants", "cables",
         "recommended_equipments",
-        "brands", "manufacturers", "audit_log",
+        "manufacturers", "audit_log",
     ]
     for t in tables:
         await db.execute(text(f'TRUNCATE TABLE "{t}" CASCADE'))
@@ -62,23 +61,6 @@ async def seed_manufacturers(db: AsyncSession, dry_run: bool):
         )
         if dry_run:
             print(f"  + Manufacturer: {obj.id} - {obj.name}")
-            continue
-        db.add(obj)
-    if not dry_run:
-        await db.commit()
-
-
-async def seed_brands(db: AsyncSession, dry_run: bool):
-    data = load_json("brands.json")
-    for item in data:
-        obj = Brand(
-            id=item["id"],
-            name=item["name"],
-            slug=item["slug"],
-            manufacturer_id=item["manufacturer_id"],
-        )
-        if dry_run:
-            print(f"  + Brand: {obj.id} - {obj.name}")
             continue
         db.add(obj)
     if not dry_run:
@@ -184,7 +166,7 @@ async def seed_cables(db: AsyncSession, dry_run: bool):
 
         cable = Cable(
             id=cable_data["id"],
-            brand_id=cable_data["brand_id"],
+            manufacturer_id=cable_data["manufacturer_id"],
             product_type_id=f"{industry}/{category}/{product_type}",
             model=cable_data["model"],
             slug=cable_data["slug"],
@@ -302,9 +284,6 @@ async def main(dry_run: bool):
 
         print("Seeding manufacturers...")
         await seed_manufacturers(db, dry_run)
-
-        print("Seeding brands...")
-        await seed_brands(db, dry_run)
 
         print("Seeding taxonomy...")
         await seed_taxonomy(db, dry_run)
