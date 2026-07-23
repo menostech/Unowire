@@ -52,7 +52,7 @@ export default async function CablesPage({ searchParams }: PageProps) {
           <thead>
             <tr className="border-b border-gray-200 text-left text-gray-500">
               <th className="px-4 py-3 font-medium">Model</th>
-              <th className="px-4 py-3 font-medium">Brand</th>
+              <th className="px-4 py-3 font-medium">Manufacturer</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Product Type</th>
               <th className="px-4 py-3 font-medium">Size System</th>
@@ -64,7 +64,7 @@ export default async function CablesPage({ searchParams }: PageProps) {
               <tr key={c.id} className="border-b border-gray-100 last:border-0">
                 <td className="px-4 py-3 text-gray-900">{c.model}</td>
                 <td className="px-4 py-3 text-gray-600">
-                  {c.brand?.name || c.brand_id || '—'}
+                  {c.manufacturer?.name || c.manufacturer_id || '—'}
                 </td>
                 <td className="px-4 py-3 text-gray-600">
                   {c.category_id?.split('/').pop() || '—'}
