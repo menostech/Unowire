@@ -1,4 +1,3 @@
-from app.models.brand import Brand
 from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.email_config import EmailConfig, EmailTemplate
 from app.models.equipment import RecommendedEquipment
@@ -16,7 +15,6 @@ from app.models.user import AuditLog, User
 __all__ = [
     "AdminMenuItem",
     "AuditLog",
-    "Brand",
     "Cable",
     "CableVariant",
     "Category",
