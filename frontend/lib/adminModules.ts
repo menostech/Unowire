@@ -11,7 +11,6 @@ export interface AdminModule {
 export const ADMIN_MODULES: AdminModule[] = [
   { id: "dashboard",       label: "Dashboard",       scopeAware: false, scopeType: null },
   { id: "cables",          label: "Cables",          scopeAware: true,  scopeType: "manufacturer" },
-  { id: "brands",          label: "Brands",          scopeAware: true,  scopeType: "manufacturer" },
   { id: "manufacturers",   label: "Manufacturers",   scopeAware: true,  scopeType: "manufacturer" },
   { id: "industries",      label: "Industries",      scopeAware: false, scopeType: null },
   { id: "equipment_mfrs",  label: "Equipment Mfrs",  scopeAware: true,  scopeType: "equipment_manufacturer" },

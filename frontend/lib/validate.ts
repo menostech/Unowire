@@ -7,34 +7,21 @@ import type { ValidationError } from './types';
  */
 export async function validateAllData(): Promise<ValidationError[]> {
   const errors: ValidationError[] = [];
-  const brands = await api.brands.all();
   const manufacturers = await api.manufacturers.all();
   const categories = api.categories.all();
   const cables = await api.cables.all();
   const equipments = await api.recommendedEquipments.all();
 
-  const brandIds = new Set(brands.map(b => b.id));
   const manufacturerIds = new Set(manufacturers.map(m => m.id));
   const categoryIds = new Set(categories.map(c => c.id));
 
-  // 1. brand.manufacturer_id 引用完整性
-  for (const brand of brands) {
-    if (!manufacturerIds.has(brand.manufacturer_id)) {
-      errors.push({
-        file: "brands.json",
-        message: `Brand ${brand.id} references missing manufacturer_id: ${brand.manufacturer_id}`,
-        severity: "error",
-      });
-    }
-  }
-
-  // 2. cable.brand_id 引用完整性
+  // 2. cable.manufacturer_id 引用完整性
   for (const cable of cables) {
-    if (!brandIds.has(cable.brand_id)) {
+    if (!manufacturerIds.has(cable.manufacturer_id)) {
       errors.push({
         file: "cables.json",
         cable_id: cable.id,
-        message: `Cable ${cable.id} references missing brand_id: ${cable.brand_id}`,
+        message: `Cable ${cable.id} references missing manufacturer_id: ${cable.manufacturer_id}`,
         severity: "error",
       });
     }
@@ -256,12 +243,12 @@ export async function validateAllData(): Promise<ValidationError[]> {
     }
   }
 
-  // 6. (brand_slug, cable_slug) 组合唯一
+  // 6. (manufacturer_slug, cable_slug) 组合唯一
   const urlSet = new Set<string>();
   for (const cable of cables) {
-    const brand = await api.brands.getById(cable.brand_id);
-    if (brand) {
-      const urlKey = `${brand.slug}/${cable.slug}`;
+    const manufacturer = await api.manufacturers.getById(cable.manufacturer_id);
+    if (manufacturer) {
+      const urlKey = `${manufacturer.slug}/${cable.slug}`;
       if (urlSet.has(urlKey)) {
         errors.push({
           file: "cables.json",

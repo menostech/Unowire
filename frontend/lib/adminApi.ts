@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { AdminMessage, AdminMessageListResponse, Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem } from './types';
+import type { AdminMessage, AdminMessageListResponse, Manufacturer, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem } from './types';
 import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -26,15 +26,6 @@ interface BackendManufacturer {
   featured_text_sort: number;
 }
 
-interface BackendBrand {
-  id: string;
-  name: string;
-  slug: string;
-  manufacturer_id: string;
-  manufacturer?: BackendManufacturer | null;
-  image_url: string | null;
-}
-
 interface BackendSpecItem {
   spec_key: string;
   label: string;
@@ -55,7 +46,7 @@ interface BackendCableVariant {
 
 interface BackendCable {
   id: string;
-  brand_id: string;
+  manufacturer_id: string;
   product_type_id: string;
   industry_id: string;
   category_id: string;
@@ -67,7 +58,7 @@ interface BackendCable {
   meta_description: string | null;
   image_url: string | null;
   category_ids?: string[];
-  brand?: BackendBrand | null;
+  manufacturer?: BackendManufacturer | null;
   common_specs?: BackendSpecItem[];
   variants?: BackendCableVariant[];
 }
@@ -189,18 +180,6 @@ function adaptManufacturer(m: BackendManufacturer): Manufacturer {
   };
 }
 
-function adaptBrand(b: BackendBrand): Brand {
-  return {
-    id: b.id,
-    name: b.name,
-    slug: b.slug,
-    manufacturer_id: b.manufacturer_id,
-    country: b.manufacturer?.country ?? '',
-    website: b.manufacturer?.website ?? '',
-    image_url: b.image_url,
-  };
-}
-
 function adaptSpecItem(s: BackendSpecItem) {
   return {
     key: s.spec_key,
@@ -215,7 +194,7 @@ function adaptSpecItem(s: BackendSpecItem) {
 function adaptCable(c: BackendCable): Cable {
   return {
     id: c.id,
-    brand_id: c.brand_id,
+    manufacturer_id: c.manufacturer_id,
     model: c.model,
     slug: c.slug,
     type: c.product_type_id,
@@ -305,43 +284,6 @@ export const adminApi = {
     async remove(id: string): Promise<void> {
       const res = await adminFetch(`/api/manufacturers/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`API ${res.status}: /api/manufacturers/${id}`);
-    },
-  },
-
-  brands: {
-    async all(page = 1, page_size = 20): Promise<{ items: Brand[]; total: number }> {
-      const data = await adminGet<ListResponse<BackendBrand>>(
-        `/api/brands?page=${page}&page_size=${page_size}`
-      );
-      return { items: data.items.map(adaptBrand), total: data.total };
-    },
-    async getById(id: string): Promise<Brand | null> {
-      try {
-        const data = await adminGet<BackendBrand>(`/api/brands/${id}`);
-        return adaptBrand(data);
-      } catch {
-        return null;
-      }
-    },
-    async create(payload: { id: string; name: string; slug: string; manufacturer_id: string }): Promise<Brand> {
-      const res = await adminFetch('/api/brands', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/brands`);
-      return adaptBrand(await res.json() as BackendBrand);
-    },
-    async update(id: string, payload: { id: string; name: string; slug: string; manufacturer_id: string }): Promise<Brand> {
-      const res = await adminFetch(`/api/brands/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/brands/${id}`);
-      return adaptBrand(await res.json() as BackendBrand);
-    },
-    async remove(id: string): Promise<void> {
-      const res = await adminFetch(`/api/brands/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/brands/${id}`);
     },
   },
 
