@@ -2,7 +2,6 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.schemas.brand import BrandRead
 from app.schemas.equipment import RecommendedEquipmentRead
 from app.schemas.manufacturer import ManufacturerRead
 
@@ -33,7 +32,7 @@ class CableRead(BaseModel):
     id: str
     model: str
     slug: str
-    brand_id: str
+    manufacturer_id: str
     product_type_id: str
     industry_id: str
     category_id: str
@@ -42,7 +41,7 @@ class CableRead(BaseModel):
     meta_title: str | None = None
     meta_description: str | None = None
     image_url: str | None = None
-    brand: BrandRead | None = None
+    manufacturer: ManufacturerRead | None = None
     common_specs: list[SpecItemRead] = []
     variants: list[CableVariantRead] = []
     created_at: datetime
@@ -59,12 +58,6 @@ class CableDetailRead(CableRead):
 
 # Facet schemas
 class ManufacturerFacet(BaseModel):
-    id: str
-    name: str
-    count: int
-
-
-class BrandFacet(BaseModel):
     id: str
     name: str
     count: int
@@ -92,7 +85,6 @@ class OuterDiameterFacet(BaseModel):
 
 class FilterFacets(BaseModel):
     manufacturers: list[ManufacturerFacet] = []
-    brands: list[BrandFacet] = []
     size: list[SizeFacet] = []
     size_range: SizeRangeFacet | None = None
     spec_facets: dict[str, list[SpecFacetValue]] = {}
@@ -127,7 +119,7 @@ class CableVariantCreate(BaseModel):
 
 class CableCreate(BaseModel):
     id: str
-    brand_id: str
+    manufacturer_id: str
     product_type_id: str
     industry_id: str
     category_id: str
@@ -150,7 +142,7 @@ class CableVariantUpdate(BaseModel):
 
 
 class CableUpdate(BaseModel):
-    brand_id: str | None = None
+    manufacturer_id: str | None = None
     product_type_id: str | None = None
     industry_id: str | None = None
     category_id: str | None = None
@@ -173,7 +165,6 @@ class CableFilterParams(BaseModel):
     product_type: str | None = None
     q: str | None = None
     manufacturer: list[str] | None = None
-    brand: list[str] | None = None
     size: list[str] | None = None
     min_size: float | None = None
     max_size: float | None = None
