@@ -6,7 +6,7 @@ class TestMenuTree:
         res = client.get("/api/admin/menu/tree")
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 5  # top-level items (dashboard, cables, equipment, media, settings)
+        assert len(data) == 8  # top-level items (dashboard, cables, manufacturers, industries, equipment, media, menu-inquiries, settings)
         # Equipment group has 3 children
         equipment = next(i for i in data if i["id"] == "equipment")
         assert equipment["type"] == "group"
@@ -42,7 +42,7 @@ class TestMenuFlat:
         res = client.get("/api/admin/menu", headers=admin_headers)
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 20  # 21 original seed items - 1 removed
+        assert len(data) == 19  # all admin_menu_items after brands menu item removed
 
 
 class TestMenuCreate:

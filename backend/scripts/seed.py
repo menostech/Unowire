@@ -18,7 +18,7 @@ from app.core.database import async_session, engine
 from app.core.security import hash_password
 from app.models import *  # noqa: F401, F403
 from app.models.cable import Cable, CableVariant, SpecItem
-from app.models.equipment import RecommendedEquipment
+from app.models.equipment import EquipmentManufacturer, RecommendedEquipment
 from app.models.manufacturer import Manufacturer
 from app.models.taxonomy import Category, Industry, ProductType
 from app.models.user import User
@@ -237,19 +237,47 @@ async def seed_cables(db: AsyncSession, dry_run: bool):
         await db.commit()
 
 
+_EQUIP_TYPE_TO_CATEGORY = {
+    "semi_automatic_stripping_machine": "processing/semi-automatic-stripping-machine",
+    "fully_automatic_cutting_stripping_machine": "processing/fully-automatic-cutting-stripping-machine",
+}
+
+
 async def seed_equipment(db: AsyncSession, dry_run: bool):
     data = load_json("recommended-equipments.json")
-    for item in data:
+    for idx, item in enumerate(data):
+        brand = item.get("brand")
+        emfr_id = brand.lower().replace(" ", "-") if brand else None
+        if emfr_id:
+            existing = (
+                await db.execute(
+                    select(EquipmentManufacturer).where(EquipmentManufacturer.id == emfr_id)
+                )
+            ).scalar_one_or_none()
+            if existing is None:
+                db.add(EquipmentManufacturer(
+                    id=emfr_id, name=brand, slug=emfr_id, sort_order=0,
+                ))
+                if not dry_run:
+                    await db.flush()
+        category_id = _EQUIP_TYPE_TO_CATEGORY.get(
+            item.get("type", ""), "processing/semi-automatic-stripping-machine"
+        )
+        model = item.get("model", "")
+        slug = model.lower().replace(" ", "-") or item.get("id", "")
         obj = RecommendedEquipment(
             id=item.get("id"),
-            name=item.get("name") or item.get("model", ""),
-            slug=item.get("slug") or item.get("id", ""),
-            brand=item.get("brand"),
+            manufacturer_id=emfr_id,
+            category_id=category_id,
+            model=model,
+            slug=slug,
             applicable_specs=item.get("applicable_specs", []),
             description=item.get("description"),
+            external_url=item.get("external_url"),
+            sort_order=idx,
         )
         if dry_run:
-            print(f"  + Equipment: {obj.id} - {obj.name}")
+            print(f"  + Equipment: {obj.id} - {obj.model}")
             continue
         db.add(obj)
     if not dry_run:
