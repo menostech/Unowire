@@ -23,7 +23,6 @@ export async function generateMetadata({
 interface SearchParams {
   q?: string;
   manufacturer?: string;
-  brand?: string;
   size?: string;
   min_size?: string;
   max_size?: string;
@@ -59,7 +58,7 @@ export default async function ProductTypePage({
   // Known non-spec keys are excluded; everything else that appears in the product type's
   // filter config as an enum filter (except size + outer_diameter) is packed into spec_filters.
   const knownKeys = new Set([
-    'q', 'manufacturer', 'brand', 'size', 'min_size', 'max_size',
+    'q', 'manufacturer', 'size', 'min_size', 'max_size',
     'min_od', 'max_od', 'page',
   ]);
   const specFilters: Record<string, string[]> = {};
@@ -74,7 +73,6 @@ export default async function ProductTypePage({
     product_type: productTypeKey,
     q: sp.q,
     manufacturer: parseArrayParam(sp, 'manufacturer'),
-    brand: parseArrayParam(sp, 'brand'),
     size: parseArrayParam(sp, 'size'),
     min_size: sp.min_size ? parseFloat(sp.min_size) : undefined,
     max_size: sp.max_size ? parseFloat(sp.max_size) : undefined,
@@ -123,7 +121,6 @@ export default async function ProductTypePage({
                   <CableCard
                     key={item.cable.id}
                     cable={item.cable}
-                    brand={item.brand}
                     manufacturer={item.manufacturer}
                   />
                 ))}

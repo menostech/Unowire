@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     default: 'Unowire — Cable Specs Database',
     template: '%s | Unowire',
   },
-  description: 'Query cable specifications online. Browse cables by brand, category, and specs.',
+  description: 'Query cable specifications online. Browse cables by manufacturer, category, and specs.',
   robots: { index: true, follow: true },
 };
 
