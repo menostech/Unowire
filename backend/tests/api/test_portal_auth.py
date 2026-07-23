@@ -50,7 +50,7 @@ def test_portal_me_permissions_returns_allowed_modules(client, cable_manager_hea
     res = client.get("/api/portal/auth/me/permissions", headers=cable_manager_headers)
     assert res.status_code == 200
     data = res.json()
-    assert set(data["allowed_modules"]) == {"dashboard", "cables", "brands", "inquiries", "media", "me"}
+    assert set(data["allowed_modules"]) == {"dashboard", "cables", "inquiries", "media", "me"}
 
 
 def test_portal_logout_clears_cookie(client, cable_manager_headers):

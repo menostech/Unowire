@@ -88,11 +88,11 @@ def test_update_role_permissions(client, admin_headers):
     res = client.put(
         "/api/admin/roles/editor_v2",
         headers=admin_headers,
-        json={"permissions": ["dashboard", "cables", "brands"]},
+        json={"permissions": ["dashboard", "cables", "manufacturers"]},
     )
     assert res.status_code == 200
     role = res.json()
-    assert set(role["permissions"]) == {"dashboard", "cables", "brands"}
+    assert set(role["permissions"]) == {"dashboard", "cables", "manufacturers"}
 
 
 def test_cannot_remove_protected_modules_from_admin(client, admin_headers):

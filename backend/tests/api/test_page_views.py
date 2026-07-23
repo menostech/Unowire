@@ -28,7 +28,6 @@ def real_entity_ids():
     import asyncio
     from sqlalchemy import select
     from app.models.cable import Cable
-    from app.models.brand import Brand
     from app.models.equipment import EquipmentManufacturer, RecommendedEquipment
     from app.models.manufacturer import Manufacturer
 
@@ -37,8 +36,7 @@ def real_entity_ids():
             cable_stmt = (
                 select(Cable.id)
                 .select_from(Cable)
-                .join(Brand, Cable.brand_id == Brand.id)
-                .join(Manufacturer, Brand.manufacturer_id == Manufacturer.id)
+                .join(Manufacturer, Cable.manufacturer_id == Manufacturer.id)
                 .order_by(Cable.id)
                 .limit(3)
             )
