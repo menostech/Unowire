@@ -10,7 +10,6 @@ When adding a new module:
 ADMIN_MODULES = [
     {"id": "dashboard",       "label": "Dashboard",       "scope_aware": False, "scope_type": None},
     {"id": "cables",          "label": "Cables",          "scope_aware": True,  "scope_type": "manufacturer"},
-    {"id": "brands",          "label": "Brands",          "scope_aware": True,  "scope_type": "manufacturer"},
     {"id": "manufacturers",   "label": "Manufacturers",   "scope_aware": True,  "scope_type": "manufacturer"},
     {"id": "industries",      "label": "Industries",      "scope_aware": False, "scope_type": None},
     {"id": "equipment_mfrs",  "label": "Equipment Mfrs",  "scope_aware": True,  "scope_type": "equipment_manufacturer"},

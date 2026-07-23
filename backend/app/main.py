@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, brands, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_brands, portal_equipment, portal_inquiries, portal_media, portal_me
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_equipment, portal_inquiries, portal_media, portal_me
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -85,7 +85,6 @@ async def integrity_error_handler(request: Request, exc: IntegrityError):
 app.include_router(auth.router)
 app.include_router(health.router, prefix=settings.api_prefix, tags=["health"])
 app.include_router(manufacturers.router, prefix=f"{settings.api_prefix}/manufacturers", tags=["manufacturers"])
-app.include_router(brands.router, prefix=f"{settings.api_prefix}/brands", tags=["brands"])
 app.include_router(industries.router, prefix=f"{settings.api_prefix}/industries", tags=["industries"])
 app.include_router(categories.router, prefix=f"{settings.api_prefix}/industries/{{industry_id}}/categories", tags=["categories"])
 app.include_router(product_types.router, prefix=f"{settings.api_prefix}/industries/{{industry_id}}/categories/{{category_id}}/product-types", tags=["product-types"])
@@ -114,7 +113,6 @@ app.include_router(portal_auth.router)
 app.include_router(page_views.router)
 app.include_router(portal_dashboard.router)
 app.include_router(portal_cables.router)
-app.include_router(portal_brands.router)
 app.include_router(portal_equipment.router)
 app.include_router(portal_inquiries.router)
 app.include_router(portal_media.router)

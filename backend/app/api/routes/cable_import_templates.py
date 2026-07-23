@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 CSV_TEMPLATE_HEADERS = [
-    "id", "model", "slug", "brand_id", "industry_id",
+    "id", "model", "slug", "manufacturer_id", "industry_id",
     "category_id", "product_type_id", "size_system",
     "base_description", "meta_title", "meta_description", "category_ids",
 ]
@@ -21,13 +21,13 @@ CSV_TEMPLATE_EXAMPLE = {
     "id": "consumer_electronics_premium_hdmi_cable",
     "model": "Premium HDMI Cable 4K",
     "slug": "premium-hdmi-cable-4k",
-    "brand_id": "sony",
+    "manufacturer_id": "mfr-1",
     "industry_id": "consumer_electronics",
     "category_id": "consumer_electronics/internal_wiring",
     "product_type_id": "consumer_electronics/internal_wiring/electronic_wire",
     "size_system": "none",
     "base_description": "High-speed HDMI cable with Ethernet",
-    "meta_title": "Premium HDMI Cable 4K - Sony",
+    "meta_title": "Premium HDMI Cable 4K - Hitachi Cable",
     "meta_description": "High-speed HDMI cable supporting 4K resolution",
     "category_ids": '["consumer_electronics/internal_wiring"]',
 }
@@ -56,13 +56,13 @@ async def download_json_example(user: User = Depends(require_operator("cables"))
             "id": "consumer_electronics_premium_hdmi",
             "model": "Premium HDMI Cable 4K",
             "slug": "premium-hdmi-cable-4k",
-            "brand_id": "sony",
+            "manufacturer_id": "mfr-1",
             "industry_id": "consumer_electronics",
             "category_id": "consumer_electronics/internal_wiring",
             "product_type_id": "consumer_electronics/internal_wiring/electronic_wire",
             "size_system": "none",
             "base_description": "High-speed HDMI cable with Ethernet",
-            "meta_title": "Premium HDMI Cable 4K - Sony",
+            "meta_title": "Premium HDMI Cable 4K - Hitachi Cable",
             "meta_description": "High-speed HDMI cable supporting 4K resolution",
             "category_ids": ["consumer_electronics/internal_wiring"],
             "common_specs": [

@@ -116,7 +116,7 @@ async def get_current_factory_user(
 # factory users see a curated feature set, even if an operator misconfigures
 # their role permissions.
 _FACTORY_ALLOWED_BY_SCOPE: dict[str, set[str]] = {
-    "manufacturer": {"dashboard", "cables", "brands", "inquiries", "media", "me"},
+    "manufacturer": {"dashboard", "cables", "inquiries", "media", "me"},
     "equipment_manufacturer": {"dashboard", "equipment", "inquiries", "media", "me"},
 }
 
