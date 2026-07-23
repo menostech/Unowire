@@ -1,6 +1,5 @@
 interface StatsRowProps {
   cables: number;
-  brands: number;
   industries: number;
   equipment: number;
   manufacturers: number;
@@ -11,10 +10,9 @@ interface Stat {
   value: number;
 }
 
-export function StatsRow({ cables, brands, industries, equipment, manufacturers }: StatsRowProps) {
+export function StatsRow({ cables, industries, equipment, manufacturers }: StatsRowProps) {
   const stats: Stat[] = [
     { label: 'Cables', value: cables },
-    { label: 'Brands', value: brands },
     { label: 'Industries', value: industries },
     { label: 'Equipment', value: equipment },
     { label: 'Manufacturers', value: manufacturers },
@@ -22,7 +20,7 @@ export function StatsRow({ cables, brands, industries, equipment, manufacturers 
 
   return (
     <section className="border-b bg-gray-50 py-8">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {stats.map(stat => (
           <div
             key={stat.label}
