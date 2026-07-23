@@ -5,10 +5,8 @@ from sqlalchemy.orm import selectinload
 from app.crud.base import CRUDBase
 from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.equipment import RecommendedEquipment
-from app.models.brand import Brand
 from app.models.manufacturer import Manufacturer
 from app.schemas.cable import (
-    BrandFacet,
     CableCreate,
     CableFilterParams,
     CableUpdate,
@@ -24,20 +22,20 @@ from app.schemas.cable import (
 class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
     async def get_detail(self, db: AsyncSession, id: str) -> Cable | None:
         stmt = select(Cable).where(Cable.id == id).options(
-            selectinload(Cable.brand).selectinload(Brand.manufacturer),
+            selectinload(Cable.manufacturer),
             selectinload(Cable.variants).selectinload(CableVariant.specs),
             selectinload(Cable.common_specs),
         )
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_url(self, db: AsyncSession, brand_slug: str, cable_slug: str) -> Cable | None:
+    async def get_by_url(self, db: AsyncSession, manufacturer_slug: str, cable_slug: str) -> Cable | None:
         stmt = (
             select(Cable)
-            .join(Brand, Cable.brand_id == Brand.id)
-            .where(Brand.slug == brand_slug, Cable.slug == cable_slug)
+            .join(Manufacturer, Cable.manufacturer_id == Manufacturer.id)
+            .where(Manufacturer.slug == manufacturer_slug, Cable.slug == cable_slug)
             .options(
-                selectinload(Cable.brand).selectinload(Brand.manufacturer),
+                selectinload(Cable.manufacturer),
                 selectinload(Cable.variants).selectinload(CableVariant.specs),
                 selectinload(Cable.common_specs),
             )
@@ -72,17 +70,14 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
             stmt = stmt.where(search_filter)
             count_stmt = count_stmt.where(search_filter)
 
-        # Manufacturer / brand filters
+        # Manufacturer filter (direct join on Cable.manufacturer_id)
         if params.manufacturer:
-            stmt = stmt.join(Brand, Cable.brand_id == Brand.id).where(
-                Brand.manufacturer_id.in_(params.manufacturer)
+            stmt = stmt.join(Manufacturer, Cable.manufacturer_id == Manufacturer.id).where(
+                Manufacturer.id.in_(params.manufacturer)
             )
-            count_stmt = count_stmt.join(Brand, Cable.brand_id == Brand.id).where(
-                Brand.manufacturer_id.in_(params.manufacturer)
+            count_stmt = count_stmt.join(Manufacturer, Cable.manufacturer_id == Manufacturer.id).where(
+                Manufacturer.id.in_(params.manufacturer)
             )
-        if params.brand:
-            stmt = stmt.where(Cable.brand_id.in_(params.brand))
-            count_stmt = count_stmt.where(Cable.brand_id.in_(params.brand))
 
         # Size filters via spec_items subquery
         if params.size:
@@ -148,7 +143,7 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
 
         # Pagination
         stmt = stmt.options(
-            selectinload(Cable.brand),
+            selectinload(Cable.manufacturer),
             selectinload(Cable.variants).selectinload(CableVariant.specs),
             selectinload(Cable.common_specs),
         ).offset((params.page - 1) * params.page_size).limit(params.page_size)
@@ -169,11 +164,10 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
         if not cable_ids:
             return FilterFacets()
 
-        # Manufacturer facets
+        # Manufacturer facets (direct join)
         mfr_stmt = (
             select(Manufacturer.id, Manufacturer.name, func.count(Cable.id.distinct()))
-            .join(Brand, Brand.manufacturer_id == Manufacturer.id)
-            .join(Cable, Cable.brand_id == Brand.id)
+            .join(Cable, Cable.manufacturer_id == Manufacturer.id)
             .where(Cable.id.in_(cable_ids))
             .group_by(Manufacturer.id, Manufacturer.name)
         )
@@ -181,19 +175,6 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
         manufacturers = [
             ManufacturerFacet(id=row[0], name=row[1], count=row[2])
             for row in mfr_result.all()
-        ]
-
-        # Brand facets
-        brand_stmt = (
-            select(Brand.id, Brand.name, func.count(Cable.id.distinct()))
-            .join(Brand, Cable.brand_id == Brand.id)
-            .where(Cable.id.in_(cable_ids))
-            .group_by(Brand.id, Brand.name)
-        )
-        brand_result = await db.execute(brand_stmt)
-        brands = [
-            BrandFacet(id=row[0], name=row[1], count=row[2])
-            for row in brand_result.all()
         ]
 
         # Size facets
@@ -260,7 +241,6 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
 
         return FilterFacets(
             manufacturers=manufacturers,
-            brands=brands,
             size=size_facets,
             size_range=size_range,
             spec_facets=spec_facets,
@@ -270,13 +250,12 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
     async def list_by_manufacturer(
         self, db: AsyncSession, *, scope_id: str, skip: int = 0, limit: int = 50
     ) -> list[Cable]:
-        """List cables where brand.manufacturer_id == scope_id. For portal routes."""
+        """List cables where manufacturer_id == scope_id. For portal routes."""
         stmt = (
             select(Cable)
-            .join(Brand, Cable.brand_id == Brand.id)
-            .where(Brand.manufacturer_id == scope_id)
+            .where(Cable.manufacturer_id == scope_id)
             .options(
-                selectinload(Cable.brand),
+                selectinload(Cable.manufacturer),
                 selectinload(Cable.variants).selectinload(CableVariant.specs),
                 selectinload(Cable.common_specs),
             )
@@ -288,12 +267,11 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
         return list(result.scalars().all())
 
     async def count_by_manufacturer(self, db: AsyncSession, *, scope_id: str) -> int:
-        """Count cables where brand.manufacturer_id == scope_id."""
+        """Count cables where manufacturer_id == scope_id."""
         stmt = (
             select(func.count())
             .select_from(Cable)
-            .join(Brand, Cable.brand_id == Brand.id)
-            .where(Brand.manufacturer_id == scope_id)
+            .where(Cable.manufacturer_id == scope_id)
         )
         result = await db.execute(stmt)
         return result.scalar() or 0
