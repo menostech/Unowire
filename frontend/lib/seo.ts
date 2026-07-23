@@ -41,7 +41,7 @@ export function generateProductTypeMetadata(
 export function generateHomeMetadata(): Metadata {
   return {
     title: { absolute: 'Unowire - Cable Specs Database' },
-    description: 'Query cable specifications online. Browse cables by brand, category, and specs.',
+    description: 'Query cable specifications online. Browse cables by manufacturer, category, and specs.',
     alternates: { canonical: '/' },
     robots: { index: true, follow: true },
   };
