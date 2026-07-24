@@ -292,7 +292,7 @@ async def seed_admin(db: AsyncSession, dry_run: bool):
     obj = User(
         email=settings.admin_email,
         password_hash=hash_password(settings.admin_password),
-        role="admin",
+        role_id="admin",
         is_active=True,
     )
     if dry_run:
