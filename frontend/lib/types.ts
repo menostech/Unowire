@@ -133,6 +133,13 @@ export interface EquipmentManufacturer {
   website: string | null;
   image_url: string | null;
   description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EquipmentCategory {
@@ -350,4 +357,109 @@ export interface PagePublicRead {
   meta_title: string | null;
   meta_description: string | null;
   og_image_url: string | null;
+}
+
+// === Site Menu ===
+export type SiteMenuLocation = "header" | "footer";
+export type SiteMenuItemType = "link" | "group";
+
+export interface SiteMenuItem {
+  id: string;
+  location: SiteMenuLocation;
+  parent_id: string | null;
+  type: SiteMenuItemType;
+  label: string;
+  url: string | null;
+  sort_order: number;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SiteMenuTreeNode {
+  id: string;
+  type: SiteMenuItemType;
+  label: string;
+  url: string | null;
+  children: SiteMenuTreeNode[];
+}
+
+// === Equipment Filters ===
+export interface EquipmentFilterParams {
+  q?: string;
+  category_ids?: string[];
+  manufacturer_ids?: string[];
+  spec_filters?: Record<string, { min?: number; max?: number; values?: string[] }>;
+}
+
+export interface EquipmentFilterFacets {
+  manufacturers: { id: string; name: string; count: number }[];
+  categories: { id: string; label: string; parent_id: string | null; count: number }[];
+  spec_facets: Record<string, {
+    type: "range" | "enum";
+    min?: number; max?: number;
+    values?: { value: string; count: number }[];
+  }>;
+}
+
+export interface EquipmentListResponse {
+  items: RecommendedEquipment[];
+  total: number;
+  page: number;
+  page_size: number;
+  facets: EquipmentFilterFacets;
+}
+
+// === System Messages ===
+export interface AdminMessage {
+  id: number;
+  title: string;
+  body: string;
+  created_by: number;
+  created_by_email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminMessageListResponse {
+  items: AdminMessage[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface MemberMessage {
+  id: number;
+  title: string;
+  body: string;
+  created_at: string;
+  is_read: boolean;
+}
+
+export interface MemberMessageListResponse {
+  items: MemberMessage[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface UnreadCount {
+  unread: number;
+}
+
+// === Inquiries ===
+export interface InquiryRead {
+  id: number;
+  sender_id: number;
+  recipient_type: string;
+  recipient_id: string;
+  recipient_name: string | null;  // resolved at query time; null if manufacturer deleted
+  subject: string;
+  body: string;
+  reply_body: string | null;
+  replied_at: string | null;
+  replied_by: number | null;
+  is_read: boolean;
+  is_member_read: boolean;
+  created_at: string;
 }

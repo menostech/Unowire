@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem } from './types';
+import type { AdminMessage, AdminMessageListResponse, Manufacturer, Brand, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem } from './types';
 import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -845,6 +845,41 @@ export const adminApi = {
     },
   },
 
+  messages: {
+    async all(page = 1, page_size = 20): Promise<AdminMessageListResponse> {
+      return adminGet<AdminMessageListResponse>(
+        `/api/admin/messages?page=${page}&page_size=${page_size}`
+      );
+    },
+    async getById(id: number): Promise<AdminMessage | null> {
+      try {
+        return await adminGet<AdminMessage>(`/api/admin/messages/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: { title: string; body: string }): Promise<AdminMessage> {
+      const res = await adminFetch(`/api/admin/messages`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      const res = await adminFetch(`/api/admin/messages/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+  },
+
   pages: {
     async all(page = 1, pageSize = 20, statusFilter?: string): Promise<{ items: PageListItem[]; total: number; page: number; page_size: number }> {
       const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
@@ -885,6 +920,71 @@ export const adminApi = {
     async remove(id: string): Promise<void> {
       const res = await adminFetch(`/api/admin/pages/${id}`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+  },
+
+  siteMenu: {
+    async all(locationFilter?: 'header' | 'footer'): Promise<SiteMenuItem[]> {
+      const params = locationFilter ? `?location=${locationFilter}` : '';
+      return adminGet<SiteMenuItem[]>(`/api/admin/site-menu${params}`);
+    },
+    async getById(id: string): Promise<SiteMenuItem | null> {
+      try {
+        return await adminGet<SiteMenuItem>(`/api/admin/site-menu/${id}`);
+      } catch {
+        return null;
+      }
+    },
+    async getTree(location: 'header' | 'footer'): Promise<SiteMenuItem[]> {
+      return adminGet<SiteMenuItem[]>(`/api/admin/site-menu/tree?location=${location}`);
+    },
+    async create(payload: {
+      id: string;
+      location: 'header' | 'footer';
+      parent_id?: string | null;
+      type: 'link' | 'group';
+      label: string;
+      url?: string | null;
+      sort_order?: number;
+      is_visible?: boolean;
+    }): Promise<SiteMenuItem> {
+      const res = await adminFetch('/api/admin/site-menu', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/site-menu`);
+      }
+      return res.json();
+    },
+    async update(id: string, payload: Partial<SiteMenuItem>): Promise<SiteMenuItem> {
+      const res = await adminFetch(`/api/admin/site-menu/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/site-menu/${id}`);
+      }
+      return res.json();
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/admin/site-menu/${id}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+    },
+    async sort(id: string, direction: 'up' | 'down'): Promise<void> {
+      const res = await adminFetch(`/api/admin/site-menu/${id}/sort`, {
+        method: 'PUT',
+        body: JSON.stringify({ direction }),
+      });
+      if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `API ${res.status}`);
       }

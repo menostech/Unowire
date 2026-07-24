@@ -5,11 +5,13 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_access_token, verify_password
+from app.models.role import Role
 from app.models.user import User
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -39,14 +41,25 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
             content={"code": 429, "message": "Too many login attempts"},
         )
 
-    result = await db.execute(select(User).where(User.email == body.email))
+    result = await db.execute(
+        select(User)
+        .where(User.email == body.email)
+        .options(selectinload(User.role).selectinload(Role.permissions))
+    )
     user = result.scalar_one_or_none()
 
     if user is None or not verify_password(body.password, user.password_hash) or not user.is_active:
         _login_attempts.setdefault(ip, []).append(time.time())
         raise HTTPException(status_code=401, detail={"code": 401, "message": "Invalid email or password"})
 
-    token = create_access_token(user.id, user.email, user.role_id)
+    # Cross-protection: factory users (scope_type != None) must use /api/portal/auth/login
+    if user.role and user.role.scope_type is not None:
+        raise HTTPException(
+            status_code=403,
+            detail={"code": 403, "message": "Use /portal/login"},
+        )
+
+    token = create_access_token(user.id, user.email, user.role_id, token_type="admin")
     _login_attempts.pop(ip, None)
 
     response = JSONResponse(

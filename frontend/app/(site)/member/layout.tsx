@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { MessagesUnreadBadge } from '@/components/member/MessagesUnreadBadge';
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -28,6 +29,13 @@ export default async function MemberLayout({ children }: { children: React.React
           </Link>
           <Link href="/member/inquiries" className="block px-3 py-2 rounded hover:bg-gray-100 text-sm">
             My Inquiries
+          </Link>
+          <Link
+            href="/member/messages"
+            className="flex items-center px-3 py-2 rounded hover:bg-gray-100 text-sm"
+          >
+            <span>Messages</span>
+            <MessagesUnreadBadge />
           </Link>
           <Link href="/member/profile" className="block px-3 py-2 rounded hover:bg-gray-100 text-sm">
             Profile

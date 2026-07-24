@@ -12,12 +12,18 @@ from app.core.email import send_email_background
 from app.core.security import create_member_token, hash_password, verify_password
 from app.crud.inquiry import crud_inquiry
 from app.crud.member import crud_member
+from app.crud.system_message import crud_system_message
 from app.models.equipment import EquipmentManufacturer
 from app.models.inquiry import Inquiry
 from app.models.manufacturer import Manufacturer
 from app.models.member import Member
 from app.schemas.inquiry import InquiryCreate, InquiryRead
 from app.schemas.member import MemberLogin, MemberRead, MemberRegister, MemberVerify
+from app.schemas.system_message import (
+    MemberMessageListResponse,
+    MemberMessageRead,
+    UnreadCountResponse,
+)
 
 router = APIRouter(prefix="/api/member", tags=["member"])
 
@@ -105,6 +111,14 @@ async def me(member: Member = Depends(get_current_member)):
 
 # --- Inquiry endpoints (member-side) ---
 
+
+def _attach_recipient_name(inquiry: Inquiry, name: str | None) -> Inquiry:
+    """Attach the resolved recipient name to an Inquiry instance so
+    Pydantic's from_attributes=True can read it during serialization."""
+    inquiry.recipient_name = name
+    return inquiry
+
+
 @router.post("/inquiries", response_model=InquiryRead, status_code=201)
 async def create_inquiry(
     body: InquiryCreate,
@@ -126,7 +140,13 @@ async def create_inquiry(
     # Notify staff (best-effort)
     await _notify_staff_of_inquiry(db, inquiry, member)
 
-    return inquiry
+    # Re-query to attach the resolved recipient name
+    row = await crud_inquiry.get_with_recipient_name(db, inquiry.id)
+    if row is None:
+        # Should not happen — we just created it
+        raise HTTPException(status_code=500, detail={"code": 500, "message": "Inquiry disappeared after create"})
+    inquiry, name = row
+    return _attach_recipient_name(inquiry, name)
 
 
 async def _notify_staff_of_inquiry(db: AsyncSession, inquiry: Inquiry, member: Member):
@@ -165,7 +185,8 @@ async def list_my_inquiries(
     member: Member = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud_inquiry.list_by_member(db, member.id)
+    rows = await crud_inquiry.list_by_member(db, member.id)
+    return [_attach_recipient_name(inq, name) for inq, name in rows]
 
 
 @router.get("/inquiries/unread-count")
@@ -183,10 +204,80 @@ async def get_inquiry(
     member: Member = Depends(get_current_member),
     db: AsyncSession = Depends(get_db),
 ):
-    inquiry = await crud_inquiry.get(db, inquiry_id)
-    if inquiry is None or inquiry.sender_id != member.id:
+    row = await crud_inquiry.get_with_recipient_name(db, inquiry_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Inquiry not found"})
+    inquiry, name = row
+    if inquiry.sender_id != member.id:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Inquiry not found"})
     # Mark as read by member (if there's a reply)
     if inquiry.reply_body is not None and not inquiry.is_member_read:
         await crud_inquiry.mark_read_for_member(db, inquiry)
-    return inquiry
+    return _attach_recipient_name(inquiry, name)
+
+
+# --- System message endpoints (member-side) ---
+
+@router.get("/messages", response_model=MemberMessageListResponse)
+async def list_my_messages(
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+    page: int = 1,
+    page_size: int = 20,
+):
+    items, total = await crud_system_message.list_for_member(
+        db, member_id=member.id, page=page, page_size=page_size
+    )
+    return MemberMessageListResponse(
+        items=[
+            MemberMessageRead(
+                id=msg.id,
+                title=msg.title,
+                body=msg.body,
+                created_at=msg.created_at,
+                is_read=is_read,
+            )
+            for msg, is_read in items
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/messages/unread-count", response_model=UnreadCountResponse)
+async def my_messages_unread_count(
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    count = await crud_system_message.unread_count_for_member(db, member.id)
+    return UnreadCountResponse(unread=count)
+
+
+@router.get("/messages/{message_id}", response_model=MemberMessageRead)
+async def get_my_message(
+    message_id: int,
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await crud_system_message.get_for_member(
+        db, member_id=member.id, message_id=message_id
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": 404, "message": "Message not found"},
+        )
+    msg, is_read = result
+    # Mark as read on first view (idempotent)
+    if not is_read:
+        await crud_system_message.mark_read(
+            db, member_id=member.id, message_id=message_id
+        )
+    return MemberMessageRead(
+        id=msg.id,
+        title=msg.title,
+        body=msg.body,
+        created_at=msg.created_at,
+        is_read=True,
+    )

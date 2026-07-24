@@ -3,7 +3,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.cable import crud_cable
@@ -88,7 +88,7 @@ async def get_cable(id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=CableRead, status_code=201)
-async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
+async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("cables"))):
     from app.models.cable import Cable as CableModel, CableVariant, SpecItem
 
     # Scope check: cable_manager can only create cables for their own manufacturer
@@ -130,7 +130,7 @@ async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), 
 
 
 @router.put("/{id}", response_model=CableRead)
-async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
+async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("cables"))):
     from app.models.cable import CableVariant, SpecItem
 
     cable = await crud_cable.get_detail(db, id)
@@ -183,7 +183,7 @@ async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(
 
 
 @router.delete("/{id}", response_model=CableRead)
-async def delete_cable(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_module("cables"))):
+async def delete_cable(id: str, db: AsyncSession = Depends(get_db), user: User = Depends(require_operator("cables"))):
     # Scope check: cable_manager can only delete their own manufacturer's cables
     if user.role and user.role.scope_type == "manufacturer":
         cable = await crud_cable.get_detail(db, id)

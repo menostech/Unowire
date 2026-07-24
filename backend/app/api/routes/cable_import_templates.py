@@ -5,7 +5,7 @@ import csv
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 
 router = APIRouter()
@@ -34,7 +34,7 @@ CSV_TEMPLATE_EXAMPLE = {
 
 
 @router.get("/csv-template")
-async def download_csv_template(user: User = Depends(require_module("cables"))):
+async def download_csv_template(user: User = Depends(require_operator("cables"))):
     """Return CSV template file (header + 1 example row)."""
     output = StringIO()
     writer = csv.DictWriter(output, fieldnames=CSV_TEMPLATE_HEADERS)
@@ -49,7 +49,7 @@ async def download_csv_template(user: User = Depends(require_module("cables"))):
 
 
 @router.get("/json-example")
-async def download_json_example(user: User = Depends(require_module("cables"))):
+async def download_json_example(user: User = Depends(require_operator("cables"))):
     """Return JSON example file (1 complete cable object with nested specs/variants)."""
     example = [
         {

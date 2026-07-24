@@ -24,6 +24,7 @@ ADMIN_MODULES = [
     {"id": "email_config",    "label": "Email Config",    "scope_aware": False, "scope_type": None},
     {"id": "members",         "label": "Members",         "scope_aware": False, "scope_type": None},
     {"id": "pages",          "label": "Pages",           "scope_aware": False, "scope_type": None},
+    {"id": "messages",         "label": "Messages",         "scope_aware": False, "scope_type": None},
 ]
 
 MODULE_BY_ID = {m["id"]: m for m in ADMIN_MODULES}

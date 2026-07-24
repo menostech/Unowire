@@ -40,8 +40,13 @@ def _cleanup_test_data():
 
     async def _cleanup():
         async with _test_engine.begin() as conn:
+            # Truncate page_views (per-test cleanup also runs, but this ensures
+            # cross-session isolation for the page_views table)
+            await conn.execute(text("TRUNCATE TABLE page_views"))
             # Clean up test pages
             await conn.execute(text("DELETE FROM pages WHERE id LIKE 'page-test-%' OR slug LIKE 'test-%'"))
+            # Clean up test site menu items
+            await conn.execute(text("DELETE FROM site_menu_items WHERE id LIKE 'test-%'"))
             # Clean up test-scoped media folders + uploads (scoped media folders feature)
             await conn.execute(text(
                 "DELETE FROM uploads WHERE folder_id IN (SELECT id FROM media_folders "
@@ -82,6 +87,77 @@ def _cleanup_test_data():
 @pytest.fixture
 def client():
     return TestClient(app)
+
+
+@pytest.fixture
+def db_session():
+    """Yields a short-lived async DB session and ensures factory test users are seeded.
+
+    Used as an unused parameter in some tests (e.g., portal login tests) to
+    express the dependency on cable_manager@test.com / equip_manager@test.com
+    existing in the DB before login. The seeding is idempotent — duplicates the
+    INSERT...ON CONFLICT logic from cable_manager_headers/equipment_manager_headers
+    so tests that don't depend on those header fixtures still have the users.
+    """
+    import asyncio
+    from sqlalchemy import text
+    from app.core.security import hash_password
+    from app.core.database import async_session
+    from app.crud.folder import crud_folder
+
+    async def _seed():
+        async with _test_engine.begin() as conn:
+            # cable_manager@test.com (manufacturer scope)
+            await conn.execute(text(
+                "INSERT INTO roles (id, name, scope_type, is_system) "
+                "VALUES ('cable_manager_test', 'Cable Manager Test', 'manufacturer', false) "
+                "ON CONFLICT (id) DO NOTHING"
+            ))
+            for mod in ("media", "manufacturers"):
+                await conn.execute(text(
+                    "INSERT INTO role_permissions (role_id, module) "
+                    "VALUES ('cable_manager_test', :mod) ON CONFLICT DO NOTHING"
+                ), {"mod": mod})
+            await conn.execute(text(
+                "INSERT INTO users (email, password_hash, role_id, scope_id, is_active, created_at, updated_at) "
+                "VALUES ('cable_manager@test.com', :ph, 'cable_manager_test', 'mfr-1', true, NOW(), NOW()) "
+                "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash"
+            ), {"ph": hash_password("test123456")})
+            # equip_manager@test.com (equipment_manufacturer scope)
+            await conn.execute(text(
+                "INSERT INTO roles (id, name, scope_type, is_system) "
+                "VALUES ('equip_manager_test', 'Equipment Manager Test', 'equipment_manufacturer', false) "
+                "ON CONFLICT (id) DO NOTHING"
+            ))
+            for mod in ("media", "equipment_mfrs"):
+                await conn.execute(text(
+                    "INSERT INTO role_permissions (role_id, module) "
+                    "VALUES ('equip_manager_test', :mod) ON CONFLICT DO NOTHING"
+                ), {"mod": mod})
+            await conn.execute(text(
+                "INSERT INTO users (email, password_hash, role_id, scope_id, is_active, created_at, updated_at) "
+                "VALUES ('equip_manager@test.com', :ph, 'equip_manager_test', 'em-1', true, NOW(), NOW()) "
+                "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash"
+            ), {"ph": hash_password("test123456")})
+        # Ensure media folders exist for both scopes (idempotent)
+        async with async_session() as s:
+            await crud_folder.provision_for_manufacturer(
+                s, scope_type="manufacturer", scope_id="mfr-1", name="Test Cable Mfr"
+            )
+            await crud_folder.provision_for_manufacturer(
+                s, scope_type="equipment_manufacturer", scope_id="em-1", name="Test Equip Mfr"
+            )
+
+    asyncio.run(_seed())
+
+    async def _make():
+        return async_session()
+
+    session = asyncio.run(_make())
+    try:
+        yield session
+    finally:
+        asyncio.run(session.close())
 
 
 @pytest.fixture
@@ -132,7 +208,7 @@ def cable_manager_headers(client):
 
     asyncio.run(_setup())
     res = client.post(
-        "/api/auth/login",
+        "/api/portal/auth/login",
         json={"email": "cable_manager@test.com", "password": "test123456"},
     )
     assert res.status_code == 200, f"Login failed: {res.text}"
@@ -174,9 +250,21 @@ def equipment_manager_headers(client):
 
     asyncio.run(_setup())
     res = client.post(
-        "/api/auth/login",
+        "/api/portal/auth/login",
         json={"email": "equip_manager@test.com", "password": "test123456"},
     )
     assert res.status_code == 200, f"Login failed: {res.text}"
     token = res.json()["token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def factory_user_headers(cable_manager_headers):
+    """Alias for cable_manager_headers — factory user with manufacturer scope."""
+    return cable_manager_headers
+
+
+@pytest.fixture
+def equipment_factory_user_headers(equipment_manager_headers):
+    """Alias for equipment_manager_headers — factory user with equipment_manufacturer scope."""
+    return equipment_manager_headers

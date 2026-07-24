@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.equipment import crud_equipment
@@ -49,7 +49,7 @@ async def get_equipment(id: str, db: AsyncSession = Depends(get_db)):
 async def create_equipment(
     obj_in: RecommendedEquipmentCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("equipment_list")),
+    user: User = Depends(require_operator("equipment_list")),
 ):
     # Scope check: equipment_manager can only create equipment for their own manufacturer
     if user.role and user.role.scope_type == "equipment_manufacturer":
@@ -66,7 +66,7 @@ async def update_equipment(
     id: str,
     obj_in: RecommendedEquipmentUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("equipment_list")),
+    user: User = Depends(require_operator("equipment_list")),
 ):
     obj = await crud_equipment.get(db, id)
     if not obj:
@@ -85,7 +85,7 @@ async def update_equipment(
 async def delete_equipment(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("equipment_list")),
+    user: User = Depends(require_operator("equipment_list")),
 ):
     # Scope check
     if user.role and user.role.scope_type == "equipment_manufacturer":

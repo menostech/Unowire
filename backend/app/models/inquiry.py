@@ -13,7 +13,7 @@ class Inquiry(Base):
     sender_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("members.id", ondelete="CASCADE"), nullable=False
     )
-    recipient_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    recipient_type: Mapped[str] = mapped_column(String(30), nullable=False)
     recipient_id: Mapped[str] = mapped_column(String(100), nullable=False)
     subject: Mapped[str] = mapped_column(String(200), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)

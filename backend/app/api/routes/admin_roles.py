@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.core.database import get_db
 from app.core.modules import ADMIN_MODULES
 from app.crud.role import crud_role
@@ -29,7 +29,7 @@ def _role_to_read(role) -> RoleRead:
 @router.get("", response_model=list[RoleRead])
 async def list_roles(
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("roles")),
+    user: User = Depends(require_operator("roles")),
 ):
     roles = await crud_role.get_all_with_permissions(db)
     return [_role_to_read(r) for r in roles]
@@ -37,7 +37,7 @@ async def list_roles(
 
 @router.get("/modules")
 async def list_modules(
-    user: User = Depends(require_module("roles")),
+    user: User = Depends(require_operator("roles")),
 ):
     """List all available admin modules (for the permission editor checkbox matrix)."""
     return ADMIN_MODULES
@@ -47,7 +47,7 @@ async def list_modules(
 async def get_role(
     role_id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("roles")),
+    user: User = Depends(require_operator("roles")),
 ):
     role = await crud_role.get_with_permissions(db, role_id)
     if role is None:
@@ -59,7 +59,7 @@ async def get_role(
 async def create_role(
     obj_in: RoleCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("roles")),
+    user: User = Depends(require_operator("roles")),
 ):
     role = await crud_role.create_with_permissions(db, obj_in=obj_in)
     # Re-load with permissions
@@ -72,7 +72,7 @@ async def update_role(
     role_id: str,
     obj_in: RoleUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("roles")),
+    user: User = Depends(require_operator("roles")),
 ):
     db_obj = await crud_role.get_with_permissions(db, role_id)
     if db_obj is None:
@@ -86,7 +86,7 @@ async def update_role(
 async def delete_role(
     role_id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("roles")),
+    user: User = Depends(require_operator("roles")),
 ):
     # Fetch first so we can check is_system before self-delete.
     # System roles must never be deletable, regardless of who is asking.

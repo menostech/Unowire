@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.core.database import get_db
 from app.core.email import render_and_send, _invalidate_cache
 from app.crud.email_config import crud_email_config, crud_email_template
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/admin/email", tags=["admin-email"])
 
 @router.get("/config", response_model=EmailConfigRead)
 async def get_config(
-    user: User = Depends(require_module("email_config")),
+    user: User = Depends(require_operator("email_config")),
     db: AsyncSession = Depends(get_db),
 ):
     config = await crud_email_config.get_or_create(db)
@@ -31,7 +31,7 @@ async def get_config(
 @router.put("/config", response_model=EmailConfigRead)
 async def update_config(
     body: EmailConfigUpdate,
-    user: User = Depends(require_module("email_config")),
+    user: User = Depends(require_operator("email_config")),
     db: AsyncSession = Depends(get_db),
 ):
     config = await crud_email_config.update(db, obj_in=body, updated_by=user.id)
@@ -43,7 +43,7 @@ async def update_config(
 
 @router.post("/test")
 async def send_test_email(
-    user: User = Depends(require_module("email_config")),
+    user: User = Depends(require_operator("email_config")),
     db: AsyncSession = Depends(get_db),
 ):
     config = await crud_email_config.get(db)
@@ -59,7 +59,7 @@ async def send_test_email(
 
 @router.get("/templates", response_model=list[EmailTemplateRead])
 async def list_templates(
-    user: User = Depends(require_module("email_config")),
+    user: User = Depends(require_operator("email_config")),
     db: AsyncSession = Depends(get_db),
 ):
     return await crud_email_template.list_all(db)
@@ -68,7 +68,7 @@ async def list_templates(
 @router.get("/templates/{template_id}", response_model=EmailTemplateRead)
 async def get_template(
     template_id: str,
-    user: User = Depends(require_module("email_config")),
+    user: User = Depends(require_operator("email_config")),
     db: AsyncSession = Depends(get_db),
 ):
     template = await crud_email_template.get(db, template_id)
@@ -81,7 +81,7 @@ async def get_template(
 async def update_template(
     template_id: str,
     body: EmailTemplateUpdate,
-    user: User = Depends(require_module("email_config")),
+    user: User = Depends(require_operator("email_config")),
     db: AsyncSession = Depends(get_db),
 ):
     template = await crud_email_template.get(db, template_id)

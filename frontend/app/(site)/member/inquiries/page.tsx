@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { recipientDisplayName } from '@/lib/utils';
 
 export default async function MyInquiriesPage() {
   const cookieStore = await cookies();
@@ -26,6 +27,7 @@ export default async function MyInquiriesPage() {
             >
               <div className="flex justify-between items-start">
                 <div>
+                  <p className="text-xs text-gray-500 mb-1">To: {recipientDisplayName(i.recipient_name)}</p>
                   <p className="font-medium text-sm">{i.subject}</p>
                   <p className="text-xs text-gray-500 mt-1">{i.body?.slice(0, 80) || ''}...</p>
                 </div>

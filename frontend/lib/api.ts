@@ -166,6 +166,13 @@ interface BackendEquipmentManufacturer {
   website: string | null;
   image_url: string | null;
   description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface BackendEquipmentCategory {
@@ -189,7 +196,7 @@ interface BackendEquipment {
   image_url: string | null;
   external_url: string | null;
   sort_order: number;
-  manufacturer: { id: string; name: string; slug: string; country: string | null; website: string | null; image_url: string | null; description: string | null } | null;
+  manufacturer: BackendEquipmentManufacturer | null;
   category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
 }
 
@@ -353,6 +360,13 @@ function adaptEquipmentManufacturer(m: BackendEquipmentManufacturer | null | und
     website: m.website ?? null,
     image_url: m.image_url ?? null,
     description: m.description ?? null,
+    founded_year: m.founded_year ?? null,
+    address: m.address ?? null,
+    phone: m.phone ?? null,
+    email: m.email ?? null,
+    sort_order: m.sort_order ?? 0,
+    created_at: m.created_at ?? '',
+    updated_at: m.updated_at ?? '',
   };
 }
 
@@ -381,15 +395,7 @@ function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
     image_url: e.image_url ?? null,
     external_url: e.external_url ?? null,
     sort_order: e.sort_order ?? 0,
-    manufacturer: e.manufacturer ? {
-      id: e.manufacturer.id,
-      name: e.manufacturer.name,
-      slug: e.manufacturer.slug,
-      country: e.manufacturer.country,
-      website: e.manufacturer.website,
-      image_url: e.manufacturer.image_url,
-      description: e.manufacturer.description,
-    } : null,
+    manufacturer: adaptEquipmentManufacturer(e.manufacturer),
     category: e.category ? {
       id: e.category.id,
       parent_id: e.category.parent_id,
@@ -544,6 +550,42 @@ export const api = {
         `/api/recommended-equipments?cable_id=${encodeURIComponent(cableId)}`
       );
       return res.items.map(adaptEquipment);
+    },
+  },
+
+  equipmentManufacturers: {
+    async all(): Promise<EquipmentManufacturer[]> {
+      const res = await fetchWithCache<{ items: BackendEquipmentManufacturer[]; total: number; page: number; page_size: number }>(
+        '/api/equipment-manufacturers?page_size=999'
+      );
+      return (res.items ?? []).map(adaptEquipmentManufacturer).filter((m): m is EquipmentManufacturer => m !== null);
+    },
+    async getById(id: string): Promise<EquipmentManufacturer | null> {
+      try {
+        const data = await fetchWithCache<BackendEquipmentManufacturer>(`/api/equipment-manufacturers/${encodeURIComponent(id)}`);
+        return adaptEquipmentManufacturer(data);
+      } catch {
+        return null;
+      }
+    },
+    async getBySlug(slug: string): Promise<EquipmentManufacturer | null> {
+      const all = await this.all();
+      return all.find((m) => m.slug === slug) ?? null;
+    },
+  },
+
+  equipmentCategories: {
+    async tree(): Promise<EquipmentCategory[]> {
+      const data = await fetchWithCache<BackendEquipmentCategory[]>('/api/equipment-categories');
+      return (data ?? []).map(c => adaptEquipmentCategory(c)!).filter((c): c is EquipmentCategory => c !== null);
+    },
+    async getById(id: string): Promise<EquipmentCategory | null> {
+      try {
+        const data = await fetchWithCache<BackendEquipmentCategory>(`/api/equipment-categories/${encodeURIComponent(id)}`);
+        return adaptEquipmentCategory(data);
+      } catch {
+        return null;
+      }
     },
   },
 

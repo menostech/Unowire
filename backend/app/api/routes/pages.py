@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_module
+from app.api.deps import require_operator
 from app.core.database import get_db
 from app.crud.page import (
     SlugConflictError,
@@ -30,7 +30,7 @@ async def list_pages(
     page_size: int = Query(20, ge=1, le=100),
     status_filter: str | None = Query(None, alias="status"),
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("pages")),
+    user: User = Depends(require_operator("pages")),
 ):
     items, total = await crud_page.list_paginated(
         db, page=page, page_size=page_size, status_filter=status_filter
@@ -42,7 +42,7 @@ async def list_pages(
 async def get_page(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("pages")),
+    user: User = Depends(require_operator("pages")),
 ):
     obj = await crud_page.get(db, id)
     if not obj:
@@ -54,7 +54,7 @@ async def get_page(
 async def create_page(
     obj_in: PageCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("pages")),
+    user: User = Depends(require_operator("pages")),
 ):
     try:
         obj = await crud_page.create(db, obj_in=obj_in)
@@ -70,7 +70,7 @@ async def update_page(
     id: str,
     obj_in: PageUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("pages")),
+    user: User = Depends(require_operator("pages")),
 ):
     obj = await crud_page.get(db, id)
     if not obj:
@@ -88,7 +88,7 @@ async def update_page(
 async def delete_page(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_module("pages")),
+    user: User = Depends(require_operator("pages")),
 ):
     obj = await crud_page.get(db, id)
     if not obj:

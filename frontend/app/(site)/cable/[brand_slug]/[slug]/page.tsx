@@ -46,6 +46,19 @@ export default async function CableDetailPage({
   const memberToken = (await cookies()).get('member_token')?.value;
   const isMember = !!memberToken;
 
+  // Fire-and-forget page view tracking. Errors are silently ignored.
+  if (cable?.id) {
+    try {
+      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/page-views`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entity_type: 'cable', entity_id: String(cable.id) }),
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
+  }
+
   const breadcrumbItems = [
     { name: 'Home', url: '/' },
     { name: 'Cables', url: '/cables' },

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { recipientDisplayName } from '@/lib/utils';
 
 export default async function InquiryDetailPage({
   params,
@@ -33,7 +34,9 @@ export default async function InquiryDetailPage({
       </div>
       {inquiry.reply_body && (
         <div className="border border-blue-200 bg-blue-50 rounded p-4">
-          <p className="text-xs text-blue-600 mb-2">Manufacturer reply</p>
+          <p className="text-xs text-blue-600 mb-2">
+            {recipientDisplayName(inquiry.recipient_name)} reply
+          </p>
           <p className="text-sm whitespace-pre-wrap">{inquiry.reply_body}</p>
           {inquiry.replied_at && (
             <p className="text-xs text-gray-400 mt-2">{new Date(inquiry.replied_at).toLocaleString()}</p>
@@ -41,7 +44,9 @@ export default async function InquiryDetailPage({
         </div>
       )}
       {!inquiry.reply_body && (
-        <p className="text-sm text-gray-500 italic">Awaiting reply from manufacturer.</p>
+        <p className="text-sm text-gray-500 italic">
+          Awaiting reply from {recipientDisplayName(inquiry.recipient_name)}.
+        </p>
       )}
     </div>
   );

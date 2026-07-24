@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ReplyForm } from '@/components/admin/form/ReplyForm';
+import { recipientDisplayName } from '@/lib/utils';
 
 export default async function AdminInquiryDetailPage({
   params,
@@ -34,7 +35,7 @@ export default async function AdminInquiryDetailPage({
         </div>
         <div>
           <p className="text-gray-500">Recipient:</p>
-          <p>{inquiry.recipient_type}: {inquiry.recipient_id}</p>
+          <p>{recipientDisplayName(inquiry.recipient_name)}</p>
         </div>
         <div>
           <p className="text-gray-500">Created:</p>

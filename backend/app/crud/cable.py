@@ -1,4 +1,4 @@
-﻿from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -266,6 +266,37 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
             spec_facets=spec_facets,
             outer_diameter=outer_diameter,
         )
+
+    async def list_by_manufacturer(
+        self, db: AsyncSession, *, scope_id: str, skip: int = 0, limit: int = 50
+    ) -> list[Cable]:
+        """List cables where brand.manufacturer_id == scope_id. For portal routes."""
+        stmt = (
+            select(Cable)
+            .join(Brand, Cable.brand_id == Brand.id)
+            .where(Brand.manufacturer_id == scope_id)
+            .options(
+                selectinload(Cable.brand),
+                selectinload(Cable.variants).selectinload(CableVariant.specs),
+                selectinload(Cable.common_specs),
+            )
+            .order_by(Cable.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+        )
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
+    async def count_by_manufacturer(self, db: AsyncSession, *, scope_id: str) -> int:
+        """Count cables where brand.manufacturer_id == scope_id."""
+        stmt = (
+            select(func.count())
+            .select_from(Cable)
+            .join(Brand, Cable.brand_id == Brand.id)
+            .where(Brand.manufacturer_id == scope_id)
+        )
+        result = await db.execute(stmt)
+        return result.scalar() or 0
 
 
 crud_cable = CRUDCable(Cable)
