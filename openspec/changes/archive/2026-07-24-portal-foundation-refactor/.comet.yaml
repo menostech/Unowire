@@ -16,14 +16,14 @@ plan: docs/superpowers/plans/2026-07-24-portal-foundation-refactor.md
 verify_result: pass
 verify_failures: 0
 verification_report: docs/superpowers/reports/2026-07-24-portal-foundation-refactor-verify.md
-branch_status: pending
+branch_status: handled
 created_at: 2026-07-24
 verified_at: 2026-07-24
 archive_confirmation: confirmed
 archived: true
 bound_branch: master
 direct_override: null
-handoff_context: openspec/changes/portal-foundation-refactor/.comet/handoff/design-context.json
+handoff_context: openspec/changes/archive/2026-07-24-portal-foundation-refactor/.comet/handoff/design-context.json
 handoff_hash: 8d4776660dee49b4966aedac26ae4728b4158ae2c921d4306256bed0e019e396
 classic_profile: full
 classic_migration: 1
