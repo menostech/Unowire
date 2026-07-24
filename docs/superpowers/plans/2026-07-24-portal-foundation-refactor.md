@@ -102,7 +102,7 @@ Documentation-only references (historical specs/plans/openspec/.comet) require N
 **Interfaces:**
 - Produces: `PortalScopeType`, `PortalUser`, `PortalPermissions`, `PortalDashboardStats`, `PortalDashboard`, `PortalCable`, `PortalCableUpdate`, `PortalEquipment`, `PortalEquipmentUpdate`, `PortalInquiry`, `PortalFolder`, `PortalUpload`, `PortalUploadsResponse` — consumed by Tasks 2, 3, 6, 8.
 
-- [ ] **Step 1: Create `frontend/lib/types/portal.ts` with corrected interfaces**
+- [x] **Step 1: Create `frontend/lib/types/portal.ts` with corrected interfaces**
 
 Use these EXACT interfaces (they override the Design Doc's draft — see "Schema Discrepancies"). They match the verified backend schemas in `backend/app/schemas/{cable,equipment,inquiry,folder}.py` and the route responses in `backend/app/api/routes/portal_{auth,dashboard,media,cables,equipment,inquiries}.py`.
 
@@ -274,7 +274,7 @@ git commit -m "feat(portal): add typed portal interfaces matching backend schema
 - Consumes: `PortalUser`, `PortalPermissions`, `PortalDashboard`, `PortalCable`, `PortalEquipment`, `PortalInquiry`, `PortalFolder`, `PortalUpload`, `PortalUploadsResponse` from Task 1.
 - Produces: a typed `portalApi` server module consumed by `layout.tsx`, `page.tsx`, list pages, `settings/page.tsx`. The `me` block is REMOVED here (callers use `portalApi.auth.me()`).
 
-- [ ] **Step 1: Replace the inline `auth.me()` return type with `PortalUser`**
+- [x] **Step 1: Replace the inline `auth.me()` return type with `PortalUser`**
 
 In `frontend/lib/portalApi.ts`, add an import at the top:
 
@@ -316,7 +316,7 @@ async permissions(): Promise<PortalPermissions | null> {
 },
 ```
 
-- [ ] **Step 3: Replace `dashboard.get()` return type with `PortalDashboard`**
+- [x] **Step 3: Replace `dashboard.get()` return type with `PortalDashboard`**
 
 ```typescript
 async get(): Promise<PortalDashboard> {
@@ -366,7 +366,7 @@ inquiries: {
 },
 ```
 
-- [ ] **Step 7: Replace `folders.all()` and `uploads.all()` return types**
+- [x] **Step 7: Replace `folders.all()` and `uploads.all()` return types**
 
 ```typescript
 folders: {
@@ -395,14 +395,14 @@ me: {
 
 > **Note:** The `me` block is fully removed in Task 5 after its caller (`settings/page.tsx`) is migrated. Keeping it typed here avoids a broken intermediate state.
 
-- [ ] **Step 9: Verify `portalApi.ts` has zero `any` remaining**
+- [x] **Step 9: Verify `portalApi.ts` has zero `any` remaining**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors. (The list pages currently consume `any[]` from these methods; re-typing them may surface type errors in `cables/page.tsx`, `equipment/page.tsx`, `inquiries/page.tsx`, `media/page.tsx` because they read fields off `any`. Since `any` was previously returned, the call sites used untyped access. After re-typing, fix any compile errors in those list pages by reading only fields that exist on the new interfaces — they already do: `c.id`, `c.model`, `c.slug`, `c.manufacturer?.name`, `c.created_at`, `inq.id`, `inq.subject`, `inq.body`, `inq.is_read`, `inq.created_at`, `f.id`, `f.name`, `f.upload_count`, `u.id`, `u.filename`, `u.url_path`. All these fields exist on the Task 1 interfaces.)
 
 If `tsc` reports errors in list pages, fix them in this step (they will be field-access fixes only — no logic changes).
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add frontend/lib/portalApi.ts frontend/app/portal/cables/page.tsx frontend/app/portal/equipment/page.tsx frontend/app/portal/inquiries/page.tsx frontend/app/portal/media/page.tsx

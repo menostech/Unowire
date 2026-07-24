@@ -5,10 +5,10 @@
 
 ## 2. Server-Side portalApi Type Safety
 
-- [ ] 2.1 Replace all `any` return types in `frontend/lib/portalApi.ts` with interfaces from `types/portal.ts`
-- [ ] 2.2 Add typed `PortalCableUpdate`, `PortalEquipmentUpdate` payload types to method signatures
-- [ ] 2.3 Verify `portalApi.auth.me()` returns `PortalUser | null` (not `any`)
-- [ ] 2.4 Run `tsc --noEmit` to verify 0 type errors in portalApi
+- [x] 2.1 Replace all `any` return types in `frontend/lib/portalApi.ts` with interfaces from `types/portal.ts`
+- [x] 2.2 Add typed `PortalCableUpdate`, `PortalEquipmentUpdate` payload types to method signatures
+- [x] 2.3 Verify `portalApi.auth.me()` returns `PortalUser | null` (not `any`)
+- [x] 2.4 Run `tsc --noEmit` to verify 0 type errors in portalApi
 
 ## 3. Client-Side portalApiClient (Unified BFF Write Layer)
 
