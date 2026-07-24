@@ -1,4 +1,15 @@
 import { cookies } from 'next/headers';
+import type {
+  PortalUser,
+  PortalPermissions,
+  PortalDashboard,
+  PortalCable,
+  PortalEquipment,
+  PortalInquiry,
+  PortalFolder,
+  PortalUpload,
+  PortalUploadsResponse,
+} from '@/lib/types/portal';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
 
@@ -26,107 +37,66 @@ async function portalGet<T>(path: string): Promise<T> {
 
 export const portalApi = {
   auth: {
-    async me() {
+    async me(): Promise<PortalUser | null> {
       try {
-        return await portalGet<{
-          id: number;
-          email: string;
-          role_id: string;
-          role_name: string;
-          scope_type: string;
-          scope_id: string;
-        }>('/api/portal/auth/me');
+        return await portalGet<PortalUser>('/api/portal/auth/me');
       } catch {
         return null;
       }
     },
-    async permissions() {
+    async permissions(): Promise<PortalPermissions | null> {
       try {
-        return await portalGet<{
-          user_id: number;
-          email: string;
-          role_id: string;
-          role_name: string;
-          scope_type: string;
-          scope_id: string;
-          allowed_modules: string[];
-        }>('/api/portal/auth/me/permissions');
+        return await portalGet<PortalPermissions>('/api/portal/auth/me/permissions');
       } catch {
         return null;
       }
     },
   },
   dashboard: {
-    async get() {
-      return portalGet<{
-        factory_name: string;
-        scope_type: string;
-        stats: {
-          cables_count?: number;
-          equipment_count?: number;
-          views_total: number;
-          views_trend_30d: number;
-          inquiries_total: number;
-          inquiries_unread: number;
-        };
-        inquiry_trend: { date: string; count: number }[];
-        views_trend: { date: string; count: number }[];
-        recent_inquiries: {
-          id: number;
-          subject: string;
-          created_at: string;
-          is_read: boolean;
-        }[];
-      }>('/api/portal/dashboard');
+    async get(): Promise<PortalDashboard> {
+      return portalGet<PortalDashboard>('/api/portal/dashboard');
     },
   },
   cables: {
-    async all() {
-      return portalGet<any[]>('/api/portal/cables');
+    async all(): Promise<PortalCable[]> {
+      return portalGet<PortalCable[]>('/api/portal/cables');
     },
-    async getById(id: string) {
-      return portalGet<any>(`/api/portal/cables/${id}`);
+    async getById(id: string): Promise<PortalCable> {
+      return portalGet<PortalCable>(`/api/portal/cables/${id}`);
     },
   },
   equipment: {
-    async all() {
-      return portalGet<any[]>('/api/portal/equipment');
+    async all(): Promise<PortalEquipment[]> {
+      return portalGet<PortalEquipment[]>('/api/portal/equipment');
     },
-    async getById(id: string) {
-      return portalGet<any>(`/api/portal/equipment/${id}`);
+    async getById(id: string): Promise<PortalEquipment> {
+      return portalGet<PortalEquipment>(`/api/portal/equipment/${id}`);
     },
   },
   inquiries: {
-    async all() {
-      return portalGet<any[]>('/api/portal/inquiries');
+    async all(): Promise<PortalInquiry[]> {
+      return portalGet<PortalInquiry[]>('/api/portal/inquiries');
     },
-    async unreadCount() {
+    async unreadCount(): Promise<{ count: number }> {
       return portalGet<{ count: number }>('/api/portal/inquiries/unread-count');
     },
-    async getById(id: number) {
-      return portalGet<any>(`/api/portal/inquiries/${id}`);
+    async getById(id: number): Promise<PortalInquiry> {
+      return portalGet<PortalInquiry>(`/api/portal/inquiries/${id}`);
     },
   },
   folders: {
-    async all() {
-      return portalGet<any[]>('/api/portal/folders');
+    async all(): Promise<PortalFolder[]> {
+      return portalGet<PortalFolder[]>('/api/portal/folders');
     },
   },
   uploads: {
-    async all() {
-      return portalGet<{ items: any[]; total: number }>('/api/portal/uploads');
+    async all(): Promise<PortalUploadsResponse> {
+      return portalGet<PortalUploadsResponse>('/api/portal/uploads');
     },
   },
   me: {
-    async get() {
-      return portalGet<{
-        id: number;
-        email: string;
-        role_id: string;
-        role_name: string;
-        scope_type: string;
-        scope_id: string;
-      }>('/api/portal/me');
+    async get(): Promise<PortalUser> {
+      return portalGet<PortalUser>('/api/portal/me');
     },
   },
 };
