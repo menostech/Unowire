@@ -304,7 +304,7 @@ async me(): Promise<PortalUser | null> {
 },
 ```
 
-- [ ] **Step 2: Replace `auth.permissions()` return type with `PortalPermissions`**
+- [x] **Step 2: Replace `auth.permissions()` return type with `PortalPermissions`**
 
 ```typescript
 async permissions(): Promise<PortalPermissions | null> {
@@ -324,7 +324,7 @@ async get(): Promise<PortalDashboard> {
 },
 ```
 
-- [ ] **Step 4: Replace `cables` methods' `any` with `PortalCable`**
+- [x] **Step 4: Replace `cables` methods' `any` with `PortalCable`**
 
 ```typescript
 cables: {
@@ -350,7 +350,7 @@ equipment: {
 },
 ```
 
-- [ ] **Step 6: Replace `inquiries` methods' `any` with `PortalInquiry`**
+- [x] **Step 6: Replace `inquiries` methods' `any` with `PortalInquiry`**
 
 ```typescript
 inquiries: {
@@ -381,7 +381,7 @@ uploads: {
 },
 ```
 
-- [ ] **Step 8: Remove the `me` block**
+- [x] **Step 8: Remove the `me` block**
 
 Delete the entire `me: { async get() { ... } }` block from `portalApi`. This removes the `/api/portal/me` caller from `portalApi.ts`. (The settings page caller is migrated in Task 5; do NOT remove the `me` block until Task 5 migrates that caller — but since Task 5 runs after Task 2, this step would break `settings/page.tsx` at type-check. To keep each task independently green, defer the actual deletion of the `me` block to Task 5 Step 2. Instead, here, ONLY re-type the `me.get()` return to `PortalUser` so it stays consistent:)
 
@@ -606,12 +606,12 @@ Open `backend/tests/api/test_portal_me.py`. Every `client.get("/api/portal/me", 
 
 If a `test_portal_auth.py` already covers `GET /api/portal/auth/me`, merge the migrated PUT assertions into it and delete `test_portal_me.py` instead of leaving a duplicate. Check `backend/tests/api/` for an existing portal_auth test file first; otherwise keep the migrated `test_portal_me.py` (renamed in-place is fine).
 
-- [ ] **Step 2: Run migrated backend tests**
+- [x] **Step 2: Run migrated backend tests**
 
 Run: `pytest backend/tests/ -k portal`
 Expected: all pass against `/api/portal/auth/me`.
 
-- [ ] **Step 3: Remove `portal_me.py` and unregister its router**
+- [x] **Step 3: Remove `portal_me.py` and unregister its router**
 
 Delete `backend/app/api/routes/portal_me.py`. In `backend/app/main.py`:
 - Remove `portal_me` from the import on line 12 (the long `from app.api.routes import (...)` tuple).
@@ -630,7 +630,7 @@ Delete the entire `me: { async get() { ... } }` block (the one re-typed in Task 
 
 Change line 7 from `me = await portalApi.me.get();` to `me = await portalApi.auth.me();`. The local `me` variable becomes `PortalUser | null` (already typed as `any` — change the declaration to `let me: PortalUser | null = null;` and add the import `import type { PortalUser } from '@/lib/types/portal';`). The JSX already reads `me.email`, `me.role_name`, `me.scope_type`, `me.scope_id` — all exist on `PortalUser`. Wrap in the existing try/catch (it already has one).
 
-- [ ] **Step 7: Delete the old BFF route**
+- [x] **Step 7: Delete the old BFF route**
 
 Delete `frontend/app/api/portal/me/route.ts` and the now-empty `frontend/app/api/portal/me/` directory.
 
@@ -688,7 +688,7 @@ git commit -m "refactor(portal): consolidate /api/portal/me into /api/portal/aut
 
 **Shared pattern (apply to every form):** add `const [errors, setErrors] = useState<Record<string, string>>({});`. Add a `validate()` returning boolean. On submit, call `validate()`; if false, return without calling the API. In the `catch`, if `err instanceof PortalApiError && err.fieldErrors`, `setErrors(err.fieldErrors)`; else if `err instanceof PortalApiError`, set the form-level message to `err.message`; else set form-level message to `'Network error'`. Render `{errors.<field> && <p className="mt-1 text-sm text-red-600">{errors.<field>}</p>}` below each validated field.
 
-- [ ] **Step 1: Refactor `CableEditForm.tsx`**
+- [x] **Step 1: Refactor `CableEditForm.tsx`**
 
 Change the prop type from `{ cable }: { cable: any }` to `{ cable }: { cable: PortalCable }` (import `PortalCable` from `@/lib/types/portal`). Replace the `handleSave` body:
 
@@ -734,7 +734,7 @@ export function CableEditForm({ cable }: { cable: PortalCable }) {
 
 Add the inline error `<p>` below the Model input. Leave the Base Description field without validation (optional).
 
-- [ ] **Step 2: Refactor `EquipmentEditForm.tsx`**
+- [x] **Step 2: Refactor `EquipmentEditForm.tsx`**
 
 Same pattern. Prop type `{ equipment }: { equipment: PortalEquipment }`. Validation rule: `model` required.
 
@@ -766,7 +766,7 @@ async function handleSave() {
 
 Add inline error below the Model input.
 
-- [ ] **Step 3: Refactor `ReplyForm.tsx`**
+- [x] **Step 3: Refactor `ReplyForm.tsx`**
 
 Validation rule: `reply_body` required (non-empty after trim). Replace the raw `fetch` with `portalApiClient.inquiries.reply(inquiryId, replyBody)`. The payload is `{ reply_body: replyBody }` (matches backend `InquiryReply` schema — `reply_body: str`). Keep `router.refresh()` on success.
 
@@ -803,7 +803,7 @@ async function handleSubmit(e: React.FormEvent) {
 
 Render `{errors.reply_body && <p className="mt-1 text-sm text-red-600">{errors.reply_body}</p>}` below the textarea. (Keep the existing `error` form-level message for non-field errors.)
 
-- [ ] **Step 4: Refactor `ChangePasswordForm.tsx`**
+- [x] **Step 4: Refactor `ChangePasswordForm.tsx`**
 
 Validation rules: `old_password` required; `new_password` ≥ 8 chars; `new_password !== old_password`. Replace the raw `fetch('/api/portal/me', PUT)` with `portalApiClient.auth.changePassword(oldPassword, newPassword)` (which calls `/api/portal/auth/me` PUT — added in Task 5).
 
@@ -869,7 +869,7 @@ Expected: 0 errors.
 - Consumes: nothing (pure presentational skeletons).
 - Produces: Next.js streaming skeletons for every portal route segment; consistent empty-state styling.
 
-- [ ] **Step 1: Create `frontend/app/portal/loading.tsx` (dashboard skeleton)**
+- [x] **Step 1: Create `frontend/app/portal/loading.tsx` (dashboard skeleton)**
 
 ```tsx
 export default function PortalDashboardLoading() {
@@ -915,11 +915,11 @@ export default function PortalCablesLoading() {
 }
 ```
 
-- [ ] **Step 3: Create `frontend/app/portal/equipment/loading.tsx`**
+- [x] **Step 3: Create `frontend/app/portal/equipment/loading.tsx`**
 
 Reuse the same skeleton markup as Step 2 (table with 5 placeholder rows).
 
-- [ ] **Step 4: Create `frontend/app/portal/inquiries/loading.tsx` (card list skeleton)**
+- [x] **Step 4: Create `frontend/app/portal/inquiries/loading.tsx` (card list skeleton)**
 
 ```tsx
 export default function PortalInquiriesLoading() {
@@ -936,7 +936,7 @@ export default function PortalInquiriesLoading() {
 }
 ```
 
-- [ ] **Step 5: Create `frontend/app/portal/media/loading.tsx` (grid skeleton)**
+- [x] **Step 5: Create `frontend/app/portal/media/loading.tsx` (grid skeleton)**
 
 ```tsx
 export default function PortalMediaLoading() {
@@ -987,7 +987,7 @@ Expected: 0 errors.
 - Consumes: `portalApi.auth.me()`, `portalApi.auth.permissions()` (both `| null`), `PortalDashboard` from Task 1, `PortalUser`/`PortalPermissions` from Task 1.
 - Produces: server-side redirect to `/portal/login?from=<path>` on expired token; dashboard error UI on backend failure; `allowedModules` prop passed to sidebar (consumed in Task 9).
 
-- [ ] **Step 1: Add `x-pathname` request header in `frontend/middleware.ts`**
+- [x] **Step 1: Add `x-pathname` request header in `frontend/middleware.ts`**
 
 The existing middleware returns `NextResponse.next()` at the end and `NextResponse.redirect(...)` in the no-cookie branches. Modify the final `return NextResponse.next();` to set the `x-pathname` header on the forwarded request. Replace the final `return NextResponse.next();` with:
 
@@ -1001,7 +1001,7 @@ return NextResponse.next({
 
 Do NOT change the existing redirect branches — they return early as before. `pathname` is already in scope (from `request.nextUrl`).
 
-- [ ] **Step 2: Refactor `frontend/app/portal/layout.tsx` — parallel fetch + redirect + permissions prop**
+- [x] **Step 2: Refactor `frontend/app/portal/layout.tsx` — parallel fetch + redirect + permissions prop**
 
 ```tsx
 import { headers, redirect } from 'next/headers';
@@ -1038,7 +1038,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
 Notes: `user` is now `PortalUser | null`; pass it directly (the sidebar's `PortalUser` type will be updated in Task 9 to the shared `PortalUser` from `portal.ts`). `perms` is `PortalPermissions | null`.
 
-- [ ] **Step 3: Create `frontend/components/portal/PortalDashboardContent.tsx`**
+- [x] **Step 3: Create `frontend/components/portal/PortalDashboardContent.tsx`**
 
 Extract the existing dashboard render from `frontend/app/portal/page.tsx` into a presentational component:
 
@@ -1067,7 +1067,7 @@ export function PortalDashboardContent({ data }: { data: PortalDashboard }) {
 }
 ```
 
-- [ ] **Step 4: Create `frontend/components/portal/PortalDashboardErrorState.tsx`**
+- [x] **Step 4: Create `frontend/components/portal/PortalDashboardErrorState.tsx`**
 
 Small client component with a Retry button that calls `router.refresh()`:
 
@@ -1098,7 +1098,7 @@ export function PortalDashboardErrorState() {
 }
 ```
 
-- [ ] **Step 5: Refactor `frontend/app/portal/page.tsx` — try/catch + redirect + error state**
+- [x] **Step 5: Refactor `frontend/app/portal/page.tsx` — try/catch + redirect + error state**
 
 ```tsx
 import { redirect } from 'next/navigation';
@@ -1120,12 +1120,12 @@ export default async function PortalDashboardPage() {
 }
 ```
 
-- [ ] **Step 6: Verify frontend compiles**
+- [x] **Step 6: Verify frontend compiles**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors. (Note: the `PortalSidebar` prop signature change to accept `allowedModules` is applied in Task 9. If `tsc` errors here because `PortalSidebar` does not yet accept `allowedModules`, EITHER complete Task 9 Step 1 first in the same session OR temporarily pass the prop only after Task 9. To keep this task independently green, do Task 9 Step 1 immediately after Step 2 above — the two are coupled. Recommended order: Task 8 Step 2 → Task 9 Step 1 → Task 8 Steps 3–6.)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add frontend/middleware.ts frontend/app/portal/layout.tsx frontend/app/portal/page.tsx frontend/components/portal/PortalDashboardContent.tsx frontend/components/portal/PortalDashboardErrorState.tsx frontend/components/portal/layout/PortalSidebar.tsx
@@ -1145,7 +1145,7 @@ git commit -m "feat(portal): redirect on expired token and handle dashboard erro
 - Consumes: `PortalUser` from Task 1, `allowedModules: string[]` prop from Task 8 layout.
 - Produces: sidebar that filters nav items by `allowed_modules` (in addition to the existing `scope_type` selection).
 
-- [ ] **Step 1: Update `PortalSidebar` to use the shared `PortalUser` type and filter nav by `allowedModules`**
+- [x] **Step 1: Update `PortalSidebar` to use the shared `PortalUser` type and filter nav by `allowedModules`**
 
 Replace the local `PortalUser` interface with an import of the shared type, and add the `allowedModules` prop. Filter the selected nav list by `allowedModules.includes(item.module)`:
 
@@ -1211,12 +1211,12 @@ export function PortalSidebar({
 
 Keep the existing unread-count `useEffect` and `handleLogout` and the JSX `<nav>` map exactly as-is — only the `nav` computation and the prop signature change.
 
-- [ ] **Step 2: Verify frontend compiles**
+- [x] **Step 2: Verify frontend compiles**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add frontend/components/portal/layout/PortalSidebar.tsx
@@ -1231,22 +1231,22 @@ git commit -m "feat(portal): gate sidebar nav by allowed_modules"
 
 **Files:** none (verification only)
 
-- [ ] **Step 1: TypeScript type-check**
+- [x] **Step 1: TypeScript type-check**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors.
 
-- [ ] **Step 2: Backend test suite**
+- [x] **Step 2: Backend test suite**
 
 Run: `pytest backend/tests/`
 Expected: all tests pass, no regressions from the endpoint move (`test_portal_me.py` migrated in Task 5 runs against `/api/portal/auth/me`).
 
-- [ ] **Step 3: Frontend production build**
+- [x] **Step 3: Frontend production build**
 
 Run: `cd frontend && npm run build`
 Expected: build succeeds.
 
-- [ ] **Step 4: Smoke test — happy path**
+- [x] **Step 4: Smoke test — happy path**
 
 Login as a `cable_manager` user. Verify:
 - Dashboard loads at `/portal` (factory name, stats, charts, recent inquiries render).
@@ -1254,26 +1254,26 @@ Login as a `cable_manager` user. Verify:
 - Open an inquiry, type a reply, click Send Reply → reply is sent, inquiry marked replied.
 - Open Settings, change password (valid old + new ≥ 8 chars) → "Password changed successfully".
 
-- [ ] **Step 5: Smoke test — token expiry**
+- [x] **Step 5: Smoke test — token expiry**
 
 Delete the `portal_token` cookie (devtools → Application → Cookies). Navigate to `/portal`, `/portal/cables`, `/portal/inquiries`. Verify each redirects to `/portal/login?from=<original-path>` (no 500, no sidebar-less bare page).
 
-- [ ] **Step 6: Smoke test — permissions**
+- [x] **Step 6: Smoke test — permissions**
 
 Login as a manufacturer user whose `allowed_modules` is `["dashboard", "cables", "me"]` (simulate by editing the role/scope or using a test fixture). Verify the sidebar shows only Dashboard, Cables, and Settings — Inquiries and Media are hidden.
 
-- [ ] **Step 7: Smoke test — dashboard error**
+- [x] **Step 7: Smoke test — dashboard error**
 
 With a valid `portal_token` cookie, stop the backend process (or point `INTERNAL_API_BASE` at a dead port). Reload `/portal`. Verify the dashboard shows "Failed to load dashboard data" with a Retry button (NOT a 500 page). Restart the backend, click Retry → dashboard loads.
 
-- [ ] **Step 8: Smoke test — form validation**
+- [x] **Step 8: Smoke test — form validation**
 
 - Cables: clear the Model field, click Save → inline "Model is required" error appears below the field; no API call is made (network tab shows no PUT).
 - Equipment: same as cables.
 - Reply: clear the reply textarea, click Send Reply → inline "Reply cannot be empty" error; no POST.
 - Change Password: enter short new password (< 8 chars) → inline "Password must be at least 8 characters"; enter new password equal to old → inline "New password must differ from current password"; no PUT.
 
-- [ ] **Step 9: Smoke test — `/api/portal/me` removed**
+- [x] **Step 9: Smoke test — `/api/portal/me` removed**
 
 With the backend running, issue `GET /api/portal/me` (e.g. via curl or browser) → expect 404. `GET /api/portal/auth/me` with a valid token → 200 with profile JSON. `PUT /api/portal/auth/me` with `{ old_password, new_password }` → 200 `{ ok: true }`.
 
