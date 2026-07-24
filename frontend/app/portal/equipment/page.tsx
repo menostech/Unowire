@@ -12,7 +12,7 @@ export default async function PortalEquipmentPage() {
     <div>
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Equipment</h1>
       {equipment.length === 0 ? (
-        <p className="text-sm text-gray-500">No equipment in your scope yet.</p>
+        <p className="empty-state text-sm text-gray-500">No equipment in your scope yet.</p>
       ) : (
         <div className="overflow-hidden rounded-lg bg-white shadow-sm">
           <table className="w-full text-left text-sm">

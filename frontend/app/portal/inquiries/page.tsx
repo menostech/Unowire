@@ -12,7 +12,7 @@ export default async function PortalInquiriesPage() {
     <div>
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Inquiries</h1>
       {inquiries.length === 0 ? (
-        <p className="text-sm text-gray-500">No inquiries yet.</p>
+        <p className="empty-state text-sm text-gray-500">No inquiries yet.</p>
       ) : (
         <div className="space-y-3">
           {inquiries.map((inq) => (

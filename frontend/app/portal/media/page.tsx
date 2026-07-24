@@ -18,7 +18,7 @@ export default async function PortalMediaPage() {
         <div className="rounded-lg bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold text-gray-700">Folders</h2>
           {folders.length === 0 ? (
-            <p className="text-xs text-gray-500">No folders.</p>
+            <p className="empty-state text-xs text-gray-500">No folders.</p>
           ) : (
             <ul className="space-y-1">
               {folders.map((f) => (
@@ -34,7 +34,7 @@ export default async function PortalMediaPage() {
             Uploads {uploads ? `(${uploads.total})` : ''}
           </h2>
           {!uploads || uploads.items.length === 0 ? (
-            <p className="text-xs text-gray-500">No uploads.</p>
+            <p className="empty-state text-xs text-gray-500">No uploads.</p>
           ) : (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
               {uploads.items.map((u) => (
