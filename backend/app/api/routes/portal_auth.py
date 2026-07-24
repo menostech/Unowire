@@ -11,7 +11,7 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import get_current_factory_user
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.security import create_access_token, verify_password
+from app.core.security import create_access_token, hash_password, verify_password
 from app.models.role import Role
 from app.models.user import User
 
@@ -114,3 +114,24 @@ async def portal_my_permissions(user: User = Depends(get_current_factory_user)):
         "scope_id": user.scope_id,
         "allowed_modules": sorted(allowed),
     }
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
+@router.put("/me")
+async def change_password(
+    body: ChangePasswordRequest,
+    user: User = Depends(get_current_factory_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not verify_password(body.old_password, user.password_hash):
+        raise HTTPException(status_code=400, detail={"code": 400, "message": "Current password is incorrect"})
+    if len(body.new_password) < 8:
+        raise HTTPException(status_code=400, detail={"code": 400, "message": "Password must be at least 8 characters"})
+    user.password_hash = hash_password(body.new_password)
+    db.add(user)
+    await db.commit()
+    return {"ok": True}
