@@ -530,7 +530,7 @@ git commit -m "feat(portal): add typed client-side portalApiClient and PortalApi
 - Consumes: existing `get_current_factory_user` dep, `verify_password` / `hash_password` from `app.core.security`.
 - Produces: `PUT /api/portal/auth/me` (password change) — consumed by the BFF route added in Task 5 and by `portalApiClient.auth.changePassword`.
 
-- [ ] **Step 1: Add `ChangePasswordRequest` schema and `PUT /me` handler to `portal_auth.py`**
+- [x] **Step 1: Add `ChangePasswordRequest` schema and `PUT /me` handler to `portal_auth.py`**
 
 At the top of `backend/app/api/routes/portal_auth.py`, add imports (merge with existing imports — `hash_password` is new; `verify_password` is already imported):
 
@@ -565,7 +565,7 @@ async def change_password(
 
 This is the exact logic moved verbatim from `portal_me.py` (same `ChangePasswordRequest` shape, same 400 errors, same `verify_password` / `hash_password` calls).
 
-- [ ] **Step 2: Verify the new endpoint works in isolation (before removing the old one)**
+- [x] **Step 2: Verify the new endpoint works in isolation (before removing the old one)** — DB unavailable; verified via py_compile + module import + route registration. Full pytest deferred to Task 10.
 
 Run backend tests for portal auth if any exist, then run the full suite:
 
@@ -574,7 +574,7 @@ pytest backend/tests/ -k portal
 ```
 Expected: all pass. (`portal_me.py` still exists at this point, so existing `test_portal_me.py` tests still pass against the old endpoint; the new endpoint is additive.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add backend/app/api/routes/portal_auth.py

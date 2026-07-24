@@ -18,7 +18,7 @@
 
 ## 4. Backend Endpoint Consolidation
 
-- [ ] 4.1 Add `PUT /api/portal/auth/me` endpoint to `portal_auth.py` for password change (move logic from `portal_me.py`)
+- [x] 4.1 Add `PUT /api/portal/auth/me` endpoint to `portal_auth.py` for password change (move logic from `portal_me.py`)
 - [ ] 4.2 Remove `backend/app/api/routes/portal_me.py` and unregister its router in `main.py`
 - [ ] 4.3 Remove `frontend/app/api/portal/me/route.ts` BFF route
 - [ ] 4.4 Update `portalApi.me.get()` to call `/api/portal/auth/me` instead of `/api/portal/me`
