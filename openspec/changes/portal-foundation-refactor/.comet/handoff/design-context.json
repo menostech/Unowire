@@ -1,0 +1,15 @@
+{
+  "change": "portal-foundation-refactor",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "8d4776660dee49b4966aedac26ae4728b4158ae2c921d4306256bed0e019e396",
+  "files": [
+    { "path": "openspec/changes/portal-foundation-refactor/proposal.md", "sha256": "3d1274ff7f4cee91da1e5337771a55c362a9d48343a151facb79a9ea457801e7" },
+    { "path": "openspec/changes/portal-foundation-refactor/design.md", "sha256": "bda9f106d9b0391300485f743b04db2e2426ec0b670d75f1426309462d2af6ad" },
+    { "path": "openspec/changes/portal-foundation-refactor/tasks.md", "sha256": "2ae7f06ef3a01db52e3a34d74221b3f23aa095021130bbda5a488a23f6bd644d" },
+    { "path": "openspec/changes/portal-foundation-refactor/specs/portal-api-layer/spec.md", "sha256": "1e700814d492bf2df90f7154f86cb95601f659bd7b0d6b4a76842f3df2bf5874" },
+    { "path": "openspec/changes/portal-foundation-refactor/specs/portal-error-resilience/spec.md", "sha256": "56b9b39b3e9dcab99473a638029332d2d84422057d17d747f0832521e4c86705" }
+  ]
+}
