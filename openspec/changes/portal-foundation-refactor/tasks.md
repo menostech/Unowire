@@ -12,9 +12,9 @@
 
 ## 3. Client-Side portalApiClient (Unified BFF Write Layer)
 
-- [ ] 3.1 Create `frontend/lib/portalApiClient.ts` with client-side typed write methods: `cables.update(id, data)`, `equipment.update(id, data)`, `inquiries.reply(id, body)`, `auth.changePassword(old, new)`
-- [ ] 3.2 Each method calls the corresponding BFF route at `/api/portal/*` with typed payloads
-- [ ] 3.3 Add error handling that parses BFF error responses and throws typed errors
+- [x] 3.1 Create `frontend/lib/portalApiClient.ts` with client-side typed write methods: `cables.update(id, data)`, `equipment.update(id, data)`, `inquiries.reply(id, body)`, `auth.changePassword(old, new)`
+- [x] 3.2 Each method calls the corresponding BFF route at `/api/portal/*` with typed payloads
+- [x] 3.3 Add error handling that parses BFF error responses and throws typed errors
 
 ## 4. Backend Endpoint Consolidation
 

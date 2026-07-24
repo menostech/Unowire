@@ -20,13 +20,19 @@
 - Risk signals: none (type-safety only, all within portal subsystem)
 - Review: skipped (standard, no risk signals)
 - Verification: tsc --noEmit passed with 0 errors
-- Note: 2.2 (typed payload signatures) satisfied — portalApi.ts is read-only server-side with no write methods; typed payloads PortalCableUpdate/PortalEquipmentUpdate are consumed by portalApiClient in Task 3
 
-## Current Task: Task 3 — Client-Side portalApiClient (Unified BFF Write Layer)
+### Task 3 — Client-Side portalApiClient (Unified BFF Write Layer)
+- Stage: done
+- Commit: 6c9f17d552d9460b410bfe6fabbb2b606ad901d9
+- Risk signals: none (new file, client-side write layer, no cross-module coordination)
+- Review: skipped (standard, no risk signals)
+- Verification: tsc --noEmit passed with 0 errors; BFF routes verified to exist
 
-- Plan task text: "Step 1: Create `frontend/lib/portalApiClient.ts`"
-- OpenSpec task text: "3.1 Create `frontend/lib/portalApiClient.ts` with client-side typed write methods"
+## Current Task: Task 4 — Backend Endpoint Consolidation — Add PUT /api/portal/auth/me
+
+- Plan task text: "Step 1: Add ChangePasswordRequest schema and PUT /me handler to portal_auth.py"
+- OpenSpec task text: "4.1 Add PUT /api/portal/auth/me endpoint to portal_auth.py for password change"
 - Stage: pending
 - Implementation commit: pending
-- Risk signals: none (new file, client-side write layer, no cross-module coordination)
+- Risk signals: security-sensitive (auth/password change), but same logic as existing portal_me.py — evaluate after implementation
 - Review-fix round: 0/1 (standard)

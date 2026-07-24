@@ -501,16 +501,16 @@ export const portalApiClient = {
 };
 ```
 
-- [ ] **Step 2: Verify the BFF write routes that `portalApiClient` depends on exist**
+- [x] **Step 2: Verify the BFF write routes that `portalApiClient` depends on exist**
 
 Confirm these files exist (they do, per planning): `frontend/app/api/portal/cables/[id]/route.ts` (PUT), `frontend/app/api/portal/equipment/[id]/route.ts` (PUT), `frontend/app/api/portal/inquiries/[id]/reply/route.ts` (POST). No changes needed — they already forward the `portal_token` cookie as Bearer and proxy the response. The `/api/portal/auth/me` PUT handler is added in Task 5.
 
-- [ ] **Step 3: Verify types compile**
+- [x] **Step 3: Verify types compile**
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/lib/portalApiClient.ts
