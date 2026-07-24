@@ -44,7 +44,7 @@ export default async function EditManufacturerPage({ params }: PageProps) {
   const cables = cablesResult.items.map(c => ({
     id: c.id,
     model: c.model,
-    brand: c.brand ? { name: c.brand.name } : null,
+    manufacturer: c.manufacturer ? { name: c.manufacturer.name } : null,
   }));
 
   return (

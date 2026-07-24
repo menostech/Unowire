@@ -27,7 +27,6 @@ async def list_cables(
     product_type: str | None = None,
     q: str | None = None,
     manufacturer: list[str] | None = Query(None),
-    brand: list[str] | None = Query(None),
     size: list[str] | None = Query(None),
     min_size: float | None = None,
     max_size: float | None = None,
@@ -51,7 +50,6 @@ async def list_cables(
         product_type=product_type,
         q=q,
         manufacturer=manufacturer,
-        brand=brand,
         size=size,
         min_size=min_size,
         max_size=max_size,
@@ -67,9 +65,9 @@ async def list_cables(
     )
 
 
-@router.get("/by-url/{brand_slug}/{cable_slug}", response_model=CableDetailRead)
-async def get_cable_by_url(brand_slug: str, cable_slug: str, db: AsyncSession = Depends(get_db)):
-    cable = await crud_cable.get_by_url(db, brand_slug, cable_slug)
+@router.get("/by-url/{manufacturer_slug}/{cable_slug}", response_model=CableDetailRead)
+async def get_cable_by_url(manufacturer_slug: str, cable_slug: str, db: AsyncSession = Depends(get_db)):
+    cable = await crud_cable.get_by_url(db, manufacturer_slug, cable_slug)
     if not cable:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})
     # Get recommended equipment
@@ -93,12 +91,10 @@ async def create_cable(obj_in: CableCreate, db: AsyncSession = Depends(get_db), 
 
     # Scope check: cable_manager can only create cables for their own manufacturer
     if user.role and user.role.scope_type == "manufacturer":
-        from app.crud.brand import crud_brand
-        brand = await crud_brand.get(db, obj_in.brand_id)
-        if brand is None or brand.manufacturer_id != user.scope_id:
+        if obj_in.manufacturer_id != user.scope_id:
             raise HTTPException(
                 status_code=403,
-                detail={"code": 403, "message": "Cannot create cable for a brand outside your scope"},
+                detail={"code": 403, "message": "Cannot create cable for a manufacturer outside your scope"},
             )
 
     cable_data = obj_in.model_dump(exclude={"common_specs", "variants"})
@@ -139,9 +135,7 @@ async def update_cable(id: str, obj_in: CableUpdate, db: AsyncSession = Depends(
 
     # Scope check: cable_manager can only modify their own manufacturer's cables
     if user.role and user.role.scope_type == "manufacturer":
-        if cable.brand is None:
-            await db.refresh(cable, attribute_names=["brand"])
-        if cable.brand is None or cable.brand.manufacturer_id != user.scope_id:
+        if cable.manufacturer_id != user.scope_id:
             raise HTTPException(
                 status_code=403,
                 detail={"code": 403, "message": "Cannot modify cable outside your scope"},
@@ -189,7 +183,7 @@ async def delete_cable(id: str, db: AsyncSession = Depends(get_db), user: User =
         cable = await crud_cable.get_detail(db, id)
         if cable is None:
             raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})
-        if cable.brand is None or cable.brand.manufacturer_id != user.scope_id:
+        if cable.manufacturer_id != user.scope_id:
             raise HTTPException(
                 status_code=403,
                 detail={"code": 403, "message": "Cannot delete cable outside your scope"},

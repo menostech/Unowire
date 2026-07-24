@@ -37,7 +37,6 @@ function isActive(pathname: string, href: string): boolean {
 const PAGE_ID_TO_MODULE_ID: Record<string, string> = {
   dashboard: 'dashboard',
   cables: 'cables',
-  brands: 'brands',
   manufacturers: 'manufacturers',
   industries: 'industries',
   'equipment-mfrs': 'equipment_mfrs',

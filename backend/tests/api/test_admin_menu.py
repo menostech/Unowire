@@ -6,8 +6,7 @@ class TestMenuTree:
         res = client.get("/api/admin/menu/tree")
         assert res.status_code == 200
         data = res.json()
-        # 6 top-level items (dashboard, cable, equipment, media, settings, inquiries)
-        assert len(data) == 6
+        assert len(data) == 8  # top-level items (dashboard, cables, manufacturers, industries, equipment, media, menu-inquiries, settings)
         # Equipment group has 3 children
         equipment = next(i for i in data if i["id"] == "equipment")
         assert equipment["type"] == "group"
@@ -43,7 +42,7 @@ class TestMenuFlat:
         res = client.get("/api/admin/menu", headers=admin_headers)
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 21  # all seed items (12 original + roles + users + inquiries + email-config + pages + site-menu + members + messages)
+        assert len(data) == 19  # all admin_menu_items after brands menu item removed
 
 
 class TestMenuCreate:
@@ -152,7 +151,7 @@ class TestMenuCreate:
                 "id": "nested-too-deep",
                 "parent_id": "cables",
                 "type": "page",
-                "page_id": "brands",
+                "page_id": "industries",
                 "label": "Nested",
             },
             headers=admin_headers,

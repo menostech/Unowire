@@ -25,12 +25,12 @@ class Cable(Base):
             "size_system IN ('awg','mm2','kcmil','none')",
             name="ck_cables_size_system",
         ),
-        UniqueConstraint("brand_id", "slug"),
+        UniqueConstraint("manufacturer_id", "slug"),
     )
 
     id: Mapped[str] = mapped_column(String(100), primary_key=True)
-    brand_id: Mapped[str] = mapped_column(
-        String(100), ForeignKey("brands.id", ondelete="RESTRICT"), nullable=False
+    manufacturer_id: Mapped[str] = mapped_column(
+        String(100), ForeignKey("manufacturers.id", ondelete="RESTRICT"), nullable=False
     )
     product_type_id: Mapped[str] = mapped_column(
         String(100), ForeignKey("product_types.id", ondelete="RESTRICT"), nullable=False
@@ -52,7 +52,7 @@ class Cable(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    brand: Mapped["Brand"] = relationship(lazy="selectin")
+    manufacturer: Mapped["Manufacturer"] = relationship(lazy="selectin")
     variants: Mapped[list["CableVariant"]] = relationship(
         back_populates="cable", lazy="selectin", order_by="CableVariant.sort_order"
     )

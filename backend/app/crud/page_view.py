@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
 from app.models.cable import Cable
-from app.models.brand import Brand
 from app.models.equipment import EquipmentManufacturer
 from app.models.equipment import RecommendedEquipment
 from app.models.manufacturer import Manufacturer
@@ -70,12 +69,11 @@ class CRUDPageView(CRUDBase[PageView, PageViewCreate, PageViewCreate]):
     ) -> tuple[str | None, str | None]:
         """Resolve (scope_type, scope_id) for an entity. Returns (None, None) if not found."""
         if entity_type == "cable":
-            # Cable -> Brand -> Manufacturer
+            # Cable -> Manufacturer (direct FK)
             stmt = (
                 select(Manufacturer.id)
                 .select_from(Cable)
-                .join(Brand, Cable.brand_id == Brand.id)
-                .join(Manufacturer, Brand.manufacturer_id == Manufacturer.id)
+                .join(Manufacturer, Cable.manufacturer_id == Manufacturer.id)
                 .where(Cable.id == entity_id)
             )
             result = await db.execute(stmt)

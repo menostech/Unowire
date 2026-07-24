@@ -5,20 +5,18 @@ from datetime import datetime
 
 from app.core.database import async_session
 from app.crud.cable import crud_cable
-from app.crud.brand import crud_brand
 from app.crud.equipment import crud_equipment
 from app.crud.inquiry import crud_inquiry
 
 
 def test_cable_list_by_manufacturer_returns_only_scope_cables():
-    """list_by_manufacturer returns cables where brand.manufacturer_id == scope_id."""
+    """list_by_manufacturer returns cables where cable.manufacturer_id == scope_id."""
     async def _run():
         async with async_session() as db:
             cables = await crud_cable.list_by_manufacturer(db, scope_id="mfr-1", skip=0, limit=20)
-            # All returned cables should have brand.manufacturer_id == "mfr-1"
+            # All returned cables should have manufacturer_id == "mfr-1" (direct FK)
             for c in cables:
-                assert c.brand is not None
-                assert c.brand.manufacturer_id == "mfr-1"
+                assert c.manufacturer_id == "mfr-1"
     asyncio.run(_run())
 
 
@@ -29,15 +27,6 @@ def test_cable_count_by_manufacturer():
             count = await crud_cable.count_by_manufacturer(db, scope_id="mfr-1")
             assert isinstance(count, int)
             assert count >= 0
-    asyncio.run(_run())
-
-
-def test_brand_list_by_manufacturer():
-    async def _run():
-        async with async_session() as db:
-            brands = await crud_brand.list_by_manufacturer(db, scope_id="mfr-1", skip=0, limit=20)
-            for b in brands:
-                assert b.manufacturer_id == "mfr-1"
     asyncio.run(_run())
 
 

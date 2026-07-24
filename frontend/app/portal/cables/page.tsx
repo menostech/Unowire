@@ -19,7 +19,7 @@ export default async function PortalCablesPage() {
             <thead className="border-b bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
                 <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Brand</th>
+                <th className="px-4 py-3">Manufacturer</th>
                 <th className="px-4 py-3">Created</th>
               </tr>
             </thead>
@@ -31,7 +31,7 @@ export default async function PortalCablesPage() {
                       {c.model || c.slug || c.id}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{c.brand?.name ?? '—'}</td>
+                  <td className="px-4 py-3 text-gray-600">{c.manufacturer?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-500">
                     {c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}
                   </td>

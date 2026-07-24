@@ -5,7 +5,7 @@ import { useState, type FormEvent } from 'react';
 interface CableOption {
   id: string;
   model: string;
-  brand?: { name: string } | null;
+  manufacturer?: { name: string } | null;
 }
 
 interface ShowcaseInitialData {
@@ -242,8 +242,8 @@ export function ManufacturerShowcaseBlocks({
                 />
                 <div className="text-sm">
                   <div className="font-medium text-gray-900">{cable.model}</div>
-                  {cable.brand?.name && (
-                    <div className="text-gray-500 text-xs">{cable.brand.name}</div>
+                  {cable.manufacturer?.name && (
+                    <div className="text-gray-500 text-xs">{cable.manufacturer.name}</div>
                   )}
                 </div>
               </label>

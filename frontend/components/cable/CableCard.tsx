@@ -1,15 +1,14 @@
 import Link from 'next/link';
-import type { Cable, Brand, Manufacturer } from '@/lib/types';
+import type { Cable, Manufacturer } from '@/lib/types';
 import { getCableUrl } from '@/lib/api';
 import { getPrimaryVariant, findVariantSpec, formatSpecValue, formatSizeValue } from '@/lib/utils';
 
 interface CableCardProps {
   cable: Cable;
-  brand?: Brand | null;
   manufacturer?: Manufacturer | null;
 }
 
-export function CableCard({ cable, brand, manufacturer }: CableCardProps) {
+export function CableCard({ cable, manufacturer }: CableCardProps) {
   const primaryVariant = getPrimaryVariant(cable);
   const url = getCableUrl(cable);
   const sizeSpec = primaryVariant ? findVariantSpec(primaryVariant, "size") : null;
@@ -32,14 +31,11 @@ export function CableCard({ cable, brand, manufacturer }: CableCardProps) {
       <div className="p-3">
         <h3 className="font-semibold text-gray-900 truncate">{cable.model}</h3>
         <div className="flex items-center gap-2 mb-2">
-          {brand?.image_url && (
-            <img src={brand.image_url} alt={brand.name} className="h-6 w-6 rounded object-cover" />
-          )}
-          {manufacturer?.image_url && !brand?.image_url && (
+          {manufacturer?.image_url && (
             <img src={manufacturer.image_url} alt={manufacturer.name} className="h-6 w-6 rounded object-cover" />
           )}
           <p className="text-xs text-gray-500">
-            {brand?.name ?? "Unknown"}{manufacturer ? ` · ${manufacturer.country}` : ""}
+            {manufacturer?.name ?? "Unknown"}{manufacturer ? ` · ${manufacturer.country}` : ""}
           </p>
         </div>
 

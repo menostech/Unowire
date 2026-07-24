@@ -21,14 +21,14 @@ export default async function EditCablePage({ params }: PageProps) {
     );
   }
 
-  const brandRes = await adminApi.brands.all(1, 999);
-  const brands = brandRes.items.map((b) => ({ id: b.id, name: b.name }));
+  const mfrRes = await adminApi.manufacturers.all(1, 999);
+  const manufacturers = mfrRes.items.map((m) => ({ id: m.id, name: m.name }));
   const taxonomy = await api.taxonomy.all();
 
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Edit Cable</h1>
-      <CableForm initial={cable} brands={brands} taxonomy={taxonomy} />
+      <CableForm initial={cable} manufacturers={manufacturers} taxonomy={taxonomy} />
     </div>
   );
 }

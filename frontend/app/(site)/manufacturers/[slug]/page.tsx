@@ -7,7 +7,7 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { CableCard } from '@/components/cable/CableCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { api } from '@/lib/api';
-import type { Brand, Cable, Manufacturer } from '@/lib/types';
+import type { Cable, Manufacturer } from '@/lib/types';
 import { InquiryFormModal } from '@/components/member/InquiryFormModal';
 import { ManufacturerRecommendations } from '@/components/shared/ManufacturerRecommendations';
 
@@ -83,16 +83,10 @@ export default async function ManufacturerDetailPage({
   const isMember = !!memberToken;
 
   const allManufacturers = await api.manufacturers.all();
-  const allBrands = await api.brands.all();
   const allCables = await api.cables.all();
   const productTypeMap = await buildProductTypeMap();
 
-  const brands = allBrands.filter(b => b.manufacturer_id === manufacturer.id);
-  const brandIds = new Set(brands.map(b => b.id));
-  const cables = allCables.filter(c => brandIds.has(c.brand_id));
-
-  const brandById = new Map<string, Brand>();
-  for (const b of allBrands) brandById.set(b.id, b);
+  const cables = allCables.filter(c => c.manufacturer_id === manufacturer.id);
 
   const featuredCables = manufacturer.featured_cable_ids
     .map(id => cables.find(c => c.id === id))
@@ -101,7 +95,6 @@ export default async function ManufacturerDetailPage({
   const hasContactInfo = !!(manufacturer.address || manufacturer.phone || manufacturer.email);
   const hasAbout = !!manufacturer.description;
   const hasFeaturedCables = featuredCables.length > 0;
-  const hasBrands = brands.length > 0;
   const hasCables = cables.length > 0;
 
   const cablesByProductType = new Map<string, Cable[]>();
@@ -244,35 +237,14 @@ export default async function ManufacturerDetailPage({
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {featuredCables.map(cable => {
-                  const brand = brandById.get(cable.brand_id) ?? null;
                   return (
                     <CableCard
                       key={cable.id}
                       cable={cable}
-                      brand={brand}
                       manufacturer={manufacturer}
                     />
                   );
                 })}
-              </div>
-            </section>
-          )}
-
-          {/* 5. Brands Section */}
-          {hasBrands && (
-            <section className="mb-10">
-              <h2 className="text-xl font-bold text-gray-900 mb-3 pb-2 border-b">
-                All Brands
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {brands.map(brand => (
-                  <div
-                    key={brand.id}
-                    className="border rounded-lg p-4 bg-white"
-                  >
-                    <p className="font-medium text-gray-900">{brand.name}</p>
-                  </div>
-                ))}
               </div>
             </section>
           )}
@@ -305,12 +277,10 @@ export default async function ManufacturerDetailPage({
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {displayed.map(cable => {
-                          const brand = brandById.get(cable.brand_id) ?? null;
                           return (
                             <CableCard
                               key={cable.id}
                               cable={cable}
-                              brand={brand}
                               manufacturer={manufacturer}
                             />
                           );

@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.brand import Brand
+from app.models.manufacturer import Manufacturer
 from app.models.cable import Cable
 from app.models.taxonomy import Category, Industry, ProductType
 from app.schemas.cable import CableCreate, CableVariantCreate, SpecItemCreate
@@ -18,7 +18,7 @@ MAX_ROWS = 500
 MAX_FOLDER_DEPTH = 5  # not used here, kept for parity with spec context
 
 REQUIRED_CSV_COLUMNS = {
-    "id", "model", "slug", "brand_id", "industry_id",
+    "id", "model", "slug", "manufacturer_id", "industry_id",
     "category_id", "product_type_id", "size_system",
 }
 VALID_SIZE_SYSTEMS = {"awg", "mm2", "kcmil", "none"}
@@ -196,7 +196,7 @@ def _validate_cable_fields(data: dict[str, Any], row_number: int) -> tuple[Cable
     cable_id = data.get("id")
     model = data.get("model")
     slug = data.get("slug")
-    brand_id = data.get("brand_id")
+    manufacturer_id = data.get("manufacturer_id")
     industry_id = data.get("industry_id")
     category_id = data.get("category_id")
     product_type_id = data.get("product_type_id")
@@ -208,8 +208,8 @@ def _validate_cable_fields(data: dict[str, Any], row_number: int) -> tuple[Cable
         errors.append(f"Row {row_number}: missing required field 'model'")
     if not slug:
         errors.append(f"Row {row_number}: missing required field 'slug'")
-    if not brand_id:
-        errors.append(f"Row {row_number}: missing required field 'brand_id'")
+    if not manufacturer_id:
+        errors.append(f"Row {row_number}: missing required field 'manufacturer_id'")
     if not industry_id:
         errors.append(f"Row {row_number}: missing required field 'industry_id'")
     if not category_id:
@@ -284,7 +284,7 @@ def _validate_cable_fields(data: dict[str, Any], row_number: int) -> tuple[Cable
             id=cable_id,
             model=model,
             slug=slug,
-            brand_id=brand_id,
+            manufacturer_id=manufacturer_id,
             industry_id=industry_id,
             category_id=category_id,
             product_type_id=product_type_id,
@@ -303,21 +303,21 @@ def _validate_cable_fields(data: dict[str, Any], row_number: int) -> tuple[Cable
 
 async def _load_fk_sets(db: AsyncSession, rows: list[ParsedRow]) -> dict[str, set[str]]:
     """Layer 3: batch-load all FK target ids to avoid N+1 queries."""
-    brand_ids = {r.data.get("brand_id") for r in rows if r.data.get("brand_id")}
+    manufacturer_ids = {r.data.get("manufacturer_id") for r in rows if r.data.get("manufacturer_id")}
     industry_ids = {r.data.get("industry_id") for r in rows if r.data.get("industry_id")}
     category_ids = {r.data.get("category_id") for r in rows if r.data.get("category_id")}
     product_type_ids = {r.data.get("product_type_id") for r in rows if r.data.get("product_type_id")}
 
     fk_sets: dict[str, set[str]] = {
-        "brands": set(),
+        "manufacturers": set(),
         "industries": set(),
         "categories": set(),
         "product_types": set(),
     }
 
-    if brand_ids:
-        result = await db.execute(select(Brand.id).where(Brand.id.in_(brand_ids)))
-        fk_sets["brands"] = set(result.scalars().all())
+    if manufacturer_ids:
+        result = await db.execute(select(Manufacturer.id).where(Manufacturer.id.in_(manufacturer_ids)))
+        fk_sets["manufacturers"] = set(result.scalars().all())
     if industry_ids:
         result = await db.execute(select(Industry.id).where(Industry.id.in_(industry_ids)))
         fk_sets["industries"] = set(result.scalars().all())
@@ -382,8 +382,8 @@ async def validate_rows(db: AsyncSession, parsed_rows: list[ParsedRow]) -> list[
 
         # Layer 3: FK existence
         fk_errors: list[str] = []
-        if cable_create.brand_id not in fk_sets["brands"]:
-            fk_errors.append(f"Row {row_number}: brand_id '{cable_create.brand_id}' does not exist")
+        if cable_create.manufacturer_id not in fk_sets["manufacturers"]:
+            fk_errors.append(f"Row {row_number}: manufacturer_id '{cable_create.manufacturer_id}' does not exist")
         if cable_create.industry_id not in fk_sets["industries"]:
             fk_errors.append(f"Row {row_number}: industry_id '{cable_create.industry_id}' does not exist")
         if cable_create.category_id not in fk_sets["categories"]:

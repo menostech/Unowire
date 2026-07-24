@@ -10,7 +10,7 @@ interface CableFormProps {
   // Typed as `any` to allow round-tripping raw backend JSON through the editors.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initial?: any;
-  brands: { id: string; name: string }[];
+  manufacturers: { id: string; name: string }[];
   // Taxonomy tree already adapted to Record format by adaptTaxonomyTree.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   taxonomy: any;
@@ -18,13 +18,13 @@ interface CableFormProps {
 
 const SIZE_SYSTEMS = ['awg', 'mm2', 'kcmil', 'none'];
 
-export function CableForm({ initial, brands, taxonomy }: CableFormProps) {
+export function CableForm({ initial, manufacturers, taxonomy }: CableFormProps) {
   const router = useRouter();
 
   // === Basic fields ===
   const [model, setModel] = useState(initial?.model ?? '');
   const [slug, setSlug] = useState(initial?.slug ?? '');
-  const [brandId, setBrandId] = useState(initial?.brand_id ?? '');
+  const [manufacturerId, setManufacturerId] = useState(initial?.manufacturer_id ?? '');
   const [sizeSystem, setSizeSystem] = useState(initial?.size_system ?? 'awg');
 
   // === Cascade dropdowns ===
@@ -108,7 +108,7 @@ export function CableForm({ initial, brands, taxonomy }: CableFormProps) {
 
     const payload = {
       id: initial?.id || slug,
-      brand_id: brandId,
+      manufacturer_id: manufacturerId,
       product_type_id: `${industry}/${category}/${productType}`,
       industry_id: industry,
       category_id: `${industry}/${category}`,
@@ -196,22 +196,22 @@ export function CableForm({ initial, brands, taxonomy }: CableFormProps) {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="brand" className="text-sm font-medium text-gray-700">
-              Brand
+            <label htmlFor="manufacturer" className="text-sm font-medium text-gray-700">
+              Manufacturer
             </label>
             <select
-              id="brand"
+              id="manufacturer"
               required
-              value={brandId}
-              onChange={(e) => setBrandId(e.target.value)}
+              value={manufacturerId}
+              onChange={(e) => setManufacturerId(e.target.value)}
               className={inputClass}
             >
               <option value="" disabled>
-                Select a brand
+                Select a manufacturer
               </option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
+              {manufacturers.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
                 </option>
               ))}
             </select>

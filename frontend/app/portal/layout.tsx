@@ -1,18 +1,17 @@
-import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { portalApi } from '@/lib/portalApi';
 import { PortalSidebar } from '@/components/portal/layout/PortalSidebar';
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('portal_token')?.value;
-  if (!token) {
-    redirect('/portal/login');
-  }
+  // me() reads portal_token cookie; returns null if no token or invalid.
+  // Login page renders without sidebar when no token; middleware handles
+  // redirecting unauthenticated users away from protected pages.
   const user = await portalApi.auth.me();
+
   if (!user) {
-    redirect('/portal/login');
+    return <>{children}</>;
   }
+
   return (
     <div className="portal-shell flex min-h-screen">
       <PortalSidebar

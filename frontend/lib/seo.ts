@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import type {
-  Cable, Category, Manufacturer, Brand,
+  Cable, Category, Manufacturer,
   TaxonomyIndustry, TaxonomyCategory, ProductTypeConfig,
 } from './types';
 import { api } from './api';
@@ -10,14 +10,14 @@ import { getCategoryPathSlugs } from './category-tree';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.unowire.com';
 
 // === Cable Metadata ===
-export function generateCableMetadata(cable: Cable, brand: Brand | null): Metadata {
-  const title = cable.meta_title || `${cable.model} - ${brand?.name ?? "Unknown"}`;
+export function generateCableMetadata(cable: Cable, manufacturer: Manufacturer | null): Metadata {
+  const title = cable.meta_title || `${cable.model} - ${manufacturer?.name ?? "Unknown"}`;
   const description = cable.meta_description || cable.base_description.slice(0, 160);
-  const brandSlug = brand?.slug ?? "unknown";
+  const manufacturerSlug = manufacturer?.slug ?? "unknown";
   return {
     title,
     description,
-    alternates: { canonical: `/cables/${brandSlug}/${cable.slug}` },
+    alternates: { canonical: `/cable/${manufacturerSlug}/${cable.slug}` },
     robots: { index: true, follow: true },
   };
 }
@@ -41,7 +41,7 @@ export function generateProductTypeMetadata(
 export function generateHomeMetadata(): Metadata {
   return {
     title: { absolute: 'Unowire - Cable Specs Database' },
-    description: 'Query cable specifications online. Browse cables by brand, category, and specs.',
+    description: 'Query cable specifications online. Browse cables by manufacturer, category, and specs.',
     alternates: { canonical: '/' },
     robots: { index: true, follow: true },
   };
@@ -58,7 +58,7 @@ export function generateCablesListMetadata(): Metadata {
 }
 
 // === JSON-LD: Product ===
-export function buildCableJsonLd(cable: Cable, brand: Brand | null, manufacturer: Manufacturer | null): object {
+export function buildCableJsonLd(cable: Cable, manufacturer: Manufacturer | null): object {
   // additionalProperty: common_specs + 主变体 specs
   const primaryVariant = getPrimaryVariant(cable);
   const additionalProperty: object[] = cable.common_specs.map(s => ({
@@ -86,7 +86,7 @@ export function buildCableJsonLd(cable: Cable, brand: Brand | null, manufacturer
     "@type": "Product",
     name: cable.model,
     description: cable.base_description,
-    brand: brand ? { "@type": "Brand", name: brand.name } : undefined,
+    brand: manufacturer ? { "@type": "Organization", name: manufacturer.name } : undefined,
     manufacturer: manufacturer ? {
       "@type": "Organization",
       name: manufacturer.name,

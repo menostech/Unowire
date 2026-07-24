@@ -18,9 +18,8 @@ from app.core.database import async_session, engine
 from app.core.security import hash_password
 from app.models import *  # noqa: F401, F403
 from app.models.cable import Cable, CableVariant, SpecItem
-from app.models.equipment import RecommendedEquipment
+from app.models.equipment import EquipmentManufacturer, RecommendedEquipment
 from app.models.manufacturer import Manufacturer
-from app.models.brand import Brand
 from app.models.taxonomy import Category, Industry, ProductType
 from app.models.user import User
 
@@ -43,7 +42,7 @@ async def truncate_all(db: AsyncSession):
     tables = [
         "spec_items", "cable_variants", "cables",
         "recommended_equipments",
-        "brands", "manufacturers", "audit_log",
+        "manufacturers", "audit_log",
     ]
     for t in tables:
         await db.execute(text(f'TRUNCATE TABLE "{t}" CASCADE'))
@@ -62,23 +61,6 @@ async def seed_manufacturers(db: AsyncSession, dry_run: bool):
         )
         if dry_run:
             print(f"  + Manufacturer: {obj.id} - {obj.name}")
-            continue
-        db.add(obj)
-    if not dry_run:
-        await db.commit()
-
-
-async def seed_brands(db: AsyncSession, dry_run: bool):
-    data = load_json("brands.json")
-    for item in data:
-        obj = Brand(
-            id=item["id"],
-            name=item["name"],
-            slug=item["slug"],
-            manufacturer_id=item["manufacturer_id"],
-        )
-        if dry_run:
-            print(f"  + Brand: {obj.id} - {obj.name}")
             continue
         db.add(obj)
     if not dry_run:
@@ -184,7 +166,7 @@ async def seed_cables(db: AsyncSession, dry_run: bool):
 
         cable = Cable(
             id=cable_data["id"],
-            brand_id=cable_data["brand_id"],
+            manufacturer_id=cable_data["manufacturer_id"],
             product_type_id=f"{industry}/{category}/{product_type}",
             model=cable_data["model"],
             slug=cable_data["slug"],
@@ -255,19 +237,47 @@ async def seed_cables(db: AsyncSession, dry_run: bool):
         await db.commit()
 
 
+_EQUIP_TYPE_TO_CATEGORY = {
+    "semi_automatic_stripping_machine": "processing/semi-automatic-stripping-machine",
+    "fully_automatic_cutting_stripping_machine": "processing/fully-automatic-cutting-stripping-machine",
+}
+
+
 async def seed_equipment(db: AsyncSession, dry_run: bool):
     data = load_json("recommended-equipments.json")
-    for item in data:
+    for idx, item in enumerate(data):
+        brand = item.get("brand")
+        emfr_id = brand.lower().replace(" ", "-") if brand else None
+        if emfr_id:
+            existing = (
+                await db.execute(
+                    select(EquipmentManufacturer).where(EquipmentManufacturer.id == emfr_id)
+                )
+            ).scalar_one_or_none()
+            if existing is None:
+                db.add(EquipmentManufacturer(
+                    id=emfr_id, name=brand, slug=emfr_id, sort_order=0,
+                ))
+                if not dry_run:
+                    await db.flush()
+        category_id = _EQUIP_TYPE_TO_CATEGORY.get(
+            item.get("type", ""), "processing/semi-automatic-stripping-machine"
+        )
+        model = item.get("model", "")
+        slug = model.lower().replace(" ", "-") or item.get("id", "")
         obj = RecommendedEquipment(
             id=item.get("id"),
-            name=item.get("name") or item.get("model", ""),
-            slug=item.get("slug") or item.get("id", ""),
-            brand=item.get("brand"),
+            manufacturer_id=emfr_id,
+            category_id=category_id,
+            model=model,
+            slug=slug,
             applicable_specs=item.get("applicable_specs", []),
             description=item.get("description"),
+            external_url=item.get("external_url"),
+            sort_order=idx,
         )
         if dry_run:
-            print(f"  + Equipment: {obj.id} - {obj.name}")
+            print(f"  + Equipment: {obj.id} - {obj.model}")
             continue
         db.add(obj)
     if not dry_run:
@@ -282,7 +292,7 @@ async def seed_admin(db: AsyncSession, dry_run: bool):
     obj = User(
         email=settings.admin_email,
         password_hash=hash_password(settings.admin_password),
-        role="admin",
+        role_id="admin",
         is_active=True,
     )
     if dry_run:
@@ -302,9 +312,6 @@ async def main(dry_run: bool):
 
         print("Seeding manufacturers...")
         await seed_manufacturers(db, dry_run)
-
-        print("Seeding brands...")
-        await seed_brands(db, dry_run)
 
         print("Seeding taxonomy...")
         await seed_taxonomy(db, dry_run)

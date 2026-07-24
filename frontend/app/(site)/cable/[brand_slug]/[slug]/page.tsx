@@ -20,26 +20,19 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ brand_slug: string; slug: string }> }): Promise<Metadata> {
   const { brand_slug, slug } = await params;
-  const cable = await api.cables.getByUrl(brand_slug, slug);
-  if (!cable) return { title: 'Not Found' };
-  const brand = await api.brands.getById(cable.brand_id);
-  return generateCableMetadata(cable, brand);
+  const detail = await api.getCableDetail(brand_slug, slug);
+  if (!detail) return { title: 'Cable Not Found' };
+  return generateCableMetadata(detail.cable, detail.manufacturer);
 }
 
 export default async function CableDetailPage({
   params,
 }: { params: Promise<{ brand_slug: string; slug: string }> }) {
   const { brand_slug, slug } = await params;
-  const cable = await api.cables.getByUrl(brand_slug, slug);
-  if (!cable) notFound();
+  const detail = await api.getCableDetail(brand_slug, slug);
+  if (!detail) notFound();
+  const { cable, manufacturer, categories, recommended_equipments } = detail;
 
-  const brand = await api.brands.getById(cable.brand_id);
-  const manufacturer = brand ? await api.manufacturers.getById(brand.manufacturer_id) : null;
-  const categories = cable.category_ids
-    ? await api.categories.getByIds(cable.category_ids)
-    : [];
-  const matchedEquipment = await api.recommendedEquipments.byCable(cable.id);
-  const recommended = matchedEquipment.map(equipment => ({ equipment, matched_variants: [], explanation: [] }));
   const similar = await api.cables.similar(cable, 4);
   const allManufacturers = await api.manufacturers.all();
   const jsonUrl = `/api/cables/${brand_slug}/${slug}`;
@@ -62,7 +55,7 @@ export default async function CableDetailPage({
   const breadcrumbItems = [
     { name: 'Home', url: '/' },
     { name: 'Cables', url: '/cables' },
-    { name: brand?.name ?? 'Unknown', url: `/cables?brand=${cable.brand_id}` },
+    { name: manufacturer?.name ?? 'Unknown', url: `/cables?manufacturer=${cable.manufacturer_id}` },
     { name: cable.model },
   ];
 
@@ -70,11 +63,11 @@ export default async function CableDetailPage({
     <Container className="py-6">
       <Breadcrumbs items={breadcrumbItems} />
 
-      <JsonLd data={buildCableJsonLd(cable, brand, manufacturer)} />
+      <JsonLd data={buildCableJsonLd(cable, manufacturer)} />
       <JsonLd data={buildBreadcrumbJsonLd([
         { name: 'Home', url: '/' },
         { name: 'Cables', url: '/cables' },
-        { name: brand?.name ?? 'Unknown', url: `/cables?brand=${cable.brand_id}` },
+        { name: manufacturer?.name ?? 'Unknown', url: `/cables?manufacturer=${cable.manufacturer_id}` },
         { name: cable.model, url: getCableUrl(cable) },
       ])} />
 
@@ -94,7 +87,7 @@ export default async function CableDetailPage({
           <div>
             <h1 className="mb-1">{cable.model}</h1>
             <p className="text-gray-600">
-              {brand?.name ?? 'Unknown'}{manufacturer ? ` · ${manufacturer.country}` : ''}
+              {manufacturer?.name ?? 'Unknown'}{manufacturer ? ` · ${manufacturer.country}` : ''}
             </p>
           </div>
 
@@ -113,11 +106,11 @@ export default async function CableDetailPage({
           {/* Recommended Equipment */}
           <div>
             <h2 className="mb-3">Recommended Equipment</h2>
-            {recommended.length === 0 ? (
+            {recommended_equipments.length === 0 ? (
               <p className="text-gray-500 text-sm">No recommended equipment available for this cable.</p>
             ) : (
               <div className="grid gap-3">
-                {recommended.map(r => (
+                {recommended_equipments.map(r => (
                   <RecommendedEquipmentCard key={r.equipment.id} result={r} />
                 ))}
               </div>

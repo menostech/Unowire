@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import require_factory_module
 from app.core.database import get_db
 from app.crud.cable import crud_cable
-from app.crud.brand import crud_brand
 from app.models.user import User
 from app.schemas.cable import CableRead, CableUpdate
 
@@ -16,8 +15,7 @@ def _check_cable_ownership(user: User, cable) -> None:
     """Raise 404 if cable is None or not in user's scope."""
     if cable is None:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})
-    # cable.brand may need to be eager-loaded; crud_cable.get_detail loads it
-    if cable.brand is None or cable.brand.manufacturer_id != user.scope_id:
+    if cable.manufacturer_id != user.scope_id:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})
 
 

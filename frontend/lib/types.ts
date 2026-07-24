@@ -18,16 +18,6 @@ export interface Manufacturer {
   featured_text_sort: number;
 }
 
-export interface Brand {
-  id: string;
-  name: string;
-  slug: string;
-  manufacturer_id: string;
-  country: string;
-  website: string;
-  image_url: string | null;
-}
-
 export interface Category {
   id: string;
   level: 1 | 2 | 3 | 4;
@@ -100,7 +90,7 @@ export interface CableVariant {
 
 export interface Cable {
   id: string;
-  brand_id: string;
+  manufacturer_id: string;
   model: string;
   slug: string;
   type: string;              // legacy, retained for migration; same value as product_type
@@ -187,7 +177,6 @@ export interface CableQueryParams {
   // Filter params (query string)
   q?: string;
   manufacturer?: string[];
-  brand?: string[];
   size?: string[];              // enum values (for awg) or discrete selections (for mm2/kcmil)
   min_size?: number;            // range lower bound (mm2/kcmil only)
   max_size?: number;            // range upper bound (mm2/kcmil only)
@@ -210,7 +199,6 @@ export interface TextSearchParams {
 // === Filter Facets ===
 export interface FilterFacets {
   manufacturers: { id: string; name: string; count: number }[];
-  brands: { id: string; name: string; count: number }[];
   size: { value: string; count: number }[];                  // no size_system grouping (route fixes it)
   size_range: { min: number; max: number } | null;           // null when size_system=none or no cables
   spec_facets: Record<string, { value: string; count: number }[]>;
@@ -220,7 +208,6 @@ export interface FilterFacets {
 // === List Response ===
 export interface CableListItem {
   cable: Cable;
-  brand: Brand | null;
   manufacturer: Manufacturer | null;
 }
 
@@ -235,7 +222,6 @@ export interface CableListResponse {
 // === API Detail Response ===
 export interface CableDetailResponse {
   cable: Cable;
-  brand: Brand | null;
   manufacturer: Manufacturer | null;
   categories: Category[];
   recommended_equipments: RecommendedEquipmentResult[];

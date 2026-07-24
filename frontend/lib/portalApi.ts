@@ -88,14 +88,6 @@ export const portalApi = {
       return portalGet<any>(`/api/portal/cables/${id}`);
     },
   },
-  brands: {
-    async all() {
-      return portalGet<any[]>('/api/portal/brands');
-    },
-    async getById(id: string) {
-      return portalGet<any>(`/api/portal/brands/${id}`);
-    },
-  },
   equipment: {
     async all() {
       return portalGet<any[]>('/api/portal/equipment');

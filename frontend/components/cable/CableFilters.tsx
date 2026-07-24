@@ -88,14 +88,6 @@ function CableFiltersInner({ facets, ptConfig }: CableFiltersProps) {
         </div>
       )}
 
-      {/* Brand */}
-      {facets.brands.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Brand</h3>
-          {renderCheckboxGroup('brand', facets.brands.map(b => ({ value: b.id, label: b.name, count: b.count })))}
-        </div>
-      )}
-
       {/* Size (enum only for awg; enum + range for mm2/kcmil; hidden for none) */}
       {sizeControl === "enum" && facets.size.length > 0 && (
         <div>

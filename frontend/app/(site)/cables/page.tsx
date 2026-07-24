@@ -56,7 +56,6 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
                 <CableCard
                   key={item.cable.id}
                   cable={item.cable}
-                  brand={item.brand}
                   manufacturer={item.manufacturer}
                 />
               ))}
@@ -76,12 +75,7 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
   // Default: show all product types grouped by industry
   const industries = await api.taxonomy.industries();
   const allCables = await api.cables.all();
-  const allBrands = await api.brands.all();
   const taxonomyAll = await api.taxonomy.all();
-
-  // Map brand_id -> manufacturer_id for counting unique manufacturers
-  const brandToManufacturer = new Map<string, string>();
-  for (const b of allBrands) brandToManufacturer.set(b.id, b.manufacturer_id);
 
   // Build flat list of all product types with cable/manufacturer counts, grouped by industry
   const industryGroups = industries.map(ind => {
@@ -99,11 +93,7 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
           c.industry === industryKey && c.category === catKey && c.product_type === ptKey
         );
         const cableCount = ptCables.length;
-        const manufacturerIds = new Set<string>();
-        for (const c of ptCables) {
-          const mfrId = brandToManufacturer.get(c.brand_id);
-          if (mfrId) manufacturerIds.add(mfrId);
-        }
+        const manufacturerIds = new Set(ptCables.map(c => c.manufacturer_id));
         productTypes.push({
           productType: pt, category: cat, industry: ind,
           cableCount, manufacturerCount: manufacturerIds.size,

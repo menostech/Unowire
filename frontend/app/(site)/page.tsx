@@ -16,14 +16,12 @@ export function generateMetadata(): Metadata {
 export default async function HomePage() {
   const [
     cables,
-    brands,
     taxonomy,
     equipmentTree,
     equipmentManufacturers,
     equipmentList,
   ] = await Promise.all([
     api.cables.all(),
-    api.brands.all(),
     api.taxonomy.all(),
     api.equipmentCategories.tree(),
     api.equipmentManufacturers.all(),
@@ -38,7 +36,6 @@ export default async function HomePage() {
       <Container>
         <StatsRow
           cables={cables.length}
-          brands={brands.length}
           industries={industryCount}
           equipment={equipmentList.length}
           manufacturers={equipmentManufacturers.length}

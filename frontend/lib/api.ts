@@ -1,5 +1,5 @@
 import type {
-  ApplicableSpecRule, Brand, Cable, CableDetailResponse, Category,
+  ApplicableSpecRule, Cable, CableDetailResponse, Category,
   EquipmentManufacturer, EquipmentCategory,
   Industry, Manufacturer, ProductTypeConfig, RecommendedEquipment,
   SizeSystem, SpecItem, SpecType, Taxonomy, TaxonomyCategory,
@@ -113,7 +113,7 @@ interface BackendSpecItem {
 
 interface BackendCable {
   id: string;
-  brand_id: string;
+  manufacturer_id: string;
   product_type_id: string;
   industry_id: string;
   category_id: string;
@@ -125,18 +125,9 @@ interface BackendCable {
   meta_description: string | null;
   image_url: string | null;
   category_ids?: string[];
-  brand?: BackendBrand | null;
+  manufacturer?: BackendManufacturer | null;
   common_specs?: BackendSpecItem[];
   variants?: { slug: string; specs: BackendSpecItem[]; sort_order?: number; id?: number }[];
-}
-
-interface BackendBrand {
-  id: string;
-  name: string;
-  slug: string;
-  manufacturer_id: string;
-  image_url: string | null;
-  manufacturer?: { id: string; name: string; slug: string; country: string | null; website: string | null } | null;
 }
 
 interface BackendManufacturer {
@@ -207,7 +198,6 @@ interface BackendCableListResponse {
   page_size: number;
   facets: {
     manufacturers: { id: string; name: string; count: number }[];
-    brands: { id: string; name: string; count: number }[];
     size: { value: string; count: number }[];
     size_range: { min: number; max: number } | null;
     spec_facets: Record<string, { value: string; count: number }[]>;
@@ -291,7 +281,7 @@ function adaptSpecItem(s: BackendSpecItem): SpecItem {
 function adaptCable(c: BackendCable): Cable {
   const cable: Cable = {
     id: c.id,
-    brand_id: c.brand_id,
+    manufacturer_id: c.manufacturer_id,
     model: c.model,
     slug: c.slug,
     type: c.product_type_id,
@@ -310,23 +300,11 @@ function adaptCable(c: BackendCable): Cable {
       specs: (v.specs ?? []).map(adaptSpecItem),
     })),
   };
-  // Preserve brand slug for getCableUrl (attached as extra property, not in Cable type)
-  if (c.brand) {
-    (cable as Cable & { brand?: { slug: string } }).brand = { slug: c.brand.slug };
+  // Attach manufacturer slug for getCableUrl (not part of Cable type)
+  if (c.manufacturer) {
+    (cable as Cable & { manufacturer?: { slug: string } }).manufacturer = { slug: c.manufacturer.slug };
   }
   return cable;
-}
-
-function adaptBrand(b: BackendBrand): Brand {
-  return {
-    id: b.id,
-    name: b.name,
-    slug: b.slug,
-    manufacturer_id: b.manufacturer_id,
-    country: b.manufacturer?.country ?? '',
-    website: b.manufacturer?.website ?? '',
-    image_url: b.image_url,
-  };
 }
 
 function adaptManufacturer(m: BackendManufacturer): Manufacturer {
@@ -410,11 +388,10 @@ function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
 
 // === Helper functions ===
 export function getCableUrl(cable: Cable): string {
-  const brandSlug = (cable as unknown as Record<string, unknown>).brand_slug as string | undefined;
-  if (brandSlug) return `/cable/${brandSlug}/${cable.slug}`;
-  // Fallback: try nested brand object (attached by adaptCable for detail page)
-  const brand = (cable as unknown as Record<string, unknown>).brand as { slug: string } | undefined;
-  return `/cable/${brand?.slug ?? 'unknown'}/${cable.slug}`;
+  const manufacturerSlug = (cable as unknown as Record<string, unknown>).manufacturer_slug as string | undefined;
+  if (manufacturerSlug) return `/cable/${manufacturerSlug}/${cable.slug}`;
+  const manufacturer = (cable as unknown as Record<string, unknown>).manufacturer as { slug: string } | undefined;
+  return `/cable/${manufacturer?.slug ?? 'unknown'}/${cable.slug}`;
 }
 
 // === API object ===
@@ -436,21 +413,6 @@ export const api = {
       try {
         const data = await fetchWithCache<BackendManufacturer>(`/api/manufacturers/slug/${slug}`);
         return adaptManufacturer(data);
-      } catch {
-        return null;
-      }
-    },
-  },
-
-  brands: {
-    async all(): Promise<Brand[]> {
-      const res = await fetchWithCache<{ items: BackendBrand[] }>('/api/brands?page_size=999');
-      return res.items.map(adaptBrand);
-    },
-    async getById(id: string): Promise<Brand | null> {
-      try {
-        const data = await fetchWithCache<BackendBrand>(`/api/brands/${id}`);
-        return adaptBrand(data);
       } catch {
         return null;
       }
@@ -501,8 +463,7 @@ export const api = {
       const res = await fetchWithCache<BackendCableListResponse>('/api/cables?page_size=999');
       return res.items.map(c => {
         const adapted = adaptCable(c);
-        // Attach brand slug for getCableUrl (not part of Cable type)
-        (adapted as unknown as Record<string, unknown>).brand_slug = c.brand?.slug ?? 'unknown';
+        (adapted as unknown as Record<string, unknown>).manufacturer_slug = c.manufacturer?.slug ?? 'unknown';
         return adapted;
       });
     },
@@ -514,14 +475,13 @@ export const api = {
         return null;
       }
     },
-    async getByUrl(brandSlug: string, cableSlug: string): Promise<Cable | null> {
+    async getByUrl(manufacturerSlug: string, cableSlug: string): Promise<Cable | null> {
       try {
         const data = await fetchWithCache<BackendCable>(
-          `/api/cables/by-url/${brandSlug}/${cableSlug}`
+          `/api/cables/by-url/${manufacturerSlug}/${cableSlug}`
         );
         const adapted = adaptCable(data);
-        // Attach brand slug for getCableUrl (not part of Cable type)
-        (adapted as unknown as Record<string, unknown>).brand_slug = data.brand?.slug ?? brandSlug;
+        (adapted as unknown as Record<string, unknown>).manufacturer_slug = data.manufacturer?.slug ?? manufacturerSlug;
         return adapted;
       } catch {
         return null;
@@ -659,25 +619,20 @@ export const api = {
     },
   },
 
-  async getCableDetail(brandSlug: string, cableSlug: string): Promise<CableDetailResponse | null> {
+  async getCableDetail(manufacturerSlug: string, cableSlug: string): Promise<CableDetailResponse | null> {
     try {
       const data = await fetchWithCache<BackendCable & {
         manufacturer: BackendManufacturer | null;
         recommended_equipments: BackendEquipment[];
-      }>(`/api/cables/by-url/${brandSlug}/${cableSlug}`);
+      }>(`/api/cables/by-url/${manufacturerSlug}/${cableSlug}`);
       const cable = adaptCable(data);
-      const brand = data.brand ? adaptBrand(data.brand) : null;
       const manufacturer = data.manufacturer ? adaptManufacturer(data.manufacturer) : null;
       const cableCategories = cable.category_ids ? api.categories.getByIds(cable.category_ids) : [];
       const recommendedEquipments = (data.recommended_equipments ?? []).map(e => {
         const equipment = adaptEquipment(e);
-        return {
-          equipment,
-          matched_variants: [],
-          explanation: [],
-        };
+        return { equipment, matched_variants: [], explanation: [] };
       });
-      return { cable, brand, manufacturer, categories: cableCategories, recommended_equipments: recommendedEquipments };
+      return { cable, manufacturer, categories: cableCategories, recommended_equipments: recommendedEquipments };
     } catch {
       return null;
     }

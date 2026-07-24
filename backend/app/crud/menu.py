@@ -15,7 +15,6 @@ from app.schemas.menu import MenuItemCreate, MenuItemUpdate
 ALLOWED_PAGE_IDS = {
     "dashboard",
     "cables",
-    "brands",
     "manufacturers",
     "industries",
     "equipment-mfrs",
