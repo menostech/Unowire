@@ -893,7 +893,7 @@ export default function PortalDashboardLoading() {
 }
 ```
 
-- [ ] **Step 2: Create `frontend/app/portal/cables/loading.tsx` (table skeleton)**
+- [x] **Step 2: Create `frontend/app/portal/cables/loading.tsx` (table skeleton)**
 
 ```tsx
 export default function PortalCablesLoading() {
@@ -952,7 +952,7 @@ export default function PortalMediaLoading() {
 }
 ```
 
-- [ ] **Step 6: Standardize empty-state styling across list pages**
+- [x] **Step 6: Standardize empty-state styling across list pages**
 
 The four list pages already render a `<p className="text-sm text-gray-500">No X yet.</p>` empty state. Make the styling consistent by adding a shared `empty-state` class to each empty-state `<p>` and confirming the copy matches the spec:
 
@@ -963,17 +963,12 @@ The four list pages already render a `<p className="text-sm text-gray-500">No X 
 
 Example: `<p className="empty-state text-sm text-gray-500">No cables in your scope yet.</p>`. Do NOT introduce a new `EmptyState` component — the existing `<p>` pattern is already consistent in structure; this step only adds the shared className and verifies copy.
 
-- [ ] **Step 7: Verify frontend compiles**
+- [x] **Step 7: Verify frontend compiles** — tsc --noEmit: 0 errors.
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors.
 
-- [ ] **Step 8: Commit**
-
-```bash
-git add frontend/app/portal/loading.tsx frontend/app/portal/cables/loading.tsx frontend/app/portal/equipment/loading.tsx frontend/app/portal/inquiries/loading.tsx frontend/app/portal/media/loading.tsx frontend/app/portal/cables/page.tsx frontend/app/portal/equipment/page.tsx frontend/app/portal/inquiries/page.tsx frontend/app/portal/media/page.tsx
-git commit -m "feat(portal): add loading skeletons and consistent empty states"
-```
+- [x] **Step 8: Commit** — 189ab33
 
 **Acceptance criteria:** `portal-error-resilience/spec.md` Requirement "Portal pages SHALL display loading states"; scenarios "Cables list loading", "Dashboard loading". Requirement "Portal pages SHALL display consistent empty states"; scenarios "No cables in scope", "No inquiries".
 

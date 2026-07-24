@@ -44,5 +44,19 @@
 - Notes: migrated test_portal_me.py assertions into test_portal_auth.py and deleted test_portal_me.py; migrated ChangePasswordForm.tsx to use /api/portal/auth/me PUT
 
 ## Next Task: Task 6 — Forms — Migrate to portalApiClient + Inline Validation
+- Stage: done
+- Commit: dc6bbf3c66fbe4ea405a4f827e48c1debef58ba5
+- Risk signals: none (frontend-only, no security/auth concerns)
+- Review: skipped (standard, no risk signals)
+- Verification: tsc --noEmit passed with 0 errors
+
+## Next Task: Task 7 — Loading States & Consistent Empty States
+- Stage: done
+- Commit: 189ab33
+- Risk signals: none (frontend-only, pure presentational)
+- Review: skipped (standard, no risk signals)
+- Verification: tsc --noEmit passed with 0 errors
+
+## Next Task: Task 8 — Token-Expiry Redirect & Dashboard Error Handling
 - Stage: pending
-- Risk signals: none anticipated (frontend-only, no security/auth concerns)
+- Risk signals: auth-sensitive (token expiry redirect), cross-module (middleware + layout + page)

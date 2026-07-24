@@ -32,12 +32,12 @@
 
 ## 6. Loading States & Empty States
 
-- [ ] 6.1 Create `frontend/app/portal/loading.tsx` (dashboard skeleton: stat cards + chart placeholders)
-- [ ] 6.2 Create `frontend/app/portal/cables/loading.tsx` (table skeleton)
-- [ ] 6.3 Create `frontend/app/portal/equipment/loading.tsx` (table skeleton)
-- [ ] 6.4 Create `frontend/app/portal/inquiries/loading.tsx` (card list skeleton)
-- [ ] 6.5 Create `frontend/app/portal/media/loading.tsx` (grid skeleton)
-- [ ] 6.6 Audit all portal list pages for consistent empty-state styling (message + icon + consistent classes)
+- [x] 6.1 Create `frontend/app/portal/loading.tsx` (dashboard skeleton: stat cards + chart placeholders)
+- [x] 6.2 Create `frontend/app/portal/cables/loading.tsx` (table skeleton)
+- [x] 6.3 Create `frontend/app/portal/equipment/loading.tsx` (table skeleton)
+- [x] 6.4 Create `frontend/app/portal/inquiries/loading.tsx` (card list skeleton)
+- [x] 6.5 Create `frontend/app/portal/media/loading.tsx` (grid skeleton)
+- [x] 6.6 Audit all portal list pages for consistent empty-state styling (message + icon + consistent classes)
 
 ## 7. Form Validation & Migration to portalApiClient
 
