@@ -66,5 +66,21 @@
 - Notes: implementer correctly used redirect from next/navigation (not next/headers); reviewer info findings I1-I4 are acceptable for MVP (fail-closed sidebar on permissions null, dashboard redirects to login when backend fully down)
 
 ## Next Task: Task 10 — Verification
-- Stage: pending
+- Stage: done
 - Risk signals: none (verification only)
+- Verification:
+  - 9.1 tsc --noEmit: PASSED (0 errors)
+  - 9.2 backend tests: py_compile PASSED; pytest DEFERRED (Docker/PostgreSQL unavailable — per-task py_compile + module import verified in Tasks 4 & 5)
+  - 9.3 next build: PASSED (103+ routes generated; old /api/portal/me absent; new /api/portal/auth/me present)
+  - 9.4 smoke test (happy path): DEFERRED — requires running services (user to verify manually after deployment)
+  - 9.5 smoke test (token expiry): DEFERRED — C1 fix verified via code review (x-pathname set on all middleware branches)
+
+## Final Code Review (review_mode: standard)
+- Stage: done
+- Verdict: APPROVED (no CRITICAL or WARNING findings)
+- Findings: 5 INFO items (all non-blocking, pre-existing or forward-compatible design choices)
+  - I1: portalApiClient fieldErrors effectively dead code (no backend emits field_errors; forward-compatible)
+  - I2: media/page.tsx still uses local any[] types (pre-existing, out of scope)
+  - I3: No rate limiting on PUT /api/portal/auth/me (pre-existing, moved verbatim)
+  - I4: Password change does not invalidate existing tokens (MVP behavior per design doc)
+  - I5: ChangePasswordForm renders server messages in gray (pre-existing pattern)
