@@ -337,7 +337,7 @@ cables: {
 },
 ```
 
-- [ ] **Step 5: Replace `equipment` methods' `any` with `PortalEquipment`**
+- [x] **Step 5: Replace `equipment` methods' `any` with `PortalEquipment`**
 
 ```typescript
 equipment: {
@@ -422,7 +422,7 @@ git commit -m "refactor(portal): replace any types in portalApi with shared inte
 - Consumes: `PortalCable`, `PortalCableUpdate`, `PortalEquipment`, `PortalEquipmentUpdate`, `PortalInquiry` from Task 1. The BFF write routes (`/api/portal/cables/[id]` PUT, `/api/portal/equipment/[id]` PUT, `/api/portal/inquiries/[id]/reply` POST) already exist and forward the cookie — verify only. The `/api/portal/auth/me` PUT BFF handler is added in Task 5; `portalApiClient.auth.changePassword` calls it and will work once Task 5 lands.
 - Produces: `PortalApiError` class and `portalApiClient` object consumed by all four forms in Task 6.
 
-- [ ] **Step 1: Create `frontend/lib/portalApiClient.ts`**
+- [x] **Step 1: Create `frontend/lib/portalApiClient.ts`**
 
 ```typescript
 import type {
@@ -600,7 +600,7 @@ git commit -m "feat(portal): add PUT /api/portal/auth/me for password change"
 - Consumes: `PUT /api/portal/auth/me` from Task 4; `PortalUser` from Task 1.
 - Produces: a single `/api/portal/auth/me` endpoint pair (GET profile, PUT password) on both backend and BFF; no remaining `/api/portal/me` code references.
 
-- [ ] **Step 1: Migrate `backend/tests/api/test_portal_me.py` to `/api/portal/auth/me`**
+- [x] **Step 1: Migrate `backend/tests/api/test_portal_me.py` to `/api/portal/auth/me`**
 
 Open `backend/tests/api/test_portal_me.py`. Every `client.get("/api/portal/me", ...)` becomes `client.get("/api/portal/auth/me", ...)` (profile). Every `client.put("/api/portal/me", ...)` becomes `client.put("/api/portal/auth/me", ...)` (password change). Keep all assertions and headers identical. If the file's test names reference `portal_me`, rename them to `portal_auth_me` for clarity (e.g. `test_get_me` → `test_auth_get_me`). Do not change assertion logic — only the URL path (and optionally test names).
 
@@ -617,16 +617,16 @@ Delete `backend/app/api/routes/portal_me.py`. In `backend/app/main.py`:
 - Remove `portal_me` from the import on line 12 (the long `from app.api.routes import (...)` tuple).
 - Remove the line `app.include_router(portal_me.router)` (line 119).
 
-- [ ] **Step 4: Run full backend suite to confirm no regressions**
+- [x] **Step 4: Run full backend suite to confirm no regressions** — DB unavailable; deferred to Task 10.
 
 Run: `pytest backend/tests/`
 Expected: all pass, no import errors, no 404s from tests still hitting the old path.
 
-- [ ] **Step 5: Remove the `me` block from `frontend/lib/portalApi.ts`**
+- [x] **Step 5: Remove the `me` block from `frontend/lib/portalApi.ts`**
 
 Delete the entire `me: { async get() { ... } }` block (the one re-typed in Task 2 Step 8). `portalApi` no longer exposes a `me` namespace.
 
-- [ ] **Step 6: Migrate `frontend/app/portal/settings/page.tsx` to `portalApi.auth.me()`**
+- [x] **Step 6: Migrate `frontend/app/portal/settings/page.tsx` to `portalApi.auth.me()`**
 
 Change line 7 from `me = await portalApi.me.get();` to `me = await portalApi.auth.me();`. The local `me` variable becomes `PortalUser | null` (already typed as `any` — change the declaration to `let me: PortalUser | null = null;` and add the import `import type { PortalUser } from '@/lib/types/portal';`). The JSX already reads `me.email`, `me.role_name`, `me.scope_type`, `me.scope_id` — all exist on `PortalUser`. Wrap in the existing try/catch (it already has one).
 
@@ -634,7 +634,7 @@ Change line 7 from `me = await portalApi.me.get();` to `me = await portalApi.aut
 
 Delete `frontend/app/api/portal/me/route.ts` and the now-empty `frontend/app/api/portal/me/` directory.
 
-- [ ] **Step 8: Add `PUT` handler to `frontend/app/api/portal/auth/me/route.ts`**
+- [x] **Step 8: Add `PUT` handler to `frontend/app/api/portal/auth/me/route.ts`**
 
 The existing file has a `GET` handler. Add a `PUT` handler that forwards the cookie + body to the backend `PUT /api/portal/auth/me` (mirror the existing `cables/[id]/route.ts` PUT pattern):
 
@@ -657,12 +657,12 @@ export async function PUT(req: NextRequest) {
 
 Keep the existing `GET` handler and the existing `API_BASE` / imports unchanged.
 
-- [ ] **Step 9: Verify frontend compiles**
+- [x] **Step 9: Verify frontend compiles** — tsc --noEmit passed with 0 errors.
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors. (No remaining references to `portalApi.me` or `/api/portal/me` in frontend code.)
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit** — f558b84
 
 ```bash
 git add backend/app/main.py backend/tests/api/test_portal_me.py frontend/lib/portalApi.ts frontend/app/portal/settings/page.tsx frontend/app/api/portal/auth/me/route.ts

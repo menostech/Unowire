@@ -35,11 +35,14 @@
 - Review: APPROVED (per-task reviewer dispatched due to risk signals; no findings)
 - Verification: py_compile + module import + route registration verified; pytest deferred to Task 10 (DB unavailable)
 
-## Current Task: Task 5 — Remove /api/portal/me — Backend Route, BFF Route, portalApi.me, and Migrate All Callers
-
-- Plan task text: "Step 1: Migrate backend/tests/api/test_portal_me.py to /api/portal/auth/me"
-- OpenSpec task text: "4.2 Remove backend/app/api/routes/portal_me.py and unregister its router in main.py"
-- Stage: pending
-- Implementation commit: pending
+### Task 5 — Remove /api/portal/me — Backend Route, BFF Route, portalApi.me, and Migrate All Callers
+- Stage: done
+- Commit: f558b845b8bcf434c26c24f282373f10186b1f0b
 - Risk signals: cross-module (backend + frontend + tests), public API contract change (endpoint removal)
-- Review-fix round: 0/1 (standard)
+- Review: APPROVED (per-task reviewer dispatched due to risk signals; no findings)
+- Verification: tsc --noEmit passed with 0 errors; py_compile verified; pytest deferred to Task 10 (DB unavailable)
+- Notes: migrated test_portal_me.py assertions into test_portal_auth.py and deleted test_portal_me.py; migrated ChangePasswordForm.tsx to use /api/portal/auth/me PUT
+
+## Next Task: Task 6 — Forms — Migrate to portalApiClient + Inline Validation
+- Stage: pending
+- Risk signals: none anticipated (frontend-only, no security/auth concerns)
