@@ -2,6 +2,7 @@
 change: portal-foundation-refactor
 design-doc: docs/superpowers/specs/2026-07-24-portal-foundation-refactor-design.md
 base-ref: b25bcb5c5841aedd5406a9fa422ac825727d9a37
+archived-with: 2026-07-24-portal-foundation-refactor
 ---
 
 # Portal Foundation Refactor Implementation Plan

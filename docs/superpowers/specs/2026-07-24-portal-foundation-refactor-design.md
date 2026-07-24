@@ -2,6 +2,8 @@
 comet_change: portal-foundation-refactor
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-24-portal-foundation-refactor
+status: final
 ---
 
 # Portal Foundation Refactor — Technical Design Doc
