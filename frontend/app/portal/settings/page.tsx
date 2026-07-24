@@ -1,10 +1,11 @@
 import { portalApi } from '@/lib/portalApi';
+import type { PortalUser } from '@/lib/types/portal';
 import { ChangePasswordForm } from '@/components/portal/form/ChangePasswordForm';
 
 export default async function PortalSettingsPage() {
-  let me: any = null;
+  let me: PortalUser | null = null;
   try {
-    me = await portalApi.me.get();
+    me = await portalApi.auth.me();
   } catch {
     // ignore
   }

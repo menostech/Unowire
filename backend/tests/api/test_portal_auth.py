@@ -88,3 +88,30 @@ def test_equipment_factory_user_permissions(client, equipment_manager_headers):
     assert res.status_code == 200
     data = res.json()
     assert set(data["allowed_modules"]) == {"dashboard", "equipment", "inquiries", "media", "me"}
+
+
+def test_portal_auth_change_password(client, cable_manager_headers):
+    """Change password with correct old password succeeds."""
+    res = client.put(
+        "/api/portal/auth/me",
+        json={"old_password": "test123456", "new_password": "newpassword123"},
+        headers=cable_manager_headers,
+    )
+    assert res.status_code == 200
+
+    # Change it back so other tests don't break
+    res = client.put(
+        "/api/portal/auth/me",
+        json={"old_password": "newpassword123", "new_password": "test123456"},
+        headers=cable_manager_headers,
+    )
+    assert res.status_code == 200
+
+
+def test_portal_auth_change_password_wrong_old(client, cable_manager_headers):
+    res = client.put(
+        "/api/portal/auth/me",
+        json={"old_password": "wrong", "new_password": "newpassword123"},
+        headers=cable_manager_headers,
+    )
+    assert res.status_code == 400

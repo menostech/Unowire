@@ -94,9 +94,4 @@ export const portalApi = {
       return portalGet<PortalUploadsResponse>('/api/portal/uploads');
     },
   },
-  me: {
-    async get(): Promise<PortalUser> {
-      return portalGet<PortalUser>('/api/portal/me');
-    },
-  },
 };

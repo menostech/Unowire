@@ -13,7 +13,7 @@ export function ChangePasswordForm() {
     setSaving(true);
     setMessage('');
     try {
-      const res = await fetch('/api/portal/me', {
+      const res = await fetch('/api/portal/auth/me', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
