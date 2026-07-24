@@ -7,17 +7,7 @@ import {
   LayoutDashboard, Cable, Wrench, Mail, Image as ImageIcon,
   Settings, LogOut, ExternalLink, type LucideIcon,
 } from 'lucide-react';
-
-type ScopeType = 'manufacturer' | 'equipment_manufacturer';
-
-interface PortalUser {
-  id: number;
-  email: string;
-  role_id: string;
-  role_name: string;
-  scope_type: ScopeType;
-  scope_id: string;
-}
+import type { PortalUser } from '@/lib/types/portal';
 
 interface NavItem {
   label: string;

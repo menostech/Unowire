@@ -3,7 +3,7 @@ import Link from 'next/link';
 interface RecentInquiry {
   id: number;
   subject: string;
-  created_at: string;
+  created_at: string | null;
   is_read: boolean;
 }
 
@@ -30,7 +30,7 @@ export function RecentInquiries({ inquiries }: { inquiries: RecentInquiry[] }) {
                 {inq.subject}
               </span>
               <span className="text-xs text-gray-400">
-                {new Date(inq.created_at).toLocaleDateString()}
+                {inq.created_at ? new Date(inq.created_at).toLocaleDateString() : ''}
               </span>
             </Link>
           </li>
