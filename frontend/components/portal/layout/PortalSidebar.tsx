@@ -37,12 +37,20 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function PortalSidebar({ user }: { user: PortalUser | null }) {
+export function PortalSidebar({
+  user,
+  allowedModules,
+}: {
+  user: PortalUser | null;
+  allowedModules: string[];
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [unread, setUnread] = useState<number | null>(null);
 
-  const nav = user?.scope_type === 'equipment_manufacturer' ? EQUIPMENT_MANUFACTURER_NAV : MANUFACTURER_NAV;
+  const scopeType = user?.scope_type ?? null;
+  const baseNav = scopeType === 'equipment_manufacturer' ? EQUIPMENT_MANUFACTURER_NAV : MANUFACTURER_NAV;
+  const nav = baseNav.filter((item) => allowedModules.includes(item.module));
 
   useEffect(() => {
     let cancelled = false;

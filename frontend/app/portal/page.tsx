@@ -1,23 +1,17 @@
+import { redirect } from 'next/navigation';
 import { portalApi } from '@/lib/portalApi';
-import { DashboardStats } from '@/components/portal/DashboardStats';
-import { InquiryTrendChart } from '@/components/portal/InquiryTrendChart';
-import { ViewsTrendChart } from '@/components/portal/ViewsTrendChart';
-import { RecentInquiries } from '@/components/portal/RecentInquiries';
+import type { PortalDashboard } from '@/lib/types/portal';
+import { PortalDashboardContent } from '@/components/portal/PortalDashboardContent';
+import { PortalDashboardErrorState } from '@/components/portal/PortalDashboardErrorState';
 
 export default async function PortalDashboardPage() {
-  const data = await portalApi.dashboard.get();
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">{data.factory_name}</h1>
-        <p className="text-sm text-gray-500">Factory Portal Dashboard</p>
-      </div>
-      <DashboardStats stats={data.stats} scopeType={data.scope_type} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <InquiryTrendChart data={data.inquiry_trend} />
-        <ViewsTrendChart data={data.views_trend} />
-      </div>
-      <RecentInquiries inquiries={data.recent_inquiries} />
-    </div>
-  );
+  let data: PortalDashboard;
+  try {
+    data = await portalApi.dashboard.get();
+  } catch {
+    const user = await portalApi.auth.me();
+    if (!user) redirect('/portal/login?from=/portal');
+    return <PortalDashboardErrorState />;
+  }
+  return <PortalDashboardContent data={data} />;
 }
