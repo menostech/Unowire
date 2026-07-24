@@ -3,10 +3,12 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
 
   // Admin routes: skip login page
   if (pathname.startsWith('/admin') && pathname === '/admin/login') {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // Member routes: skip login/register/verify pages
@@ -14,12 +16,12 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/member') &&
     (pathname === '/member/login' || pathname === '/member/register' || pathname === '/member/verify')
   ) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // Portal routes: skip login page
   if (pathname.startsWith('/portal') && pathname === '/portal/login') {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // Admin routes require admin_token
@@ -52,11 +54,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-pathname', pathname);
-  return NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
