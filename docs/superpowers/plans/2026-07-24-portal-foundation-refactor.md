@@ -844,17 +844,12 @@ async function handleSubmit(e: React.FormEvent) {
 
 Render `{errors.old_password && <p className="mt-1 text-sm text-red-600">{errors.old_password}</p>}` below the Current Password input, and `{errors.new_password && <p className="mt-1 text-sm text-red-600">{errors.new_password}</p>}` below the New Password input (in addition to the existing "Minimum 8 characters." hint).
 
-- [ ] **Step 5: Verify frontend compiles**
+- [x] **Step 5: Verify frontend compiles** — tsc --noEmit: 0 errors.
 
 Run: `cd frontend && npx tsc --noEmit`
 Expected: 0 errors.
 
-- [ ] **Step 6: Commit**
-
-```bash
-git add frontend/components/portal/form/CableEditForm.tsx frontend/components/portal/form/EquipmentEditForm.tsx frontend/components/portal/form/ReplyForm.tsx frontend/components/portal/form/ChangePasswordForm.tsx
-git commit -m "feat(portal): migrate forms to portalApiClient with inline validation"
-```
+- [x] **Step 6: Commit** — dc6bbf3
 
 **Acceptance criteria:** `portal-api-layer/spec.md` Requirement "Portal forms SHALL display inline validation errors"; scenarios "Cable edit form required field validation", "Password change form min length validation", "Reply form empty body validation". All four forms use `portalApiClient` (no raw `fetch`).
 

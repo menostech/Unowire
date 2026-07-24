@@ -41,10 +41,10 @@
 
 ## 7. Form Validation & Migration to portalApiClient
 
-- [ ] 7.1 Refactor `CableEditForm.tsx` to use `portalApiClient.cables.update()` and add inline validation (model required)
-- [ ] 7.2 Refactor `EquipmentEditForm.tsx` to use `portalApiClient.equipment.update()` and add inline validation (model required)
-- [ ] 7.3 Refactor `ReplyForm.tsx` to use `portalApiClient.inquiries.reply()` and add inline validation (body not empty)
-- [ ] 7.4 Refactor `ChangePasswordForm.tsx` to use `portalApiClient.auth.changePassword()` and add inline validation (min 8 chars, new != old)
+- [x] 7.1 Refactor `CableEditForm.tsx` to use `portalApiClient.cables.update()` and add inline validation (model required)
+- [x] 7.2 Refactor `EquipmentEditForm.tsx` to use `portalApiClient.equipment.update()` and add inline validation (model required)
+- [x] 7.3 Refactor `ReplyForm.tsx` to use `portalApiClient.inquiries.reply()` and add inline validation (body not empty)
+- [x] 7.4 Refactor `ChangePasswordForm.tsx` to use `portalApiClient.auth.changePassword()` and add inline validation (min 8 chars, new != old)
 
 ## 8. Permissions-Based Sidebar Gating
 
