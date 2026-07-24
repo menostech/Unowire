@@ -1,25 +1,35 @@
 'use client';
 
 import { useState } from 'react';
+import { portalApiClient, PortalApiError } from '@/lib/portalApiClient';
+import type { PortalEquipment } from '@/lib/types/portal';
 
-export function EquipmentEditForm({ equipment }: { equipment: any }) {
+export function EquipmentEditForm({ equipment }: { equipment: PortalEquipment }) {
   const [model, setModel] = useState(equipment.model ?? '');
   const [description, setDescription] = useState(equipment.description ?? '');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function validate(): boolean {
+    const e: Record<string, string> = {};
+    if (!model.trim()) e.model = 'Model is required';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
 
   async function handleSave() {
+    if (!validate()) return;
     setSaving(true);
     setMessage('');
+    setErrors({});
     try {
-      const res = await fetch(`/api/portal/equipment/${equipment.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, description }),
-      });
-      setMessage(res.ok ? 'Saved' : 'Save failed');
-    } catch {
-      setMessage('Network error');
+      await portalApiClient.equipment.update(equipment.id, { model, description });
+      setMessage('Saved');
+    } catch (err) {
+      if (err instanceof PortalApiError && err.fieldErrors) setErrors(err.fieldErrors);
+      else if (err instanceof PortalApiError) setMessage(err.message);
+      else setMessage('Network error');
     } finally {
       setSaving(false);
     }
@@ -34,6 +44,7 @@ export function EquipmentEditForm({ equipment }: { equipment: any }) {
           onChange={(e) => setModel(e.target.value)}
           className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
         />
+        {errors.model && <p className="mt-1 text-sm text-red-600">{errors.model}</p>}
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>

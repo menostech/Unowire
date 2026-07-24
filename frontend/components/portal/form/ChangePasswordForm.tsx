@@ -1,33 +1,39 @@
 'use client';
 
 import { useState } from 'react';
+import { portalApiClient, PortalApiError } from '@/lib/portalApiClient';
 
 export function ChangePasswordForm() {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function validate(): boolean {
+    const e: Record<string, string> = {};
+    if (!oldPassword) e.old_password = 'Current password is required';
+    if (newPassword.length < 8) e.new_password = 'Password must be at least 8 characters';
+    if (newPassword && newPassword === oldPassword) e.new_password = 'New password must differ from current password';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     setSaving(true);
     setMessage('');
+    setErrors({});
     try {
-      const res = await fetch('/api/portal/auth/me', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) {
-        setMessage('Password changed successfully');
-        setOldPassword('');
-        setNewPassword('');
-      } else {
-        setMessage(data.message || 'Change failed');
-      }
-    } catch {
-      setMessage('Network error');
+      await portalApiClient.auth.changePassword(oldPassword, newPassword);
+      setMessage('Password changed successfully');
+      setOldPassword('');
+      setNewPassword('');
+    } catch (err) {
+      if (err instanceof PortalApiError && err.fieldErrors) setErrors(err.fieldErrors);
+      else if (err instanceof PortalApiError) setMessage(err.message);
+      else setMessage('Network error');
     } finally {
       setSaving(false);
     }
@@ -46,6 +52,7 @@ export function ChangePasswordForm() {
           className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
           autoComplete="current-password"
         />
+        {errors.old_password && <p className="mt-1 text-sm text-red-600">{errors.old_password}</p>}
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">New Password</label>
@@ -59,6 +66,7 @@ export function ChangePasswordForm() {
           autoComplete="new-password"
         />
         <p className="mt-1 text-xs text-gray-400">Minimum 8 characters.</p>
+        {errors.new_password && <p className="mt-1 text-sm text-red-600">{errors.new_password}</p>}
       </div>
       <button
         type="submit"
