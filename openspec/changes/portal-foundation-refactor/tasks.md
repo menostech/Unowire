@@ -26,9 +26,9 @@
 
 ## 5. Token-Expiry Redirect & Dashboard Crash Fix
 
-- [ ] 5.1 Update `frontend/app/portal/layout.tsx`: when `me()` returns null and path is not `/portal/login`, call `redirect('/portal/login?from=<current_path>')`
-- [ ] 5.2 Wrap `portalApi.dashboard.get()` in `frontend/app/portal/page.tsx` with try/catch — on auth failure redirect to login, on other error show error UI with retry
-- [ ] 5.3 Verify login page still renders normally when `me()` returns null (no redirect loop)
+- [x] 5.1 Update `frontend/app/portal/layout.tsx`: when `me()` returns null and path is not `/portal/login`, call `redirect('/portal/login?from=<current_path>')`
+- [x] 5.2 Wrap `portalApi.dashboard.get()` in `frontend/app/portal/page.tsx` with try/catch — on auth failure redirect to login, on other error show error UI with retry
+- [x] 5.3 Verify login page still renders normally when `me()` returns null (no redirect loop)
 
 ## 6. Loading States & Empty States
 

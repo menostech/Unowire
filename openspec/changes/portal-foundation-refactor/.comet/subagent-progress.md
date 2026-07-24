@@ -57,6 +57,14 @@
 - Review: skipped (standard, no risk signals)
 - Verification: tsc --noEmit passed with 0 errors
 
-## Next Task: Task 8 — Token-Expiry Redirect & Dashboard Error Handling
+## Next Task: Task 8 + Task 9 — Token-Expiry Redirect, Dashboard Error Handling, and Permissions-Based Sidebar Gating
+- Stage: done (combined dispatch — Task 8 and Task 9 Step 1 are coupled)
+- Commits: 2aba46f (implementation), 3f67386 (fix C1: x-pathname on all middleware branches)
+- Risk signals: auth-sensitive (token expiry redirect), cross-module (middleware + layout + page + sidebar)
+- Review: NEEDS_FIXES → APPROVED (per-task reviewer found C1: infinite redirect loop on /portal/login; fix dispatched and re-reviewed APPROVED)
+- Verification: tsc --noEmit passed with 0 errors
+- Notes: implementer correctly used redirect from next/navigation (not next/headers); reviewer info findings I1-I4 are acceptable for MVP (fail-closed sidebar on permissions null, dashboard redirects to login when backend fully down)
+
+## Next Task: Task 10 — Verification
 - Stage: pending
-- Risk signals: auth-sensitive (token expiry redirect), cross-module (middleware + layout + page)
+- Risk signals: none (verification only)
