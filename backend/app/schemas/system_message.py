@@ -89,3 +89,34 @@ class MemberMessageListResponse(BaseModel):
 
 class UnreadCountResponse(BaseModel):
     unread: int
+
+
+class RecipientListItem(BaseModel):
+    id: int
+    email: str
+    name: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class RecipientListResponse(BaseModel):
+    cable_managers: list[RecipientListItem]
+    equipment_managers: list[RecipientListItem]
+    members: list[RecipientListItem]
+
+
+class PortalMessageRead(BaseModel):
+    id: int
+    title: str
+    body: str
+    created_at: datetime
+    is_read: bool
+
+    model_config = {"from_attributes": True}
+
+
+class PortalMessageListResponse(BaseModel):
+    items: list[PortalMessageRead]
+    total: int
+    page: int
+    page_size: int
