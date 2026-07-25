@@ -229,6 +229,50 @@ class CRUDSystemMessage(
             return None
         return (row[0], row[1] is not None)
 
+    async def unread_count_for_staff_user(
+        self, db: AsyncSession, *, user_id: int, scope_type: str
+    ) -> int:
+        """Count targeted messages visible to the staff user that have no read row."""
+        group_value = (
+            "cable_managers" if scope_type == "manufacturer"
+            else "equipment_managers" if scope_type == "equipment_manufacturer"
+            else None
+        )
+
+        conditions = []
+        if group_value is not None:
+            group_filter = cast(
+                [{"kind": "group", "value": group_value}],
+                JSONB,
+            )
+            conditions.append(SystemMessage.recipient_targets.op("@>")(group_filter))
+        user_filter = cast(
+            [{"kind": "user", "value": str(user_id)}],
+            JSONB,
+        )
+        conditions.append(SystemMessage.recipient_targets.op("@>")(user_filter))
+
+        stmt = (
+            select(func.count())
+            .select_from(SystemMessage)
+            .outerjoin(
+                SystemMessageUserRead,
+                and_(
+                    SystemMessageUserRead.message_id == SystemMessage.id,
+                    SystemMessageUserRead.user_id == user_id,
+                ),
+            )
+            .where(
+                and_(
+                    SystemMessage.recipient_type == "targeted",
+                    or_(*conditions),
+                    SystemMessageUserRead.user_id.is_(None),
+                ),
+            )
+        )
+        result = await db.execute(stmt)
+        return result.scalar() or 0
+
     async def list_for_member(
         self,
         db: AsyncSession,
