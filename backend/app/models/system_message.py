@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, DateTime, ForeignKey, Index, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -19,6 +20,10 @@ class SystemMessage(Base):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    recipient_type: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="broadcast", server_default="broadcast"
+    )
+    recipient_targets: Mapped[list | None] = mapped_column(JSONB, nullable=True)
 
 
 class SystemMessageRead(Base):
