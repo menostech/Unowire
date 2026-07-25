@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from sqlalchemy import and_, func, select
@@ -5,6 +6,8 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
+from app.models.member import Member
+from app.models.role import Role
 from app.models.system_message import SystemMessage, SystemMessageRead
 from app.models.user import User
 from app.schemas.system_message import MessageCreate
@@ -74,6 +77,43 @@ class CRUDSystemMessage(
         await db.delete(msg)
         await db.commit()
         return True
+
+    async def list_recipients_by_group(
+        self, db: AsyncSession
+    ) -> tuple[list[tuple[int, str, str | None]], list[tuple[int, str, str | None]], list[tuple[int, str, str | None]]]:
+        """Return (cable_managers, equipment_managers, members) recipient lists.
+        Each list contains (id, email, name) tuples.
+        - cable_managers: Users with role.scope_type='manufacturer'
+        - equipment_managers: Users with role.scope_type='equipment_manufacturer'
+        - members: all Members
+        """
+        cable_stmt = (
+            select(User.id, User.email)
+            .join(Role, User.role_id == Role.id)
+            .where(Role.scope_type == "manufacturer")
+            .order_by(User.email)
+        )
+        equip_stmt = (
+            select(User.id, User.email)
+            .join(Role, User.role_id == Role.id)
+            .where(Role.scope_type == "equipment_manufacturer")
+            .order_by(User.email)
+        )
+        member_stmt = (
+            select(Member.id, Member.email, Member.name)
+            .order_by(Member.email)
+        )
+
+        cable_result, equip_result, member_result = await asyncio.gather(
+            db.execute(cable_stmt),
+            db.execute(equip_stmt),
+            db.execute(member_stmt),
+        )
+
+        cable_managers = [(r[0], r[1], None) for r in cable_result.all()]
+        equipment_managers = [(r[0], r[1], None) for r in equip_result.all()]
+        members = [(r[0], r[1], r[2]) for r in member_result.all()]
+        return cable_managers, equipment_managers, members
 
     async def list_for_member(
         self,
