@@ -281,9 +281,35 @@ class CRUDSystemMessage(
         page: int = 1,
         page_size: int = 20,
     ) -> tuple[list[tuple[SystemMessage, bool]], int]:
-        """Return (items, total) where items are (message, is_read) tuples."""
+        """Return (items, total) where items are (message, is_read) tuples.
+        Visible messages:
+        - recipient_type='broadcast' (all members)
+        - recipient_type='targeted' AND any target matches:
+            kind='group' + value='members'
+            kind='member' + value=str(member_id)
+        """
+        members_group_filter = cast(
+            [{"kind": "group", "value": "members"}],
+            JSONB,
+        )
+        member_filter = cast(
+            [{"kind": "member", "value": str(member_id)}],
+            JSONB,
+        )
+        visibility = or_(
+            SystemMessage.recipient_type == "broadcast",
+            and_(
+                SystemMessage.recipient_type == "targeted",
+                or_(
+                    SystemMessage.recipient_targets.op("@>")(members_group_filter),
+                    SystemMessage.recipient_targets.op("@>")(member_filter),
+                ),
+            ),
+        )
+
+        # Total count
         total_result = await db.execute(
-            select(func.count()).select_from(SystemMessage)
+            select(func.count()).select_from(SystemMessage).where(visibility)
         )
         total = total_result.scalar() or 0
 
@@ -297,6 +323,7 @@ class CRUDSystemMessage(
                     SystemMessageRead.member_id == member_id,
                 ),
             )
+            .where(visibility)
             .order_by(SystemMessage.created_at.desc())
             .offset(offset)
             .limit(page_size)
