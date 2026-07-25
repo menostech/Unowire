@@ -1,11 +1,18 @@
 """Portal media routes: folders + uploads. Scope-filtered to user's manufacturer."""
-from fastapi import APIRouter, Depends, HTTPException
+import os
+import uuid
+from io import BytesIO
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from PIL import Image
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_factory_module
 from app.core.database import get_db
 from app.crud.folder import crud_folder
 from app.crud.upload import crud_upload
+from app.models.upload import Upload
 from app.models.user import User
 from app.schemas.folder import FolderCreate
 
@@ -91,6 +98,65 @@ async def list_uploads(
     }
 
 
+@router.post("/uploads", status_code=status.HTTP_201_CREATED)
+async def upload_to_folder(
+    file: UploadFile = File(...),
+    folder_id: int = Form(...),
+    user: User = Depends(require_factory_module("media")),
+    db: AsyncSession = Depends(get_db),
+):
+    scope_type = user.role.scope_type
+    scope_id = user.scope_id
+    try:
+        await crud_folder.assert_folder_in_scope(db, folder_id, scope_type, scope_id)
+    except HTTPException:
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Folder not found"})
+
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail={"code": 400, "message": "File must be an image"})
+
+    content = await file.read()
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail={"code": 413, "message": "File too large (max 5MB)"})
+
+    try:
+        img = Image.open(BytesIO(content))
+    except Exception:
+        raise HTTPException(status_code=400, detail={"code": 400, "message": "Invalid image file"})
+
+    img = img.convert("RGB")
+    img.thumbnail((400, 400))
+
+    filename = f"{uuid.uuid4().hex}.webp"
+    media_dir = os.environ.get("MEDIA_DIR", "/app/media")
+    uploads_dir = os.path.join(media_dir, "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+    file_path = os.path.join(uploads_dir, filename)
+    img.save(file_path, "WEBP", quality=85)
+    size_bytes = os.path.getsize(file_path)
+    url_path = f"/media/uploads/{filename}"
+
+    db_obj = Upload(
+        filename=filename,
+        original_filename=file.filename or "",
+        content_type="image/webp",
+        size_bytes=size_bytes,
+        url_path=url_path,
+        folder_id=folder_id,
+    )
+    db.add(db_obj)
+    await db.commit()
+    await db.refresh(db_obj)
+
+    return {
+        "id": db_obj.id,
+        "filename": db_obj.filename,
+        "url_path": db_obj.url_path,
+        "folder_id": db_obj.folder_id,
+        "created_at": db_obj.created_at.isoformat() + "Z" if db_obj.created_at else None,
+    }
+
+
 @router.delete("/uploads/{upload_id}")
 async def delete_upload(
     upload_id: int,
@@ -100,9 +166,6 @@ async def delete_upload(
     # Verify ownership: upload must be in a folder within user's scope
     scope_type = user.role.scope_type
     scope_id = user.scope_id
-    from app.crud.folder import crud_folder as _crud_folder
-    from app.models.upload import Upload
-    from sqlalchemy import select
 
     stmt = select(Upload).where(Upload.id == upload_id)
     result = await db.execute(stmt)
@@ -113,12 +176,18 @@ async def delete_upload(
     # If upload has a folder, verify folder is in scope
     if upload.folder_id is not None:
         try:
-            await _crud_folder.assert_folder_in_scope(db, upload.folder_id, scope_type, scope_id)
+            await crud_folder.assert_folder_in_scope(db, upload.folder_id, scope_type, scope_id)
         except HTTPException:
             raise HTTPException(status_code=404, detail={"code": 404, "message": "Upload not found"})
     else:
         # Uploads without a folder are not in any scope — reject for portal users
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Upload not found"})
+
+    if upload.entity_id is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": 409, "message": "Cannot delete: still associated with an entity"},
+        )
 
     await crud_upload.remove(db, id=upload_id)
     return {"ok": True}
