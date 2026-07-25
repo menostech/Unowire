@@ -58,6 +58,9 @@ class CRUDSystemMessage(
         self, db: AsyncSession, *, obj_in: MessageCreate, created_by: int
     ) -> SystemMessage:
         data = obj_in.model_dump()
+        # Convert RecipientTarget Pydantic objects to plain dicts for JSONB storage.
+        # model_dump() already produces dicts, but we ensure value is string (enforced
+        # by RecipientTarget.stringify_value validator).
         db_obj = SystemMessage(created_by=created_by, **data)
         db.add(db_obj)
         await db.commit()
