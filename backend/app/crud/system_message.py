@@ -359,5 +359,22 @@ class CRUDSystemMessage(
         await db.execute(stmt)
         await db.commit()
 
+    async def mark_read_for_user(
+        self, db: AsyncSession, *, user_id: int, message_id: int
+    ) -> None:
+        """Idempotently mark a message as read by a staff user.
+        Uses ON CONFLICT DO NOTHING — if the (user_id, message_id) row already
+        exists, the original read_at is preserved (no update).
+        """
+        stmt = pg_insert(SystemMessageUserRead).values(
+            user_id=user_id,
+            message_id=message_id,
+            read_at=datetime.utcnow(),
+        ).on_conflict_do_nothing(
+            index_elements=["user_id", "message_id"],
+        )
+        await db.execute(stmt)
+        await db.commit()
+
 
 crud_system_message = CRUDSystemMessage(SystemMessage)
