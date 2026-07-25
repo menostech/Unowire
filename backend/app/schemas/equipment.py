@@ -149,3 +149,20 @@ class RecommendedEquipmentUpdate(BaseModel):
     image_url: str | None = None
     external_url: str | None = None
     sort_order: int | None = None
+
+
+class PortalEquipmentCreate(BaseModel):
+    """Portal-specific equipment create schema.
+
+    Omits `id` (server-generated) and `manufacturer_id` (server-forced to scope_id).
+    Excludes `applicable_specs` (complex rule editor; deferred).
+    """
+    category_id: str
+    model: str
+    slug: str
+    description: str | None = None
+    image_url: str | None = None
+    external_url: str | None = None
+    sort_order: int = 0
+
+    model_config = {"from_attributes": True}
