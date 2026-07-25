@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { portalApi } from '@/lib/portalApi';
 import { CableEditForm } from '@/components/portal/form/CableEditForm';
+import { CableDeleteButton } from '@/components/portal/form/CableDeleteButton';
 import type { TaxonomyIndustry } from '@/lib/types/portal';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -27,6 +28,9 @@ export default async function PortalCableDetailPage({ params }: { params: Promis
     <div>
       <h1 className="mb-6 text-2xl font-bold text-gray-900">{cable.model || cable.slug || 'Cable'}</h1>
       <CableEditForm cable={cable} taxonomy={taxonomy} />
+      <div className="mt-6">
+        <CableDeleteButton cableId={cable.id} cableName={cable.model || cable.slug || cable.id} />
+      </div>
     </div>
   );
 }
