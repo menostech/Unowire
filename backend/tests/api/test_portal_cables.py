@@ -85,3 +85,41 @@ def test_portal_create_cable_cross_scope_403(client, equipment_manager_headers):
         "model": "X", "slug": "x", "size_system": "awg",
     })
     assert res.status_code == 403
+
+
+def test_portal_delete_cable_success(client, cable_manager_headers):
+    """Manufacturer can delete their own cable."""
+    # Create a cable first
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    create_res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Delete Me Cable",
+        "slug": "delete-me-cable",
+        "size_system": "awg",
+    })
+    assert create_res.status_code == 201
+    cable_id = create_res.json()["id"]
+
+    # Delete it
+    del_res = client.delete(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers)
+    assert del_res.status_code == 200
+    assert del_res.json()["id"] == cable_id
+
+    # Verify it's gone
+    get_res = client.get(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers)
+    assert get_res.status_code == 404
+
+
+def test_portal_delete_cable_out_of_scope_404(client, cable_manager_headers):
+    """Deleting a non-existent or out-of-scope cable returns 404."""
+    res = client.delete("/api/portal/cables/nonexistent-cable-id", headers=cable_manager_headers)
+    assert res.status_code == 404

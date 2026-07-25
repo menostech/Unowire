@@ -100,3 +100,16 @@ async def portal_create_cable(
         raise HTTPException(status_code=409, detail={"code": 409, "message": "A cable with this slug already exists"})
     await db.refresh(cable)
     return cable
+
+
+@router.delete("/{cable_id}", response_model=CableRead)
+async def portal_delete_cable(
+    cable_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_factory_module("cables")),
+):
+    cable = await crud_cable.get_detail(db, id=cable_id)
+    _check_cable_ownership(user, cable)  # raises 404 if None or out-of-scope
+    deleted = await crud_cable.remove(db, id=cable_id)
+    await db.commit()
+    return deleted
