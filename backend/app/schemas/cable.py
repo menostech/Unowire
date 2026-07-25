@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -156,6 +157,27 @@ class CableUpdate(BaseModel):
     category_ids: list[str] | None = None
     common_specs: list[SpecItemCreate] | None = None
     variants: list[CableVariantUpdate] | None = None
+
+
+class PortalCableCreate(BaseModel):
+    """Portal-specific cable create schema.
+
+    Omits `id` (server-generated) and `manufacturer_id` (server-forced to scope_id).
+    Excludes `common_specs` and `variants` (portal create is intentionally minimal).
+    """
+    product_type_id: str
+    industry_id: str
+    category_id: str
+    model: str
+    slug: str
+    size_system: Literal["awg", "mm2", "kcmil", "none"]
+    base_description: str | None = None
+    meta_title: str | None = None
+    meta_description: str | None = None
+    image_url: str | None = None
+    category_ids: list[str] = []
+
+    model_config = {"from_attributes": True}
 
 
 # Cable list filter params
