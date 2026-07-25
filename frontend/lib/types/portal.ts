@@ -66,10 +66,33 @@ export interface PortalCable {
   updated_at: string;
 }
 
-// Narrow subset of backend CableUpdate that the edit form submits.
+// Portal-specific cable create payload (omits id, manufacturer_id, common_specs, variants).
+export interface PortalCableCreate {
+  product_type_id: string;
+  industry_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  size_system: 'awg' | 'mm2' | 'kcmil' | 'none';
+  base_description?: string;
+  meta_title?: string;
+  meta_description?: string;
+  image_url?: string;
+  category_ids?: string[];
+}
+
+// Cable update payload — widened to cover all editable fields.
 export interface PortalCableUpdate {
   model?: string;
+  slug?: string;
+  size_system?: 'awg' | 'mm2' | 'kcmil' | 'none';
   base_description?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  image_url?: string | null;
+  industry_id?: string;
+  category_id?: string;
+  product_type_id?: string;
 }
 
 // Matches backend RecommendedEquipmentRead (backend/app/schemas/equipment.py).
@@ -90,10 +113,26 @@ export interface PortalEquipment {
   updated_at: string;
 }
 
-// Narrow subset of backend RecommendedEquipmentUpdate that the edit form submits.
+// Portal-specific equipment create payload (omits id, manufacturer_id, applicable_specs).
+export interface PortalEquipmentCreate {
+  category_id: string;
+  model: string;
+  slug: string;
+  description?: string;
+  image_url?: string;
+  external_url?: string;
+  sort_order?: number;
+}
+
+// Equipment update payload — widened to cover all editable fields.
 export interface PortalEquipmentUpdate {
   model?: string;
+  slug?: string;
   description?: string | null;
+  image_url?: string | null;
+  external_url?: string | null;
+  sort_order?: number;
+  category_id?: string;
 }
 
 // Matches backend InquiryRead (backend/app/schemas/inquiry.py).
@@ -137,4 +176,59 @@ export interface PortalUploadsResponse {
   total: number;
   page: number;
   page_size: number;
+}
+
+// Matches backend ProductTypeRead (backend/app/schemas/taxonomy.py).
+export interface TaxonomyProductType {
+  id: string;
+  label: string;
+  slug: string;
+  size_system: string;
+  sort_order: number;
+  image_url: string | null;
+}
+
+// Matches backend CategoryRead.
+export interface TaxonomyCategory {
+  id: string;
+  industry_id: string;
+  label: string;
+  slug: string;
+  description: string | null;
+  product_types: TaxonomyProductType[];
+  sort_order: number;
+  image_url: string | null;
+}
+
+// Matches backend IndustryRead.
+export interface TaxonomyIndustry {
+  id: string;
+  label: string;
+  slug: string;
+  description: string | null;
+  categories: TaxonomyCategory[];
+  sort_order: number;
+  image_url: string | null;
+}
+
+// Matches backend EquipmentCategoryTreeRead (backend/app/schemas/equipment.py).
+export interface EquipmentCategoryChild {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  sort_order: number;
+  image_url: string | null;
+}
+
+export interface EquipmentCategoryTree {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  sort_order: number;
+  image_url: string | null;
+  children: EquipmentCategoryChild[];
 }

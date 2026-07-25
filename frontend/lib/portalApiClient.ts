@@ -1,7 +1,9 @@
 import type {
   PortalCable,
+  PortalCableCreate,
   PortalCableUpdate,
   PortalEquipment,
+  PortalEquipmentCreate,
   PortalEquipmentUpdate,
   PortalInquiry,
 } from '@/lib/types/portal';
@@ -37,6 +39,13 @@ async function bffFetch(path: string, options: RequestInit = {}): Promise<Respon
 
 export const portalApiClient = {
   cables: {
+    async create(data: PortalCableCreate): Promise<PortalCable> {
+      const res = await bffFetch('/api/portal/cables', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
     async update(id: string, data: PortalCableUpdate): Promise<PortalCable> {
       const res = await bffFetch(`/api/portal/cables/${id}`, {
         method: 'PUT',
@@ -44,14 +53,27 @@ export const portalApiClient = {
       });
       return res.json();
     },
+    async remove(id: string): Promise<void> {
+      await bffFetch(`/api/portal/cables/${id}`, { method: 'DELETE' });
+    },
   },
   equipment: {
+    async create(data: PortalEquipmentCreate): Promise<PortalEquipment> {
+      const res = await bffFetch('/api/portal/equipment', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
     async update(id: string, data: PortalEquipmentUpdate): Promise<PortalEquipment> {
       const res = await bffFetch(`/api/portal/equipment/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
       return res.json();
+    },
+    async remove(id: string): Promise<void> {
+      await bffFetch(`/api/portal/equipment/${id}`, { method: 'DELETE' });
     },
   },
   inquiries: {
