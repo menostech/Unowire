@@ -189,5 +189,10 @@ async def delete_upload(
             detail={"code": 409, "message": "Cannot delete: still associated with an entity"},
         )
 
+    media_dir = os.environ.get("MEDIA_DIR", "/app/media")
+    file_path = os.path.join(media_dir, "uploads", upload.filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
     await crud_upload.remove(db, id=upload_id)
     return {"ok": True}

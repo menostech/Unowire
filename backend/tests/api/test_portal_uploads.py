@@ -1,6 +1,7 @@
 """Tests for portal uploads routes: POST /api/portal/uploads + DELETE entity_id check."""
 import asyncio
 import io
+import os
 import uuid
 
 import pytest
@@ -238,7 +239,7 @@ def test_portal_delete_upload_nonexistent_404(client, cable_manager_headers):
 
 
 def test_portal_delete_upload_success(client, cable_manager_headers):
-    """Successful delete returns 200; subsequent delete returns 404."""
+    """Successful delete returns 200, removes file from disk; subsequent delete returns 404."""
     folder_id = _get_first_folder_id(client, cable_manager_headers)
     create_res = client.post(
         "/api/portal/uploads",
@@ -247,11 +248,21 @@ def test_portal_delete_upload_success(client, cable_manager_headers):
         data={"folder_id": str(folder_id)},
     )
     assert create_res.status_code == 201
-    upload_id = create_res.json()["id"]
+    body = create_res.json()
+    upload_id = body["id"]
+    filename = body["filename"]
+
+    # Verify file exists on disk after upload
+    media_dir = os.environ.get("MEDIA_DIR", "/app/media")
+    file_path = os.path.join(media_dir, "uploads", filename)
+    assert os.path.exists(file_path), f"Expected file {file_path} to exist after upload"
 
     del_res = client.delete(f"/api/portal/uploads/{upload_id}", headers=cable_manager_headers)
     assert del_res.status_code == 200
     assert del_res.json()["ok"] is True
+
+    # Verify file removed from disk after delete
+    assert not os.path.exists(file_path), f"Expected file {file_path} to be removed after delete"
 
     # Verify gone: deleting again returns 404
     del_again = client.delete(f"/api/portal/uploads/{upload_id}", headers=cable_manager_headers)
