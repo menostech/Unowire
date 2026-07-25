@@ -1,0 +1,8 @@
+{
+  "openspec_proposal": "openspec/changes/admin-targeted-messaging/proposal.md",
+  "openspec_design": "openspec/changes/admin-targeted-messaging/design.md",
+  "openspec_tasks": "openspec/changes/admin-targeted-messaging/tasks.md",
+  "openspec_delta_spec": "openspec/changes/admin-targeted-messaging/specs/admin-targeted-messaging/spec.md",
+  "handoff_context": "openspec/changes/admin-targeted-messaging/.comet/handoff/design-context.json",
+  "handoff_markdown": "openspec/changes/admin-targeted-messaging/.comet/handoff/design-context.md"
+}
