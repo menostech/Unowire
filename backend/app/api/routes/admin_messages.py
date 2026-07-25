@@ -9,6 +9,8 @@ from app.schemas.system_message import (
     AdminMessageRead,
     MessageCreate,
     MessageListResponse,
+    RecipientListItem,
+    RecipientListResponse,
 )
 
 router = APIRouter(prefix="/api/admin/messages", tags=["admin-messages"])
@@ -43,6 +45,24 @@ async def list_messages(
         total=total,
         page=page,
         page_size=page_size,
+    )
+
+
+@router.get("/recipients", response_model=RecipientListResponse)
+async def list_recipients(
+    user: User = Depends(require_operator("messages")),
+    db: AsyncSession = Depends(get_db),
+):
+    """List candidate recipients grouped by role.
+
+    NOTE: This route MUST be registered BEFORE GET /{message_id} to avoid
+    FastAPI matching "recipients" as a path-param.
+    """
+    cable_managers, equipment_managers, members = await crud_system_message.list_recipients_by_group(db)
+    return RecipientListResponse(
+        cable_managers=[RecipientListItem(id=r[0], email=r[1], name=r[2]) for r in cable_managers],
+        equipment_managers=[RecipientListItem(id=r[0], email=r[1], name=r[2]) for r in equipment_managers],
+        members=[RecipientListItem(id=r[0], email=r[1], name=r[2]) for r in members],
     )
 
 
