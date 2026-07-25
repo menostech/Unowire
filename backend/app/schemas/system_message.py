@@ -1,6 +1,25 @@
 from datetime import datetime
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+
+class RecipientTarget(BaseModel):
+    """A single recipient target. `value` is always stored as string in JSONB
+    for type consistency with PostgreSQL `@>` containment queries.
+    """
+    kind: Literal["group", "user", "member"]
+    value: str
+
+    @field_validator("value", mode="before")
+    @classmethod
+    def stringify_value(cls, v: str | int) -> str:
+        """Coerce int (from form inputs) to str for JSONB type consistency.
+        PostgreSQL `@>` is type-strict: '[{"value":42}]' != '[{"value":"42"}]'.
+        """
+        return str(v)
+
+    model_config = {"from_attributes": True}
 
 
 class MessageCreate(BaseModel):
