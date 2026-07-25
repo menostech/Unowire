@@ -97,3 +97,16 @@ async def portal_create_equipment(
     # Reload with relations (manufacturer, category) so response serialization
     # does not trigger lazy loading in the async context (MissingGreenlet).
     return await crud_equipment.get_with_relations(db, equipment_id)
+
+
+@router.delete("/{equipment_id}", response_model=RecommendedEquipmentRead)
+async def portal_delete_equipment(
+    equipment_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_factory_module("equipment")),
+):
+    equipment = await crud_equipment.get_with_relations(db, id=equipment_id)
+    _check_equipment_ownership(user, equipment)  # raises 404 if None or out-of-scope
+    await db.delete(equipment)
+    await db.commit()
+    return equipment

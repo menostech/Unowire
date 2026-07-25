@@ -85,3 +85,38 @@ def test_portal_create_equipment_cross_scope_403(client, cable_manager_headers):
         "category_id": "cat-1", "model": "X", "slug": "x",
     })
     assert res.status_code == 403
+
+
+def test_portal_delete_equipment_success(client, equipment_manager_headers):
+    """Equipment manufacturer can delete their own equipment."""
+    # Create equipment first
+    cat_res = client.get("/api/equipment-categories")
+    categories = cat_res.json()
+    if not categories:
+        pytest.skip("No equipment categories seeded")
+    category = categories[0]
+    if category.get("children"):
+        category = category["children"][0]
+
+    create_res = client.post("/api/portal/equipment", headers=equipment_manager_headers, json={
+        "category_id": category["id"],
+        "model": "Delete Me Equipment",
+        "slug": "delete-me-equipment",
+    })
+    assert create_res.status_code == 201
+    equipment_id = create_res.json()["id"]
+
+    # Delete it
+    del_res = client.delete(f"/api/portal/equipment/{equipment_id}", headers=equipment_manager_headers)
+    assert del_res.status_code == 200
+    assert del_res.json()["id"] == equipment_id
+
+    # Verify it's gone
+    get_res = client.get(f"/api/portal/equipment/{equipment_id}", headers=equipment_manager_headers)
+    assert get_res.status_code == 404
+
+
+def test_portal_delete_equipment_out_of_scope_404(client, equipment_manager_headers):
+    """Deleting non-existent or out-of-scope equipment returns 404."""
+    res = client.delete("/api/portal/equipment/nonexistent-id", headers=equipment_manager_headers)
+    assert res.status_code == 404
