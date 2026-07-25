@@ -50,7 +50,8 @@ async def get_equipment(
     user: User = Depends(require_factory_module("equipment")),
     db: AsyncSession = Depends(get_db),
 ):
-    equipment = await crud_equipment.get(db, equipment_id)
+    # Eager-load relations to avoid MissingGreenlet during response serialization.
+    equipment = await crud_equipment.get_with_relations(db, equipment_id)
     _check_equipment_ownership(user, equipment)
     return equipment
 
@@ -62,14 +63,16 @@ async def update_equipment(
     user: User = Depends(require_factory_module("equipment")),
     db: AsyncSession = Depends(get_db),
 ):
-    equipment = await crud_equipment.get(db, equipment_id)
+    # Eager-load relations for ownership check + later re-read after commit.
+    equipment = await crud_equipment.get_with_relations(db, equipment_id)
     _check_equipment_ownership(user, equipment)
     update_data = body.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(equipment, field, value)
     await db.commit()
-    await db.refresh(equipment)
-    return equipment
+    # Re-read with relations so response serialization does not trigger
+    # lazy loading in the async context (MissingGreenlet).
+    return await crud_equipment.get_with_relations(db, equipment_id)
 
 
 @router.post("", response_model=RecommendedEquipmentRead, status_code=201)

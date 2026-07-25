@@ -1,0 +1,15 @@
+{
+  "change": "portal-cable-equipment-crud",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "a5cfc2bb2779c070002e758b9aab1835c94826a461f35db5b0f02ff6f9dd2f94",
+  "files": [
+    { "path": "openspec/changes/portal-cable-equipment-crud/proposal.md", "sha256": "146ffe7e7b16141a596e4d512b3959cd2dc6dd860b600b3a9a08def7ea08737c" },
+    { "path": "openspec/changes/portal-cable-equipment-crud/design.md", "sha256": "f0f339199e9568f63a1848fa539e8a7ef68958686f5de9d99fb88ca7991fc339" },
+    { "path": "openspec/changes/portal-cable-equipment-crud/tasks.md", "sha256": "d9a0b5a790e7e2992d3fbfcc568f2cf26876e0ce09ecfeca6595664e3e52c3c5" },
+    { "path": "openspec/changes/portal-cable-equipment-crud/specs/portal-cable-crud/spec.md", "sha256": "d17891e0f90be52d8ddad89f7918d2340bd0ef331409b848281cc7990b5a7fbb" },
+    { "path": "openspec/changes/portal-cable-equipment-crud/specs/portal-equipment-crud/spec.md", "sha256": "be2063388d374084b062c50b3357805b7646cf29e869d38eb643da713a7bd4a4" }
+  ]
+}
