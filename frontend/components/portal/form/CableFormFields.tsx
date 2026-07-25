@@ -1,6 +1,7 @@
 'use client';
 
 import type { TaxonomyIndustry } from '@/lib/types/portal';
+import { ImageFieldWithPicker } from '@/components/portal/form/ImageFieldWithPicker';
 
 export interface CableFormState {
   model: string;
@@ -142,15 +143,11 @@ export function CableFormFields({ value, onChange, errors, taxonomy }: CableForm
         />
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Image URL</label>
-        <input
-          value={value.image_url}
-          onChange={(e) => onChange({ image_url: e.target.value })}
-          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-          placeholder="https://…"
-        />
-      </div>
+      <ImageFieldWithPicker
+        label="Image URL"
+        value={value.image_url}
+        onChange={(v) => onChange({ image_url: v })}
+      />
     </div>
   );
 }
