@@ -2,13 +2,15 @@
 comet_change: portal-media-management
 role: technical-design
 canonical_spec: openspec
+archived-with: portal-media-management
+status: archived
 ---
 
 # Design Doc: portal-media-management
 
 **Change**: portal-media-management
 **Date**: 2026-07-25
-**Status**: confirmed
+**Status**: archived
 **Canonical spec**: `openspec/changes/portal-media-management/specs/portal-media-management/spec.md`
 
 ## 1. Context

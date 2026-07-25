@@ -2,6 +2,8 @@
 change: portal-media-management
 design-doc: docs/superpowers/specs/2026-07-25-portal-media-management-design.md
 base-ref: 0aebc5a728a9c558e048501f8dd7ee2f736b0446
+archived-with: portal-media-management
+status: archived
 ---
 
 # portal-media-management Implementation Plan
