@@ -57,6 +57,8 @@ class AdminMessageRead(BaseModel):
     created_by_email: str | None = None
     created_at: datetime
     updated_at: datetime
+    recipient_type: str = "broadcast"
+    recipient_targets: list[RecipientTarget] | None = None
 
     model_config = {"from_attributes": True}
 
