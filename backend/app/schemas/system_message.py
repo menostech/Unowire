@@ -25,6 +25,28 @@ class RecipientTarget(BaseModel):
 class MessageCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     body: str = Field(min_length=1)
+    recipient_type: Literal["broadcast", "targeted"] = "broadcast"
+    recipient_targets: list[RecipientTarget] | None = None
+
+    @model_validator(mode="after")
+    def validate_recipient_targets(self) -> "MessageCreate":
+        valid_groups = {"cable_managers", "equipment_managers", "members"}
+        if self.recipient_type == "broadcast":
+            if self.recipient_targets is not None and len(self.recipient_targets) > 0:
+                raise ValueError(
+                    "recipient_targets must be null/empty when recipient_type is 'broadcast'"
+                )
+        elif self.recipient_type == "targeted":
+            if not self.recipient_targets or len(self.recipient_targets) == 0:
+                raise ValueError(
+                    "recipient_targets must be a non-empty array when recipient_type is 'targeted'"
+                )
+            for t in self.recipient_targets:
+                if t.kind == "group" and t.value not in valid_groups:
+                    raise ValueError(
+                        f"Invalid group value: {t.value}. Must be one of {sorted(valid_groups)}"
+                    )
+        return self
 
 
 class AdminMessageRead(BaseModel):
