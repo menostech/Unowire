@@ -2,18 +2,43 @@
 
 import { useState } from 'react';
 import { portalApiClient, PortalApiError } from '@/lib/portalApiClient';
-import type { PortalCable } from '@/lib/types/portal';
+import type { PortalCable, TaxonomyIndustry } from '@/lib/types/portal';
+import { CableFormFields, type CableFormState } from './CableFormFields';
 
-export function CableEditForm({ cable }: { cable: PortalCable }) {
-  const [model, setModel] = useState(cable.model ?? '');
-  const [baseDescription, setBaseDescription] = useState(cable.base_description ?? '');
+interface CableEditFormProps {
+  cable: PortalCable;
+  taxonomy: TaxonomyIndustry[];
+}
+
+export function CableEditForm({ cable, taxonomy }: CableEditFormProps) {
+  const [form, setForm] = useState<CableFormState>({
+    model: cable.model ?? '',
+    slug: cable.slug ?? '',
+    size_system: (cable.size_system as CableFormState['size_system']) ?? 'awg',
+    base_description: cable.base_description ?? '',
+    meta_title: cable.meta_title ?? '',
+    meta_description: cable.meta_description ?? '',
+    image_url: cable.image_url ?? '',
+    industry_id: cable.industry_id ?? '',
+    category_id: cable.category_id ?? '',
+    product_type_id: cable.product_type_id ?? '',
+  });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  function handleChange(patch: Partial<CableFormState>) {
+    setForm((prev) => ({ ...prev, ...patch }));
+  }
+
   function validate(): boolean {
     const e: Record<string, string> = {};
-    if (!model.trim()) e.model = 'Model is required';
+    if (!form.model.trim()) e.model = 'Model is required';
+    if (!form.slug.trim()) e.slug = 'Slug is required';
+    if (!form.size_system) e.size_system = 'Size system is required';
+    if (!form.industry_id) e.industry_id = 'Industry is required';
+    if (!form.category_id) e.category_id = 'Category is required';
+    if (!form.product_type_id) e.product_type_id = 'Product type is required';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -24,7 +49,7 @@ export function CableEditForm({ cable }: { cable: PortalCable }) {
     setMessage('');
     setErrors({});
     try {
-      await portalApiClient.cables.update(cable.id, { model, base_description: baseDescription });
+      await portalApiClient.cables.update(cable.id, form);
       setMessage('Saved');
     } catch (err) {
       if (err instanceof PortalApiError && err.fieldErrors) setErrors(err.fieldErrors);
@@ -37,24 +62,7 @@ export function CableEditForm({ cable }: { cable: PortalCable }) {
 
   return (
     <div className="max-w-xl space-y-4 rounded-lg bg-white p-6 shadow-sm">
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Model</label>
-        <input
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-        />
-        {errors.model && <p className="mt-1 text-sm text-red-600">{errors.model}</p>}
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Base Description</label>
-        <textarea
-          value={baseDescription}
-          onChange={(e) => setBaseDescription(e.target.value)}
-          rows={4}
-          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-        />
-      </div>
+      <CableFormFields value={form} onChange={handleChange} errors={errors} taxonomy={taxonomy} />
       <button
         onClick={handleSave}
         disabled={saving}
