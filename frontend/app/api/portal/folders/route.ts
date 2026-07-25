@@ -10,3 +10,18 @@ export async function GET(req: NextRequest) {
   const data = await res.json().catch(() => ({}));
   return NextResponse.json(data, { status: res.status });
 }
+
+export async function POST(req: NextRequest) {
+  const token = req.cookies.get('portal_token')?.value;
+  const body = await req.json();
+  const res = await fetch(`${API_BASE}/api/portal/folders`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  return NextResponse.json(data, { status: res.status });
+}

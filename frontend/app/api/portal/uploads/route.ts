@@ -10,3 +10,15 @@ export async function GET(req: NextRequest) {
   const data = await res.json().catch(() => ({}));
   return NextResponse.json(data, { status: res.status });
 }
+
+export async function POST(req: NextRequest) {
+  const token = req.cookies.get('portal_token')?.value;
+  const formData = await req.formData();
+  const res = await fetch(`${API_BASE}/api/portal/uploads`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  return NextResponse.json(data, { status: res.status });
+}

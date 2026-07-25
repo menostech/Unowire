@@ -8,7 +8,7 @@ import type {
   PortalInquiry,
   PortalFolder,
   PortalUpload,
-  PortalUploadsResponse,
+  PortalUploadPage,
 } from '@/lib/types/portal';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -90,8 +90,13 @@ export const portalApi = {
     },
   },
   uploads: {
-    async all(): Promise<PortalUploadsResponse> {
-      return portalGet<PortalUploadsResponse>('/api/portal/uploads');
+    async all(params?: { folderId?: number; page?: number; pageSize?: number }): Promise<PortalUploadPage> {
+      const qs = new URLSearchParams();
+      if (params?.folderId != null) qs.set('folder_id', String(params.folderId));
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.pageSize != null) qs.set('page_size', String(params.pageSize));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return portalGet<PortalUploadPage>(`/api/portal/uploads${suffix}`);
     },
   },
 };

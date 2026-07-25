@@ -162,6 +162,11 @@ export interface PortalFolder {
   upload_count: number;
 }
 
+export interface PortalFolderCreate {
+  name: string;
+  parent_id: number | null;
+}
+
 // Matches the item dict returned by GET /api/portal/uploads (portal_media.py list_uploads).
 export interface PortalUpload {
   id: number;
@@ -171,7 +176,7 @@ export interface PortalUpload {
   created_at: string | null;
 }
 
-export interface PortalUploadsResponse {
+export interface PortalUploadPage {
   items: PortalUpload[];
   total: number;
   page: number;

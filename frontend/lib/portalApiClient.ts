@@ -5,7 +5,11 @@ import type {
   PortalEquipment,
   PortalEquipmentCreate,
   PortalEquipmentUpdate,
+  PortalFolder,
+  PortalFolderCreate,
   PortalInquiry,
+  PortalUpload,
+  PortalUploadPage,
 } from '@/lib/types/portal';
 
 export class PortalApiError extends Error {
@@ -20,11 +24,15 @@ export class PortalApiError extends Error {
   }
 }
 
-async function bffFetch(path: string, options: RequestInit = {}): Promise<Response> {
-  const res = await fetch(path, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-  });
+async function bffFetch(
+  path: string,
+  options: RequestInit & { skipDefaultContentType?: boolean } = {},
+): Promise<Response> {
+  const { skipDefaultContentType, headers, ...rest } = options;
+  const finalHeaders = skipDefaultContentType
+    ? (headers as Record<string, string> | undefined)
+    : { 'Content-Type': 'application/json', ...((headers as Record<string, string>) ?? {}) };
+  const res = await fetch(path, { ...rest, headers: finalHeaders });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new PortalApiError(
@@ -91,6 +99,41 @@ export const portalApiClient = {
         method: 'PUT',
         body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
       });
+    },
+  },
+  folders: {
+    async all(): Promise<PortalFolder[]> {
+      const res = await bffFetch('/api/portal/folders');
+      return res.json();
+    },
+    async create(data: PortalFolderCreate): Promise<PortalFolder> {
+      const res = await bffFetch('/api/portal/folders', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+  },
+  uploads: {
+    async all(params?: { folderId?: number; page?: number; pageSize?: number }): Promise<PortalUploadPage> {
+      const qs = new URLSearchParams();
+      if (params?.folderId != null) qs.set('folder_id', String(params.folderId));
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.pageSize != null) qs.set('page_size', String(params.pageSize));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      const res = await bffFetch(`/api/portal/uploads${suffix}`);
+      return res.json();
+    },
+    async create(formData: FormData): Promise<PortalUpload> {
+      const res = await bffFetch('/api/portal/uploads', {
+        method: 'POST',
+        body: formData,
+        skipDefaultContentType: true,
+      });
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      await bffFetch(`/api/portal/uploads/${id}`, { method: 'DELETE' });
     },
   },
 };
