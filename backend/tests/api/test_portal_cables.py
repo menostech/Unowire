@@ -1,4 +1,6 @@
 """Tests for portal cables routes: list, detail, scope isolation."""
+import uuid
+
 import pytest
 
 
@@ -55,12 +57,13 @@ def test_portal_create_cable_success(client, cable_manager_headers):
         pytest.skip("No product types seeded")
     product_type = category["product_types"][0]
 
+    unique_slug = f"test-portal-cable-{uuid.uuid4().hex[:8]}"
     res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
         "product_type_id": product_type["id"],
         "industry_id": industry["id"],
         "category_id": category["id"],
         "model": "Test Portal Cable",
-        "slug": "test-portal-cable",
+        "slug": unique_slug,
         "size_system": "awg",
     })
     assert res.status_code == 201, f"Create failed: {res.text}"
@@ -68,8 +71,8 @@ def test_portal_create_cable_success(client, cable_manager_headers):
     assert data["model"] == "Test Portal Cable"
     assert data["manufacturer_id"] == "mfr-1"  # forced to scope_id
     assert data["id"]  # auto-generated
-    assert data["id"] != "test-portal-cable"  # includes manufacturer slug prefix
-    assert data["slug"] == "test-portal-cable"
+    assert data["id"] != unique_slug  # includes manufacturer slug prefix
+    assert data["slug"] == unique_slug
 
 
 def test_portal_create_cable_missing_fields_422(client, cable_manager_headers):
@@ -103,7 +106,7 @@ def test_portal_delete_cable_success(client, cable_manager_headers):
         "industry_id": industry["id"],
         "category_id": category["id"],
         "model": "Delete Me Cable",
-        "slug": "delete-me-cable",
+        "slug": f"delete-me-cable-{uuid.uuid4().hex[:8]}",
         "size_system": "awg",
     })
     assert create_res.status_code == 201

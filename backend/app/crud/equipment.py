@@ -76,10 +76,18 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
     async def list_by_manufacturer(
         self, db: AsyncSession, *, scope_id: str, skip: int = 0, limit: int = 50
     ) -> list[RecommendedEquipment]:
-        """List equipment where manufacturer_id == scope_id. For portal routes."""
+        """List equipment where manufacturer_id == scope_id. For portal routes.
+
+        Eager-loads `manufacturer` and `category` to avoid async lazy-load
+        (MissingGreenlet) errors during response serialization.
+        """
         stmt = (
             select(RecommendedEquipment)
             .where(RecommendedEquipment.manufacturer_id == scope_id)
+            .options(
+                selectinload(RecommendedEquipment.manufacturer),
+                selectinload(RecommendedEquipment.category),
+            )
             .order_by(RecommendedEquipment.created_at.desc())
             .offset(skip)
             .limit(limit)

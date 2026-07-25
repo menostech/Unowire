@@ -1,4 +1,6 @@
 """Tests for portal equipment routes: list, detail, scope isolation."""
+import uuid
+
 import pytest
 
 
@@ -60,17 +62,18 @@ def test_portal_create_equipment_success(client, equipment_manager_headers):
     if category.get("children"):
         category = category["children"][0]
 
+    unique_slug = f"test-portal-equipment-{uuid.uuid4().hex[:8]}"
     res = client.post("/api/portal/equipment", headers=equipment_manager_headers, json={
         "category_id": category["id"],
         "model": "Test Portal Equipment",
-        "slug": "test-portal-equipment",
+        "slug": unique_slug,
     })
     assert res.status_code == 201, f"Create failed: {res.text}"
     data = res.json()
     assert data["model"] == "Test Portal Equipment"
     assert data["manufacturer_id"] == "em-1"  # forced to scope_id
     assert data["id"]  # auto-generated
-    assert data["slug"] == "test-portal-equipment"
+    assert data["slug"] == unique_slug
 
 
 def test_portal_create_equipment_missing_fields_422(client, equipment_manager_headers):
@@ -101,7 +104,7 @@ def test_portal_delete_equipment_success(client, equipment_manager_headers):
     create_res = client.post("/api/portal/equipment", headers=equipment_manager_headers, json={
         "category_id": category["id"],
         "model": "Delete Me Equipment",
-        "slug": "delete-me-equipment",
+        "slug": f"delete-me-equipment-{uuid.uuid4().hex[:8]}",
     })
     assert create_res.status_code == 201
     equipment_id = create_res.json()["id"]
