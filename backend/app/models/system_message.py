@@ -44,3 +44,27 @@ class SystemMessageRead(Base):
     __table_args__ = (
         Index("ix_system_message_reads_message_id", "message_id"),
     )
+
+
+class SystemMessageUserRead(Base):
+    """Parallel read-tracking table for staff Users.
+    Mirrors SystemMessageRead (which tracks member reads) — added additively
+    to avoid changing the existing table's PK or query assumptions.
+    """
+    __tablename__ = "system_message_user_reads"
+
+    user_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    message_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("system_messages.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    read_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    __table_args__ = (
+        Index("ix_system_message_user_reads_message_id", "message_id"),
+    )
