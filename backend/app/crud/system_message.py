@@ -1,14 +1,14 @@
 import asyncio
 from datetime import datetime
 
-from sqlalchemy import and_, func, select
-from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy import and_, cast, func, or_, select
+from sqlalchemy.dialects.postgresql import JSONB, insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
 from app.models.member import Member
 from app.models.role import Role
-from app.models.system_message import SystemMessage, SystemMessageRead
+from app.models.system_message import SystemMessage, SystemMessageRead, SystemMessageUserRead
 from app.models.user import User
 from app.schemas.system_message import MessageCreate
 
@@ -114,6 +114,73 @@ class CRUDSystemMessage(
         equipment_managers = [(r[0], r[1], None) for r in equip_result.all()]
         members = [(r[0], r[1], r[2]) for r in member_result.all()]
         return cable_managers, equipment_managers, members
+
+    async def list_for_staff_user(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: int,
+        scope_type: str,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> tuple[list[tuple[SystemMessage, bool]], int]:
+        """List targeted messages visible to a staff user.
+        Visible if recipient_type='targeted' AND any target matches:
+        - kind='group' + value=<group_for_scope> where group_for_scope is
+          'cable_managers' for scope_type='manufacturer',
+          'equipment_managers' for scope_type='equipment_manufacturer'
+        - kind='user' + value=str(user_id)
+        Broadcast messages are excluded (member-only).
+        """
+        group_value = (
+            "cable_managers" if scope_type == "manufacturer"
+            else "equipment_managers" if scope_type == "equipment_manufacturer"
+            else None
+        )
+
+        conditions = []
+        if group_value is not None:
+            group_filter = cast(
+                [{"kind": "group", "value": group_value}],
+                JSONB,
+            )
+            conditions.append(SystemMessage.recipient_targets.op("@>")(group_filter))
+        # Individual user target — value stored as string in JSONB
+        user_filter = cast(
+            [{"kind": "user", "value": str(user_id)}],
+            JSONB,
+        )
+        conditions.append(SystemMessage.recipient_targets.op("@>")(user_filter))
+
+        base_filter = and_(
+            SystemMessage.recipient_type == "targeted",
+            or_(*conditions),
+        )
+
+        # Total count
+        total_result = await db.execute(
+            select(func.count()).select_from(SystemMessage).where(base_filter)
+        )
+        total = total_result.scalar() or 0
+
+        offset = (page - 1) * page_size
+        stmt = (
+            select(SystemMessage, SystemMessageUserRead.user_id)
+            .outerjoin(
+                SystemMessageUserRead,
+                and_(
+                    SystemMessageUserRead.message_id == SystemMessage.id,
+                    SystemMessageUserRead.user_id == user_id,
+                ),
+            )
+            .where(base_filter)
+            .order_by(SystemMessage.created_at.desc())
+            .offset(offset)
+            .limit(page_size)
+        )
+        result = await db.execute(stmt)
+        items = [(row[0], row[1] is not None) for row in result.all()]
+        return items, total
 
     async def list_for_member(
         self,
