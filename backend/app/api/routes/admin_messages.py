@@ -23,6 +23,8 @@ def _to_admin_read(msg, publisher_email: str | None) -> AdminMessageRead:
         created_by_email=publisher_email,
         created_at=msg.created_at,
         updated_at=msg.updated_at,
+        recipient_type=msg.recipient_type,
+        recipient_targets=msg.recipient_targets,
     )
 
 
