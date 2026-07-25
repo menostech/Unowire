@@ -182,6 +182,53 @@ class CRUDSystemMessage(
         items = [(row[0], row[1] is not None) for row in result.all()]
         return items, total
 
+    async def get_for_staff_user(
+        self, db: AsyncSession, *, user_id: int, scope_type: str, message_id: int
+    ) -> tuple[SystemMessage, bool] | None:
+        """Get a single message for a staff user. Returns (message, is_read) or None
+        if the message does not exist or is not targeted to the caller."""
+        group_value = (
+            "cable_managers" if scope_type == "manufacturer"
+            else "equipment_managers" if scope_type == "equipment_manufacturer"
+            else None
+        )
+
+        conditions = []
+        if group_value is not None:
+            group_filter = cast(
+                [{"kind": "group", "value": group_value}],
+                JSONB,
+            )
+            conditions.append(SystemMessage.recipient_targets.op("@>")(group_filter))
+        user_filter = cast(
+            [{"kind": "user", "value": str(user_id)}],
+            JSONB,
+        )
+        conditions.append(SystemMessage.recipient_targets.op("@>")(user_filter))
+
+        stmt = (
+            select(SystemMessage, SystemMessageUserRead.user_id)
+            .outerjoin(
+                SystemMessageUserRead,
+                and_(
+                    SystemMessageUserRead.message_id == SystemMessage.id,
+                    SystemMessageUserRead.user_id == user_id,
+                ),
+            )
+            .where(
+                and_(
+                    SystemMessage.id == message_id,
+                    SystemMessage.recipient_type == "targeted",
+                    or_(*conditions),
+                ),
+            )
+        )
+        result = await db.execute(stmt)
+        row = result.first()
+        if row is None:
+            return None
+        return (row[0], row[1] is not None)
+
     async def list_for_member(
         self,
         db: AsyncSession,
