@@ -16,14 +16,14 @@ plan: docs/superpowers/plans/2026-07-26-portal-cable-list-enhancements.md
 verify_result: pass
 verify_failures: 0
 verification_report: docs/superpowers/reports/2026-07-26-portal-cable-list-enhancements-verify.md
-branch_status: pending
+branch_status: handled
 created_at: 2026-07-26
 verified_at: 2026-07-26
 archive_confirmation: confirmed
 archived: true
 bound_branch: master
 direct_override: null
-handoff_context: openspec/changes/portal-cable-list-enhancements/.comet/handoff/design-context.json
+handoff_context: null
 handoff_hash: 6095a0c2a60bf399633b693bd6fed1f78d36a80defe81821c12a92dc15c23b79
 classic_profile: full
 classic_migration: 1
