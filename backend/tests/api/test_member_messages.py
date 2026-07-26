@@ -175,3 +175,57 @@ def test_member_inactive_account(client, admin_headers):
         headers={"Authorization": f"Bearer {member_token}"},
     )
     assert res.status_code == 401
+
+
+def test_member_sees_targeted_group_members(client, admin_headers):
+    """Member sees targeted messages with kind=group, value=members."""
+    member_headers = _register_and_verify_member(
+        client, "targeted-mbr@test-member.com"
+    )
+
+    # Create a targeted message for members group
+    create_res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Targeted Members",
+            "body": "Body",
+            "recipient_type": "targeted",
+            "recipient_targets": [{"kind": "group", "value": "members"}],
+        },
+        headers=admin_headers,
+    )
+    msg_id = create_res.json()["id"]
+
+    res = client.get("/api/member/messages", headers=member_headers)
+    assert res.status_code == 200
+    ids = [m["id"] for m in res.json()["items"]]
+    assert msg_id in ids
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+
+
+def test_member_does_not_see_staff_targeted(client, admin_headers):
+    """Member does NOT see messages targeting kind=user or group=cable_managers."""
+    member_headers = _register_and_verify_member(
+        client, "exclude-mbr@test-member.com"
+    )
+
+    # Create a staff-only targeted message
+    create_res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Staff Only",
+            "body": "Body",
+            "recipient_type": "targeted",
+            "recipient_targets": [{"kind": "group", "value": "cable_managers"}],
+        },
+        headers=admin_headers,
+    )
+    msg_id = create_res.json()["id"]
+
+    res = client.get("/api/member/messages", headers=member_headers)
+    assert res.status_code == 200
+    ids = [m["id"] for m in res.json()["items"]]
+    assert msg_id not in ids
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
