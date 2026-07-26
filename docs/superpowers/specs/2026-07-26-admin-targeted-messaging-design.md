@@ -2,6 +2,8 @@
 comet_change: admin-targeted-messaging
 role: technical-design
 canonical_spec: openspec
+status: superseded-by-main-spec
+archived-with: openspec/changes/archive/2026-07-26-admin-targeted-messaging
 ---
 
 # Design Doc — Admin Targeted Messaging

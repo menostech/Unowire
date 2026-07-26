@@ -2,6 +2,7 @@
 change: admin-targeted-messaging
 design-doc: docs/superpowers/specs/2026-07-26-admin-targeted-messaging-design.md
 base-ref: d798934133e72085fec19416b6cf2d50330c7d81
+archived-with: openspec/changes/archive/2026-07-26-admin-targeted-messaging
 ---
 
 # Admin Targeted Messaging Implementation Plan
