@@ -248,13 +248,32 @@ class CRUDCable(CRUDBase[Cable, CableCreate, CableUpdate]):
         )
 
     async def list_by_manufacturer(
-        self, db: AsyncSession, *, scope_id: str, skip: int = 0, limit: int = 50
+        self,
+        db: AsyncSession,
+        *,
+        scope_id: str,
+        skip: int = 0,
+        limit: int = 50,
+        search: str | None = None,
+        industry_id: str | None = None,
+        category_id: str | None = None,
+        product_type_id: str | None = None,
     ) -> list[Cable]:
         """List cables where manufacturer_id == scope_id. For portal routes."""
         stmt = (
             select(Cable)
             .where(Cable.manufacturer_id == scope_id)
-            .options(
+        )
+        if search:
+            stmt = stmt.where(Cable.model.ilike(f"%{search}%"))
+        if industry_id:
+            stmt = stmt.where(Cable.industry_id == industry_id)
+        if category_id:
+            stmt = stmt.where(Cable.category_id == category_id)
+        if product_type_id:
+            stmt = stmt.where(Cable.product_type_id == product_type_id)
+        stmt = (
+            stmt.options(
                 selectinload(Cable.manufacturer),
                 selectinload(Cable.variants).selectinload(CableVariant.specs),
                 selectinload(Cable.common_specs),
