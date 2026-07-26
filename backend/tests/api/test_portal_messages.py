@@ -85,3 +85,40 @@ def test_staff_sees_individual_user_target(client, admin_headers, cable_manager_
     assert msg_id in ids
     # Cleanup
     client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+
+
+def test_portal_get_message_auto_marks_read(client, admin_headers, cable_manager_headers, db_session):
+    """GET /{id} for a targeted message auto-marks it as read."""
+    msg_id = _create_targeted(client, admin_headers, [{"kind": "group", "value": "cable_managers"}])
+    # First view — should return is_read=True (auto-marked)
+    res = client.get(f"/api/portal/messages/{msg_id}", headers=cable_manager_headers)
+    assert res.status_code == 200
+    assert res.json()["is_read"] is True
+    # Verify unread count is now 0 for this message
+    list_res = client.get("/api/portal/messages", headers=cable_manager_headers)
+    items = {m["id"]: m["is_read"] for m in list_res.json()["items"]}
+    assert items[msg_id] is True
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+
+
+def test_portal_get_message_stays_read_on_reopen(client, admin_headers, cable_manager_headers, db_session):
+    """Reopening a message keeps is_read=True (idempotent mark_read)."""
+    msg_id = _create_targeted(client, admin_headers, [{"kind": "group", "value": "cable_managers"}])
+    # First view
+    client.get(f"/api/portal/messages/{msg_id}", headers=cable_manager_headers)
+    # Second view
+    res = client.get(f"/api/portal/messages/{msg_id}", headers=cable_manager_headers)
+    assert res.status_code == 200
+    assert res.json()["is_read"] is True
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+
+
+def test_portal_get_message_404_when_not_targeted(client, admin_headers, cable_manager_headers, db_session):
+    """GET /{id} for a message NOT targeted to caller returns 404."""
+    msg_id = _create_targeted(client, admin_headers, [{"kind": "group", "value": "equipment_managers"}])
+    res = client.get(f"/api/portal/messages/{msg_id}", headers=cable_manager_headers)
+    assert res.status_code == 404
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
