@@ -278,3 +278,50 @@ def test_get_recipients_requires_permission(client):
     """GET /recipients without admin token returns 401."""
     res = client.get("/api/admin/messages/recipients")
     assert res.status_code == 401
+
+
+def test_admin_list_echoes_recipient_fields(client, admin_headers):
+    """Admin message list includes recipient_type + recipient_targets."""
+    # Create a targeted message
+    create_res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Echo Test",
+            "body": "Body",
+            "recipient_type": "targeted",
+            "recipient_targets": [{"kind": "group", "value": "members"}],
+        },
+        headers=admin_headers,
+    )
+    msg_id = create_res.json()["id"]
+    res = client.get("/api/admin/messages", headers=admin_headers)
+    assert res.status_code == 200
+    items = res.json()["items"]
+    found = [m for m in items if m["id"] == msg_id]
+    assert len(found) == 1
+    assert found[0]["recipient_type"] == "targeted"
+    assert found[0]["recipient_targets"] == [{"kind": "group", "value": "members"}]
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+
+
+def test_admin_detail_echoes_recipient_fields(client, admin_headers):
+    """Admin message detail includes recipient_type + recipient_targets."""
+    create_res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Detail Echo",
+            "body": "Body",
+            "recipient_type": "targeted",
+            "recipient_targets": [{"kind": "group", "value": "cable_managers"}],
+        },
+        headers=admin_headers,
+    )
+    msg_id = create_res.json()["id"]
+    res = client.get(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["recipient_type"] == "targeted"
+    assert data["recipient_targets"] == [{"kind": "group", "value": "cable_managers"}]
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
