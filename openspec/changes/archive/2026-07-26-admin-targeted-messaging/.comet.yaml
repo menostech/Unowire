@@ -20,7 +20,7 @@ branch_status: pending
 created_at: 2026-07-25
 verified_at: 2026-07-26
 archive_confirmation: confirmed
-archived: false
+archived: true
 bound_branch: master
 direct_override: null
 handoff_context: openspec/changes/admin-targeted-messaging/.comet/handoff/design-context.json
