@@ -39,12 +39,18 @@ export default async function UsersPage() {
                     {user.is_active ? 'Active' : 'Disabled'}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="px-4 py-2 text-right space-x-3">
                   <Link
                     href={`/admin/users/${user.id}`}
                     className="text-blue-600 hover:underline"
                   >
                     Edit
+                  </Link>
+                  <Link
+                    href={`/admin/messages/new?recipientType=targeted&recipientKind=user&recipientId=${user.id}&recipientLabel=${encodeURIComponent(user.email)}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    Message
                   </Link>
                 </td>
               </tr>

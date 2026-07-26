@@ -10,6 +10,8 @@ import type {
   PortalInquiry,
   PortalUpload,
   PortalUploadPage,
+  PortalMessage,
+  PortalMessageListResponse,
 } from '@/lib/types/portal';
 
 export class PortalApiError extends Error {
@@ -134,6 +136,21 @@ export const portalApiClient = {
     },
     async remove(id: number): Promise<void> {
       await bffFetch(`/api/portal/uploads/${id}`, { method: 'DELETE' });
+    },
+  },
+  messages: {
+    async all(page = 1, pageSize = 20): Promise<PortalMessageListResponse> {
+      const qs = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+      const res = await bffFetch(`/api/portal/messages?${qs}`);
+      return res.json();
+    },
+    async getById(id: number): Promise<PortalMessage> {
+      const res = await bffFetch(`/api/portal/messages/${id}`);
+      return res.json();
+    },
+    async unreadCount(): Promise<{ unread: number }> {
+      const res = await bffFetch('/api/portal/messages/unread-count');
+      return res.json();
     },
   },
 };

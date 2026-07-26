@@ -237,3 +237,19 @@ export interface EquipmentCategoryTree {
   image_url: string | null;
   children: EquipmentCategoryChild[];
 }
+
+// Matches backend PortalMessageRead (backend/app/schemas/system_message.py).
+export interface PortalMessage {
+  id: number;
+  title: string;
+  body: string;
+  created_at: string;
+  is_read: boolean;
+}
+
+export interface PortalMessageListResponse {
+  items: PortalMessage[];
+  total: number;
+  page: number;
+  page_size: number;
+}

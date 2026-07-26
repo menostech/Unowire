@@ -397,6 +397,28 @@ export interface EquipmentListResponse {
 }
 
 // === System Messages ===
+// Targeted messaging — value is stored as string in JSONB for type consistency
+// with PostgreSQL `@>` containment queries.
+export type RecipientTargetKind = 'group' | 'user' | 'member';
+export type RecipientGroupValue = 'cable_managers' | 'equipment_managers' | 'members';
+
+export interface RecipientTarget {
+  kind: RecipientTargetKind;
+  value: string;
+}
+
+export interface RecipientListItem {
+  id: number;
+  email: string;
+  name: string | null;
+}
+
+export interface RecipientListResponse {
+  cable_managers: RecipientListItem[];
+  equipment_managers: RecipientListItem[];
+  members: RecipientListItem[];
+}
+
 export interface AdminMessage {
   id: number;
   title: string;
@@ -405,6 +427,8 @@ export interface AdminMessage {
   created_by_email: string | null;
   created_at: string;
   updated_at: string;
+  recipient_type: 'broadcast' | 'targeted';
+  recipient_targets: RecipientTarget[] | null;
 }
 
 export interface AdminMessageListResponse {

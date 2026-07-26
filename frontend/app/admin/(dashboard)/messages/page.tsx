@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
+import { formatRecipientSummary } from '@/lib/utils/messages';
 
 export default async function AdminMessagesPage() {
   const data = await adminApi.messages.all(1, 20);
@@ -27,6 +28,7 @@ export default async function AdminMessagesPage() {
               <tr>
                 <th className="px-4 py-2 text-left font-medium">ID</th>
                 <th className="px-4 py-2 text-left font-medium">Title</th>
+                <th className="px-4 py-2 text-left font-medium">Recipients</th>
                 <th className="px-4 py-2 text-left font-medium">Publisher</th>
                 <th className="px-4 py-2 text-left font-medium">Created</th>
                 <th className="px-4 py-2"><span className="sr-only">Actions</span></th>
@@ -43,6 +45,9 @@ export default async function AdminMessagesPage() {
                     >
                       {m.title}
                     </Link>
+                  </td>
+                  <td className="px-4 py-3 text-gray-700 text-xs">
+                    {formatRecipientSummary(m.recipient_targets, m.recipient_type)}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {m.created_by_email ?? '—'}

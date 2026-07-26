@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, Cable, Wrench, Mail, Image as ImageIcon,
+  LayoutDashboard, Cable, Wrench, Mail, Image as ImageIcon, Megaphone,
   Settings, LogOut, ExternalLink, type LucideIcon,
 } from 'lucide-react';
 import type { PortalUser } from '@/lib/types/portal';
+import { PortalMessagesUnreadBadge } from '@/components/portal/PortalMessagesUnreadBadge';
 
 interface NavItem {
   label: string;
@@ -20,6 +21,7 @@ const MANUFACTURER_NAV: NavItem[] = [
   { label: 'Dashboard', href: '/portal', icon: LayoutDashboard, module: 'dashboard' },
   { label: 'Cables', href: '/portal/cables', icon: Cable, module: 'cables' },
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
+  { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
@@ -28,6 +30,7 @@ const EQUIPMENT_MANUFACTURER_NAV: NavItem[] = [
   { label: 'Dashboard', href: '/portal', icon: LayoutDashboard, module: 'dashboard' },
   { label: 'Equipment', href: '/portal/equipment', icon: Wrench, module: 'equipment' },
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
+  { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
@@ -103,6 +106,7 @@ export function PortalSidebar({
                   {unread}
                 </span>
               )}
+              {item.module === 'messages' && <PortalMessagesUnreadBadge />}
             </Link>
           );
         })}

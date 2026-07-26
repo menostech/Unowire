@@ -9,6 +9,8 @@ import type {
   PortalFolder,
   PortalUpload,
   PortalUploadPage,
+  PortalMessage,
+  PortalMessageListResponse,
 } from '@/lib/types/portal';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -97,6 +99,19 @@ export const portalApi = {
       if (params?.pageSize != null) qs.set('page_size', String(params.pageSize));
       const suffix = qs.toString() ? `?${qs}` : '';
       return portalGet<PortalUploadPage>(`/api/portal/uploads${suffix}`);
+    },
+  },
+  messages: {
+    async all(page = 1, pageSize = 20): Promise<PortalMessageListResponse> {
+      return portalGet<PortalMessageListResponse>(
+        `/api/portal/messages?page=${page}&page_size=${pageSize}`,
+      );
+    },
+    async getById(id: number): Promise<PortalMessage> {
+      return portalGet<PortalMessage>(`/api/portal/messages/${id}`);
+    },
+    async unreadCount(): Promise<{ unread: number }> {
+      return portalGet<{ unread: number }>('/api/portal/messages/unread-count');
     },
   },
 };

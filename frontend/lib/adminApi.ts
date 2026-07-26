@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { AdminMessage, AdminMessageListResponse, Manufacturer, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem } from './types';
+import type { AdminMessage, AdminMessageListResponse, Manufacturer, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem, RecipientTarget, RecipientListResponse } from './types';
 import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -800,7 +800,12 @@ export const adminApi = {
         return null;
       }
     },
-    async create(payload: { title: string; body: string }): Promise<AdminMessage> {
+    async create(payload: {
+      title: string;
+      body: string;
+      recipient_type?: 'broadcast' | 'targeted';
+      recipient_targets?: RecipientTarget[] | null;
+    }): Promise<AdminMessage> {
       const res = await adminFetch(`/api/admin/messages`, {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -810,6 +815,9 @@ export const adminApi = {
         throw new Error(err.message || `API ${res.status}`);
       }
       return res.json();
+    },
+    async recipients(): Promise<RecipientListResponse> {
+      return adminGet<RecipientListResponse>(`/api/admin/messages/recipients`);
     },
     async remove(id: number): Promise<void> {
       const res = await adminFetch(`/api/admin/messages/${id}`, {

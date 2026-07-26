@@ -107,12 +107,18 @@ export default async function MembersPage({
                   <td className="px-4 py-2 text-xs text-gray-500">
                     {new Date(member.created_at).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2 text-right space-x-3">
                     <Link
                       href={`/admin/members/${member.id}`}
                       className="text-blue-600 hover:underline"
                     >
                       Edit
+                    </Link>
+                    <Link
+                      href={`/admin/messages/new?recipientType=targeted&recipientKind=member&recipientId=${member.id}&recipientLabel=${encodeURIComponent(member.email)}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Message
                     </Link>
                   </td>
                 </tr>
