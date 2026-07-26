@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime
 
 from sqlalchemy import and_, cast, func, or_, select
@@ -104,11 +103,12 @@ class CRUDSystemMessage(
             .order_by(Member.email)
         )
 
-        cable_result, equip_result, member_result = await asyncio.gather(
-            db.execute(cable_stmt),
-            db.execute(equip_stmt),
-            db.execute(member_stmt),
-        )
+        # NOTE: Async SQLAlchemy sessions do NOT support concurrent operations
+        # (asyncio.gather) on the same session — the session can only provision
+        # one connection at a time. Run the three queries sequentially.
+        cable_result = await db.execute(cable_stmt)
+        equip_result = await db.execute(equip_stmt)
+        member_result = await db.execute(member_stmt)
 
         cable_managers = [(r[0], r[1], None) for r in cable_result.all()]
         equipment_managers = [(r[0], r[1], None) for r in equip_result.all()]
