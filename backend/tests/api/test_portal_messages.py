@@ -122,3 +122,20 @@ def test_portal_get_message_404_when_not_targeted(client, admin_headers, cable_m
     assert res.status_code == 404
     # Cleanup
     client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
+
+
+def test_portal_unread_count(client, admin_headers, cable_manager_headers, db_session):
+    """unread-count returns correct count before and after reading."""
+    msg_id = _create_targeted(client, admin_headers, [{"kind": "group", "value": "cable_managers"}])
+    # Before reading — should be >= 1
+    res = client.get("/api/portal/messages/unread-count", headers=cable_manager_headers)
+    assert res.status_code == 200
+    assert res.json()["unread"] >= 1
+    # Read the message
+    client.get(f"/api/portal/messages/{msg_id}", headers=cable_manager_headers)
+    # After reading — count should decrease by 1
+    res2 = client.get("/api/portal/messages/unread-count", headers=cable_manager_headers)
+    assert res2.status_code == 200
+    assert res2.json()["unread"] == res.json()["unread"] - 1
+    # Cleanup
+    client.delete(f"/api/admin/messages/{msg_id}", headers=admin_headers)
