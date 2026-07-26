@@ -171,3 +171,86 @@ def test_delete_message_cascades_reads(client, admin_headers):
     # Verify read record is gone (cascade)
     count_after = asyncio.run(get_read_count())
     assert count_after == 0
+
+
+def test_create_broadcast_message_defaults(client, admin_headers):
+    """POST with no recipient_type defaults to broadcast."""
+    res = client.post(
+        "/api/admin/messages",
+        json={"title": "Broadcast Default", "body": "Body"},
+        headers=admin_headers,
+    )
+    assert res.status_code == 201
+    data = res.json()
+    assert data["recipient_type"] == "broadcast"
+    assert data["recipient_targets"] is None
+    # Cleanup
+    client.delete(f"/api/admin/messages/{data['id']}", headers=admin_headers)
+
+
+def test_create_targeted_message_multiple_groups(client, admin_headers):
+    """POST targeted with multiple groups succeeds."""
+    res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Targeted Multi",
+            "body": "Body",
+            "recipient_type": "targeted",
+            "recipient_targets": [
+                {"kind": "group", "value": "cable_managers"},
+                {"kind": "group", "value": "equipment_managers"},
+            ],
+        },
+        headers=admin_headers,
+    )
+    assert res.status_code == 201
+    data = res.json()
+    assert data["recipient_type"] == "targeted"
+    assert len(data["recipient_targets"]) == 2
+    # Cleanup
+    client.delete(f"/api/admin/messages/{data['id']}", headers=admin_headers)
+
+
+def test_create_targeted_message_empty_targets_returns_422(client, admin_headers):
+    """POST targeted with empty recipient_targets returns 422."""
+    res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Bad Targeted",
+            "body": "Body",
+            "recipient_type": "targeted",
+            "recipient_targets": [],
+        },
+        headers=admin_headers,
+    )
+    assert res.status_code == 422
+
+
+def test_create_targeted_message_invalid_group_returns_422(client, admin_headers):
+    """POST targeted with invalid group value returns 422."""
+    res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Bad Group",
+            "body": "Body",
+            "recipient_type": "targeted",
+            "recipient_targets": [{"kind": "group", "value": "admins"}],
+        },
+        headers=admin_headers,
+    )
+    assert res.status_code == 422
+
+
+def test_create_broadcast_with_non_null_targets_returns_422(client, admin_headers):
+    """POST broadcast with non-null recipient_targets returns 422."""
+    res = client.post(
+        "/api/admin/messages",
+        json={
+            "title": "Bad Broadcast",
+            "body": "Body",
+            "recipient_type": "broadcast",
+            "recipient_targets": [{"kind": "group", "value": "members"}],
+        },
+        headers=admin_headers,
+    )
+    assert res.status_code == 422
