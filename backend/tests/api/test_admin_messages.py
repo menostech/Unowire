@@ -254,3 +254,27 @@ def test_create_broadcast_with_non_null_targets_returns_422(client, admin_header
         headers=admin_headers,
     )
     assert res.status_code == 422
+
+
+def test_get_recipients_returns_three_groups(client, admin_headers, db_session):
+    """GET /recipients returns cable_managers, equipment_managers, members arrays."""
+    # db_session fixture seeds cable_manager@test.com and equip_manager@test.com
+    res = client.get("/api/admin/messages/recipients", headers=admin_headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert "cable_managers" in data
+    assert "equipment_managers" in data
+    assert "members" in data
+    assert isinstance(data["cable_managers"], list)
+    assert isinstance(data["equipment_managers"], list)
+    assert isinstance(data["members"], list)
+    # Each item has id, email, name
+    if data["cable_managers"]:
+        item = data["cable_managers"][0]
+        assert "id" in item and "email" in item and "name" in item
+
+
+def test_get_recipients_requires_permission(client):
+    """GET /recipients without admin token returns 401."""
+    res = client.get("/api/admin/messages/recipients")
+    assert res.status_code == 401
