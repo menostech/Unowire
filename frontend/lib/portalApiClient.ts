@@ -13,6 +13,7 @@ import type {
   PortalMessage,
   PortalMessageListResponse,
 } from '@/lib/types/portal';
+import type { ImportFormat, ImportPreview, ImportResult } from '@/lib/clientCableImport';
 
 export class PortalApiError extends Error {
   constructor(
@@ -65,6 +66,38 @@ export const portalApiClient = {
     },
     async remove(id: string): Promise<void> {
       await bffFetch(`/api/portal/cables/${id}`, { method: 'DELETE' });
+    },
+    import: {
+      async validate(file: File, format: ImportFormat): Promise<ImportPreview> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('format', format);
+        const res = await bffFetch('/api/portal/cables/import/validate', {
+          method: 'POST',
+          body: formData,
+          skipDefaultContentType: true,
+        });
+        return res.json();
+      },
+      async commit(file: File, format: ImportFormat): Promise<ImportResult> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('format', format);
+        const res = await bffFetch('/api/portal/cables/import/commit', {
+          method: 'POST',
+          body: formData,
+          skipDefaultContentType: true,
+        });
+        return res.json();
+      },
+      async downloadCsvTemplate(): Promise<Blob> {
+        const res = await bffFetch('/api/portal/cables/import/csv-template');
+        return res.blob();
+      },
+      async downloadJsonExample(): Promise<Blob> {
+        const res = await bffFetch('/api/portal/cables/import/json-example');
+        return res.blob();
+      },
     },
   },
   equipment: {

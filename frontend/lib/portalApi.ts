@@ -60,8 +60,19 @@ export const portalApi = {
     },
   },
   cables: {
-    async all(): Promise<PortalCable[]> {
-      return portalGet<PortalCable[]>('/api/portal/cables');
+    async all(params?: {
+      search?: string;
+      industry_id?: string;
+      category_id?: string;
+      product_type_id?: string;
+    }): Promise<PortalCable[]> {
+      const qs = new URLSearchParams();
+      if (params?.search) qs.set('search', params.search);
+      if (params?.industry_id) qs.set('industry_id', params.industry_id);
+      if (params?.category_id) qs.set('category_id', params.category_id);
+      if (params?.product_type_id) qs.set('product_type_id', params.product_type_id);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return portalGet<PortalCable[]>(`/api/portal/cables${suffix}`);
     },
     async getById(id: string): Promise<PortalCable> {
       return portalGet<PortalCable>(`/api/portal/cables/${id}`);
