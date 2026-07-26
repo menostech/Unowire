@@ -52,6 +52,12 @@ export function PortalSidebar({
   const [unread, setUnread] = useState<number | null>(null);
 
   const scopeType = user?.scope_type ?? null;
+  const subtitle =
+    user?.scope_type === 'manufacturer'
+      ? 'Cable Portal'
+      : user?.scope_type === 'equipment_manufacturer'
+        ? 'Equipment Portal'
+        : '';
   const baseNav = scopeType === 'equipment_manufacturer' ? EQUIPMENT_MANUFACTURER_NAV : MANUFACTURER_NAV;
   const nav = baseNav.filter((item) => allowedModules.includes(item.module));
 
@@ -83,7 +89,7 @@ export function PortalSidebar({
   return (
     <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-blue-900 p-4 text-blue-100">
       <div className="mb-6 px-2 text-lg font-bold tracking-tight">
-        {user?.role_name || 'Factory Portal'}
+        Unowire <span className="text-blue-300">{subtitle}</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1">
         {nav.map((item) => {
