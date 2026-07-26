@@ -41,8 +41,21 @@ async def list_cables(
     db: AsyncSession = Depends(get_db),
     skip: int = 0,
     limit: int = 50,
+    search: str | None = None,
+    industry_id: str | None = None,
+    category_id: str | None = None,
+    product_type_id: str | None = None,
 ):
-    cables = await crud_cable.list_by_manufacturer(db, scope_id=user.scope_id, skip=skip, limit=limit)
+    cables = await crud_cable.list_by_manufacturer(
+        db,
+        scope_id=user.scope_id,
+        skip=skip,
+        limit=limit,
+        search=search,
+        industry_id=industry_id,
+        category_id=category_id,
+        product_type_id=product_type_id,
+    )
     return cables
 
 
