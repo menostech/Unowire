@@ -1,0 +1,9 @@
+{
+  "openspec_proposal": "openspec/changes/portal-cable-list-enhancements/proposal.md",
+  "openspec_design": "openspec/changes/portal-cable-list-enhancements/design.md",
+  "openspec_tasks": "openspec/changes/portal-cable-list-enhancements/tasks.md",
+  "openspec_delta_spec": "openspec/changes/portal-cable-list-enhancements/specs/portal-cable-crud/spec.md",
+  "handoff_context": "openspec/changes/portal-cable-list-enhancements/.comet/handoff/design-context.json",
+  "handoff_markdown": "openspec/changes/portal-cable-list-enhancements/.comet/handoff/design-context.md",
+  "archive_directory": "openspec/changes/archive/2026-07-26-portal-cable-list-enhancements"
+}
