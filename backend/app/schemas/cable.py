@@ -163,7 +163,9 @@ class PortalCableCreate(BaseModel):
     """Portal-specific cable create schema.
 
     Omits `id` (server-generated) and `manufacturer_id` (server-forced to scope_id).
-    Excludes `common_specs` and `variants` (portal create is intentionally minimal).
+    Optional `common_specs` and `variants` fields allow portal users to enter
+    spec data via raw-JSON textareas. Persisted via the admin spec-persistence
+    pattern (explicit `SpecItem` / `CableVariant` creation), not via `model_dump`.
     """
     product_type_id: str
     industry_id: str
@@ -176,6 +178,8 @@ class PortalCableCreate(BaseModel):
     meta_description: str | None = None
     image_url: str | None = None
     category_ids: list[str] = []
+    common_specs: list[SpecItemCreate] | None = None
+    variants: list[CableVariantCreate] | None = None
 
     model_config = {"from_attributes": True}
 
