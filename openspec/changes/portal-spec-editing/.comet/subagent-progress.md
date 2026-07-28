@@ -24,3 +24,27 @@
 
 ## Progress Log
 
+### Task 1.1 — Extend PortalCableCreate (backend schema)
+- Status: complete
+- Stage: done
+- Commit: 3c2d25d
+- Changed files: backend/app/schemas/cable.py, backend/tests/schemas/test_cable_schema.py
+- RED: tests/schemas/test_cable_schema.py — AttributeError on missing common_specs/variants
+- GREEN: 2 schema unit tests pass; plan verification command output matches expected
+- review_mode: standard
+- Risk signals: public API change (minor, optional fields with None defaults), DONE_WITH_CONCERNS
+- Coordinator review: schema change is correct and matches plan. Transient regression (2 existing API tests fail because POST route leaks None to SQLAlchemy relationships) is by design — fixed by Task 2.1 (next task). No per-task reviewer dispatched; concern is understood and fix is queued.
+- Review stages passed: coordinator diff review
+- Unresolved feedback: none (transient regression tracked, fixed by Task 2.1)
+### Task 1.2 - Extend PortalEquipmentCreate (backend schema)
+- Status: complete (spec gap found, plan updated)
+- Stage: done
+- Commit: pending (will commit with plan updates)
+- Changed files: backend/app/schemas/equipment.py, backend/tests/schemas/test_equipment_schema.py
+- RED: tests/schemas/test_equipment_schema.py - AttributeError on missing applicable_specs
+- GREEN: 2 schema unit tests pass; plan verification command output matches expected
+- review_mode: standard
+- Risk signals: public API change (minor), BLOCKED (resolved by plan update)
+- Spec gap found: DB column applicable_specs is nullable=False with server_default=[]. Passing None via model_dump() breaks response schema. Plan Task 2.3 expanded from verification-only to include POST route fix (exclude + conditional set). Design doc updated.
+- Review stages passed: coordinator review (spec gap identified, plan updated)
+- Unresolved feedback: none (route fix deferred to expanded Task 2.3)

@@ -338,7 +338,7 @@ git commit -m "feat(portal-cables): add common_specs replacement and variant slu
 
 ---
 
-### Task 2.3: Verify portal equipment POST/PUT accept `applicable_specs`
+### Task 2.3: Fix portal equipment POST route to handle `applicable_specs` None default
 
 **Files:**
 - Modify: none (verification only).

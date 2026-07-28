@@ -1,13 +1,13 @@
 ## 1. Backend Schemas
 
-- [ ] 1.1 Extend `PortalCableCreate` in `backend/app/schemas/cable.py` with optional `common_specs: list[SpecItemCreate] | None = None` and `variants: list[CableVariantCreate] | None = None` (use `CableVariantCreate` to match admin create schema); update the docstring to remove the "Excludes specs" note.
-- [ ] 1.2 Extend `PortalEquipmentCreate` in `backend/app/schemas/equipment.py` with optional `applicable_specs: list[dict] | None = None`; update the docstring to remove the "Excludes applicable_specs" note.
+- [x] 1.1 Extend `PortalCableCreate` in `backend/app/schemas/cable.py` with optional `common_specs: list[SpecItemCreate] | None = None` and `variants: list[CableVariantCreate] | None = None` (use `CableVariantCreate` to match admin create schema); update the docstring to remove the "Excludes specs" note.
+- [x] 1.2 Extend `PortalEquipmentCreate` in `backend/app/schemas/equipment.py` with optional `applicable_specs: list[dict] | None = None`; update the docstring to remove the "Excludes applicable_specs" note.
 
 ## 2. Backend Routes
 
 - [ ] 2.1 Update `POST /api/portal/cables` in `backend/app/api/routes/portal_cables.py` to replicate admin create spec-persistence: `model_dump(exclude={"common_specs", "variants"})` for Cable fields, then iterate `obj_in.common_specs` to create `SpecItem` records and `obj_in.variants` to create `CableVariant` + nested `SpecItem` records (reference: `backend/app/api/routes/cables.py:100-124`).
 - [ ] 2.2 Update `PUT /api/portal/cables/{cable_id}` in `backend/app/api/routes/portal_cables.py`: keep `exclude={"common_specs", "variants"}` on generic field update; add `common_specs` full-replacement logic (delete existing, add new — same as admin); add `variants` slug-matched merge logic (match by slug, preserve variant ID/slug/sort_order, replace only specs; ignore payload variants with unknown slug; keep existing variants not in payload).
-- [ ] 2.3 Verify `POST /api/portal/equipment` and `PUT /api/portal/equipment/{equipment_id}` already accept `applicable_specs` via `PortalEquipmentCreate` (after schema change) and `RecommendedEquipmentUpdate` (already includes it); no route changes needed since `applicable_specs` is a JSONB column.
+- [ ] 2.3 Fix POST /api/portal/equipment route: use model_dump(exclude={applicable_specs}) + conditional set (DB column nullable=False with server_default=[]). PUT already uses exclude_unset=True.
 
 ## 3. Frontend Types
 

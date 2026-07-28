@@ -155,11 +155,13 @@ class PortalEquipmentCreate(BaseModel):
     """Portal-specific equipment create schema.
 
     Omits `id` (server-generated) and `manufacturer_id` (server-forced to scope_id).
-    Excludes `applicable_specs` (complex rule editor; deferred).
+    Optional `applicable_specs` field allows portal users to enter spec data
+    via a raw-JSON textarea. Persisted directly to the JSONB column.
     """
     category_id: str
     model: str
     slug: str
+    applicable_specs: list[dict] | None = None
     description: str | None = None
     image_url: str | None = None
     external_url: str | None = None
