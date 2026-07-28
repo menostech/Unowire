@@ -86,9 +86,11 @@ async def portal_create_equipment(
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Equipment manufacturer not found"})
 
     equipment_id = await _generate_equipment_id(db, manufacturer.slug, obj_in.slug)
-    equipment_data = obj_in.model_dump()
+    equipment_data = obj_in.model_dump(exclude={"applicable_specs"})
     equipment_data["id"] = equipment_id
     equipment_data["manufacturer_id"] = user.scope_id  # server-forced
+    if obj_in.applicable_specs is not None:
+        equipment_data["applicable_specs"] = obj_in.applicable_specs
 
     equipment = EquipmentModel(**equipment_data)
     db.add(equipment)
