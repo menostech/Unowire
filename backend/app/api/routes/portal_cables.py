@@ -135,8 +135,10 @@ async def portal_create_cable(
     except IntegrityError:
         await db.rollback()
         raise HTTPException(status_code=409, detail={"code": 409, "message": "A cable with this slug already exists"})
-    await db.refresh(cable)
-    return cable
+    # Re-read with eager-loaded relationships (variants.specs is a nested
+    # selectin; db.refresh only reloads scalar columns + direct relationships,
+    # not the nested variant.specs chain — MissingGreenlet during serialization).
+    return await crud_cable.get_detail(db, cable.id)
 
 
 @router.delete("/{cable_id}", response_model=CableRead)
