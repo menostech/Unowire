@@ -164,3 +164,92 @@ def test_portal_create_cable_with_specs(client, cable_manager_headers):
     assert data["variants"][0]["slug"] == "red"
     assert len(data["variants"][0]["specs"]) == 1
     assert data["variants"][0]["specs"][0]["spec_key"] == "color"
+
+
+def test_portal_update_cable_replace_common_specs(client, cable_manager_headers):
+    """PUT with common_specs fully replaces existing common specs."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    # Create a cable with one common spec.
+    unique_slug = f"test-portal-cable-replace-{uuid.uuid4().hex[:8]}"
+    create_res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Replace Specs Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "common_specs": [
+            {"spec_key": "old_spec", "label": "Old", "value_string": "old", "spec_type": "string", "sort_order": 0},
+        ],
+    })
+    assert create_res.status_code == 201
+    cable_id = create_res.json()["id"]
+
+    # PUT with a new common_specs list.
+    put_res = client.put(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers, json={
+        "common_specs": [
+            {"spec_key": "new_spec", "label": "New", "value_string": "new", "spec_type": "string", "sort_order": 0},
+        ],
+    })
+    assert put_res.status_code == 200, f"PUT failed: {put_res.text}"
+    data = put_res.json()
+    assert len(data["common_specs"]) == 1
+    assert data["common_specs"][0]["spec_key"] == "new_spec"
+    # The old spec is gone (full replacement, not append).
+    assert all(s["spec_key"] != "old_spec" for s in data["common_specs"])
+
+
+def test_portal_update_cable_variants_preserve_id(client, cable_manager_headers):
+    """PUT with variants matching existing slug preserves variant id and replaces specs only."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    # Create a cable with a "red" variant.
+    unique_slug = f"test-portal-cable-varid-{uuid.uuid4().hex[:8]}"
+    create_res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Variant ID Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Red", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert create_res.status_code == 201
+    cable_id = create_res.json()["id"]
+    original_variant_id = create_res.json()["variants"][0]["id"]
+    assert create_res.json()["variants"][0]["specs"][0]["value_string"] == "Red"
+
+    # PUT with the same slug but different specs.
+    put_res = client.put(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers, json={
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Crimson", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert put_res.status_code == 200, f"PUT failed: {put_res.text}"
+    data = put_res.json()
+    assert len(data["variants"]) == 1
+    # Variant id preserved.
+    assert data["variants"][0]["id"] == original_variant_id
+    assert data["variants"][0]["slug"] == "red"
+    # Specs replaced.
+    assert len(data["variants"][0]["specs"]) == 1
+    assert data["variants"][0]["specs"][0]["value_string"] == "Crimson"

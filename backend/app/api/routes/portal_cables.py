@@ -77,16 +77,52 @@ async def update_cable(
     user: User = Depends(require_factory_module("cables")),
     db: AsyncSession = Depends(get_db),
 ):
+    from app.models.cable import CableVariant, SpecItem
+
     cable = await crud_cable.get_detail(db, cable_id)
     _check_cable_ownership(user, cable)
 
-    # Reuse existing update logic from admin route (simplified for portal — no variant/spec replacement)
+    # Generic field update (specs still excluded — handled explicitly below)
     update_data = body.model_dump(exclude_unset=True, exclude={"common_specs", "variants"})
     for field, value in update_data.items():
         setattr(cable, field, value)
+
+    # Replace common_specs if provided (same as admin PUT)
+    if body.common_specs is not None:
+        for existing in list(cable.common_specs):
+            await db.delete(existing)
+        for spec_data in body.common_specs:
+            spec = SpecItem(cable_id=cable.id, variant_id=None, **spec_data.model_dump())
+            db.add(spec)
+
+    # Variants: slug-matched merge (preserve IDs, replace specs only)
+    if body.variants is not None:
+        existing_by_slug = {v.slug: v for v in cable.variants}
+        for variant_data in body.variants:
+            existing = existing_by_slug.get(variant_data.slug)
+            if existing is None:
+                # Slug not found — ignore (don't create new variants via PUT)
+                continue
+            # Preserve variant id, slug, sort_order; replace specs only
+            for existing_spec in list(existing.specs):
+                await db.delete(existing_spec)
+            for spec_data in variant_data.specs:
+                spec = SpecItem(cable_id=cable.id, variant_id=existing.id, **spec_data.model_dump())
+                db.add(spec)
+        # Existing variants not in payload: keep (don't delete)
+
     await db.commit()
-    await db.refresh(cable)
-    return cable
+    # Expire all cached state so the re-read below repopulates relationships
+    # fresh. The session uses expire_on_commit=False, so without this the
+    # identity-map-cached cable keeps its stale common_specs/variants collections
+    # and get_detail would return the pre-edit state. Use the cable_id route
+    # param (a plain string) for the re-read — accessing cable.id here would
+    # trigger a sync lazy-load of an expired scalar attribute (MissingGreenlet).
+    db.expire_all()
+    # Re-read with eager-loaded relationships (variants.specs is a nested
+    # selectin; db.refresh only reloads scalar columns + direct relationships,
+    # not the nested variant.specs chain — MissingGreenlet during serialization).
+    return await crud_cable.get_detail(db, cable_id)
 
 
 @router.post("", response_model=CableRead, status_code=201)
