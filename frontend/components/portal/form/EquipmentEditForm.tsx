@@ -19,6 +19,7 @@ export function EquipmentEditForm({ equipment, categories }: EquipmentEditFormPr
     external_url: equipment.external_url ?? '',
     sort_order: String(equipment.sort_order ?? 0),
     category_id: equipment.category_id ?? '',
+    applicable_specs_json: JSON.stringify(equipment.applicable_specs ?? [], null, 2),
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -26,6 +27,26 @@ export function EquipmentEditForm({ equipment, categories }: EquipmentEditFormPr
 
   function handleChange(patch: Partial<EquipmentFormState>) {
     setForm((prev) => ({ ...prev, ...patch }));
+    if (patch.applicable_specs_json !== undefined) {
+      validateJsonField('applicable_specs_json', patch.applicable_specs_json);
+    }
+  }
+
+  function validateJsonField(field: 'applicable_specs_json', text: string) {
+    setErrors((prev) => {
+      const next = { ...prev };
+      if (!text.trim()) {
+        delete next[field];
+        return next;
+      }
+      try {
+        JSON.parse(text);
+        delete next[field];
+      } catch (e) {
+        next[field] = `Invalid JSON: ${(e as Error).message}`;
+      }
+      return next;
+    });
   }
 
   function validate(): boolean {
@@ -40,19 +61,33 @@ export function EquipmentEditForm({ equipment, categories }: EquipmentEditFormPr
 
   async function handleSave() {
     if (!validate()) return;
+    validateJsonField('applicable_specs_json', form.applicable_specs_json);
+
+    let hasJsonError = false;
+    const payload: Parameters<typeof portalApiClient.equipment.update>[1] = {
+      model: form.model,
+      slug: form.slug,
+      description: form.description,
+      image_url: form.image_url,
+      external_url: form.external_url,
+      sort_order: Number(form.sort_order),
+      category_id: form.category_id,
+    };
+    if (form.applicable_specs_json.trim()) {
+      try {
+        payload.applicable_specs = JSON.parse(form.applicable_specs_json);
+      } catch (e) {
+        setErrors((prev) => ({ ...prev, applicable_specs_json: `Invalid JSON: ${(e as Error).message}` }));
+        hasJsonError = true;
+      }
+    }
+    if (hasJsonError) return;
+
     setSaving(true);
     setMessage('');
     setErrors({});
     try {
-      await portalApiClient.equipment.update(equipment.id, {
-        model: form.model,
-        slug: form.slug,
-        description: form.description,
-        image_url: form.image_url,
-        external_url: form.external_url,
-        sort_order: Number(form.sort_order),
-        category_id: form.category_id,
-      });
+      await portalApiClient.equipment.update(equipment.id, payload);
       setMessage('Saved');
     } catch (err) {
       if (err instanceof PortalApiError && err.fieldErrors) setErrors(err.fieldErrors);
