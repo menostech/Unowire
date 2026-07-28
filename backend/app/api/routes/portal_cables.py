@@ -95,17 +95,41 @@ async def portal_create_cable(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_factory_module("cables")),
 ):
+    from app.models.cable import CableVariant, SpecItem
+
     manufacturer = await crud_manufacturer.get(db, id=user.scope_id)
     if not manufacturer:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Manufacturer not found"})
 
     cable_id = await _generate_cable_id(db, manufacturer.slug, obj_in.slug)
-    cable_data = obj_in.model_dump()
+    cable_data = obj_in.model_dump(exclude={"common_specs", "variants"})
     cable_data["id"] = cable_id
     cable_data["manufacturer_id"] = user.scope_id  # server-forced, ignore client input
 
     cable = CableModel(**cable_data)
     db.add(cable)
+    await db.flush()
+
+    # Common specs (mirrors admin create_cable logic)
+    if obj_in.common_specs:
+        for spec_data in obj_in.common_specs:
+            spec = SpecItem(cable_id=cable.id, variant_id=None, **spec_data.model_dump())
+            db.add(spec)
+
+    # Variants + nested specs (mirrors admin create_cable logic)
+    if obj_in.variants:
+        for variant_data in obj_in.variants:
+            variant = CableVariant(
+                cable_id=cable.id,
+                slug=variant_data.slug,
+                sort_order=variant_data.sort_order,
+            )
+            db.add(variant)
+            await db.flush()
+            for spec_data in variant_data.specs:
+                spec = SpecItem(cable_id=cable.id, variant_id=variant.id, **spec_data.model_dump())
+                db.add(spec)
+
     try:
         await db.commit()
     except IntegrityError:

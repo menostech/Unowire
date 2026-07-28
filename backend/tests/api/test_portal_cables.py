@@ -126,3 +126,41 @@ def test_portal_delete_cable_out_of_scope_404(client, cable_manager_headers):
     """Deleting a non-existent or out-of-scope cable returns 404."""
     res = client.delete("/api/portal/cables/nonexistent-cable-id", headers=cable_manager_headers)
     assert res.status_code == 404
+
+
+def test_portal_create_cable_with_specs(client, cable_manager_headers):
+    """POST with common_specs and variants persists specs and returns them in the response."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    unique_slug = f"test-portal-cable-specs-{uuid.uuid4().hex[:8]}"
+    res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Spec Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "common_specs": [
+            {"spec_key": "voltage_rating", "label": "Voltage Rating", "value_string": "600V", "spec_type": "string", "filterable": True, "sort_order": 0},
+        ],
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Red", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert res.status_code == 201, f"Create failed: {res.text}"
+    data = res.json()
+    assert len(data["common_specs"]) == 1
+    assert data["common_specs"][0]["spec_key"] == "voltage_rating"
+    assert data["common_specs"][0]["value_string"] == "600V"
+    assert len(data["variants"]) == 1
+    assert data["variants"][0]["slug"] == "red"
+    assert len(data["variants"][0]["specs"]) == 1
+    assert data["variants"][0]["specs"][0]["spec_key"] == "color"
