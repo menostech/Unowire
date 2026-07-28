@@ -66,7 +66,9 @@ export interface PortalCable {
   updated_at: string;
 }
 
-// Portal-specific cable create payload (omits id, manufacturer_id, common_specs, variants).
+// Portal-specific cable create payload (omits id, manufacturer_id).
+// Optional spec fields are parsed from raw-JSON textareas; backend pydantic
+// enforces the actual SpecItemCreate / CableVariantCreate structure.
 export interface PortalCableCreate {
   product_type_id: string;
   industry_id: string;
@@ -79,9 +81,11 @@ export interface PortalCableCreate {
   meta_description?: string;
   image_url?: string;
   category_ids?: string[];
+  common_specs?: Record<string, unknown>[];
+  variants?: { slug: string; sort_order?: number; specs: Record<string, unknown>[] }[];
 }
 
-// Cable update payload — widened to cover all editable fields.
+// Cable update payload — widened to cover all editable fields plus optional specs.
 export interface PortalCableUpdate {
   model?: string;
   slug?: string;
@@ -93,6 +97,8 @@ export interface PortalCableUpdate {
   industry_id?: string;
   category_id?: string;
   product_type_id?: string;
+  common_specs?: Record<string, unknown>[];
+  variants?: { slug: string; sort_order?: number; specs: Record<string, unknown>[] }[];
 }
 
 // Matches backend RecommendedEquipmentRead (backend/app/schemas/equipment.py).
@@ -113,11 +119,12 @@ export interface PortalEquipment {
   updated_at: string;
 }
 
-// Portal-specific equipment create payload (omits id, manufacturer_id, applicable_specs).
+// Portal-specific equipment create payload (omits id, manufacturer_id).
 export interface PortalEquipmentCreate {
   category_id: string;
   model: string;
   slug: string;
+  applicable_specs?: Record<string, unknown>[];
   description?: string;
   image_url?: string;
   external_url?: string;
@@ -133,6 +140,7 @@ export interface PortalEquipmentUpdate {
   external_url?: string | null;
   sort_order?: number;
   category_id?: string;
+  applicable_specs?: Record<string, unknown>[];
 }
 
 // Matches backend InquiryRead (backend/app/schemas/inquiry.py).
