@@ -22,6 +22,8 @@ export function CableEditForm({ cable, taxonomy }: CableEditFormProps) {
     industry_id: cable.industry_id ?? '',
     category_id: cable.category_id ?? '',
     product_type_id: cable.product_type_id ?? '',
+    common_specs_json: JSON.stringify(cable.common_specs ?? [], null, 2),
+    variants_json: JSON.stringify(cable.variants ?? [], null, 2),
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -29,6 +31,29 @@ export function CableEditForm({ cable, taxonomy }: CableEditFormProps) {
 
   function handleChange(patch: Partial<CableFormState>) {
     setForm((prev) => ({ ...prev, ...patch }));
+    if (patch.common_specs_json !== undefined) {
+      validateJsonField('common_specs_json', patch.common_specs_json);
+    }
+    if (patch.variants_json !== undefined) {
+      validateJsonField('variants_json', patch.variants_json);
+    }
+  }
+
+  function validateJsonField(field: 'common_specs_json' | 'variants_json', text: string) {
+    setErrors((prev) => {
+      const next = { ...prev };
+      if (!text.trim()) {
+        delete next[field];
+        return next;
+      }
+      try {
+        JSON.parse(text);
+        delete next[field];
+      } catch (e) {
+        next[field] = `Invalid JSON: ${(e as Error).message}`;
+      }
+      return next;
+    });
   }
 
   function validate(): boolean {
@@ -45,11 +70,48 @@ export function CableEditForm({ cable, taxonomy }: CableEditFormProps) {
 
   async function handleSave() {
     if (!validate()) return;
+    // Re-validate JSON defensively.
+    validateJsonField('common_specs_json', form.common_specs_json);
+    validateJsonField('variants_json', form.variants_json);
+
+    let hasJsonError = false;
+    const payload: Parameters<typeof portalApiClient.cables.update>[1] = {
+      model: form.model,
+      slug: form.slug,
+      size_system: form.size_system,
+      base_description: form.base_description,
+      meta_title: form.meta_title,
+      meta_description: form.meta_description,
+      image_url: form.image_url,
+      industry_id: form.industry_id,
+      category_id: form.category_id,
+      product_type_id: form.product_type_id,
+    };
+    // Only include spec fields if the textarea is non-empty — omitting them
+    // preserves existing specs (backend uses exclude_unset=True on PUT).
+    if (form.common_specs_json.trim()) {
+      try {
+        payload.common_specs = JSON.parse(form.common_specs_json);
+      } catch (e) {
+        setErrors((prev) => ({ ...prev, common_specs_json: `Invalid JSON: ${(e as Error).message}` }));
+        hasJsonError = true;
+      }
+    }
+    if (form.variants_json.trim()) {
+      try {
+        payload.variants = JSON.parse(form.variants_json);
+      } catch (e) {
+        setErrors((prev) => ({ ...prev, variants_json: `Invalid JSON: ${(e as Error).message}` }));
+        hasJsonError = true;
+      }
+    }
+    if (hasJsonError) return;
+
     setSaving(true);
     setMessage('');
     setErrors({});
     try {
-      await portalApiClient.cables.update(cable.id, form);
+      await portalApiClient.cables.update(cable.id, payload);
       setMessage('Saved');
     } catch (err) {
       if (err instanceof PortalApiError && err.fieldErrors) setErrors(err.fieldErrors);
