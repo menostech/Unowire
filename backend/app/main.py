@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_equipment, portal_inquiries, portal_media, portal_messages
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_equipment, portal_equipment_import, portal_inquiries, portal_media, portal_messages
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -115,6 +115,7 @@ app.include_router(portal_dashboard.router)
 app.include_router(portal_cables.router)
 app.include_router(portal_cable_import.router)
 app.include_router(portal_equipment.router)
+app.include_router(portal_equipment_import.router)
 app.include_router(portal_inquiries.router)
 app.include_router(portal_media.router)
 app.include_router(portal_messages.router)
