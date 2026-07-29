@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { portalApi } from '@/lib/portalApi';
 import { EquipmentListToolbar } from '@/components/portal/equipment/EquipmentListToolbar';
@@ -73,7 +74,9 @@ export default async function PortalEquipmentPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      <EquipmentListToolbar categories={categories} />
+      <Suspense fallback={null}>
+        <EquipmentListToolbar categories={categories} />
+      </Suspense>
 
       {equipment.length === 0 ? (
         <p className="empty-state text-sm text-gray-500">No equipment in your scope yet.</p>

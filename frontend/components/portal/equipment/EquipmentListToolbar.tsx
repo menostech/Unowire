@@ -25,13 +25,17 @@ export function EquipmentListToolbar({ categories }: Props) {
 
   function handleSearchSubmit(e: FormEvent) {
     e.preventDefault();
-    pushParams((p) => p.set('search', search.trim()));
+    pushParams((p) => {
+      p.set('search', search.trim());
+      p.delete('page');
+    });
   }
 
   function handleCategoryChange(value: string) {
     pushParams((p) => {
       if (value) p.set('category_id', value);
       else p.delete('category_id');
+      p.delete('page');
     });
   }
 
