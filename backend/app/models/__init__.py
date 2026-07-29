@@ -1,4 +1,5 @@
 from app.models.cable import Cable, CableVariant, SpecItem
+from app.models.claim_request import ClaimRequest
 from app.models.email_config import EmailConfig, EmailTemplate
 from app.models.equipment import RecommendedEquipment
 from app.models.folder import Folder
@@ -18,6 +19,7 @@ __all__ = [
     "Cable",
     "CableVariant",
     "Category",
+    "ClaimRequest",
     "EmailConfig",
     "EmailTemplate",
     "Folder",
