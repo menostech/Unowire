@@ -1,6 +1,6 @@
 workflow: full
 language: en
-phase: build
+phase: verify
 context_compression: off
 build_mode: subagent-driven-development
 build_pause: null
@@ -8,14 +8,14 @@ subagent_dispatch: confirmed
 tdd_mode: tdd
 review_mode: standard
 isolation: current
-verify_mode: null
+verify_mode: full
 auto_transition: true
 base_ref: 831d140941dc1ff75cde36846717b4123d2b79be
 design_doc: docs/superpowers/specs/2026-07-29-portal-brand-claim-design.md
 plan: docs/superpowers/plans/2026-07-29-portal-brand-claim.md
 verify_result: pending
 verify_failures: 0
-verification_report: null
+verification_report: docs/superpowers/reports/2026-07-30-portal-brand-claim-verify.md
 branch_status: pending
 created_at: 2026-07-29
 verified_at: null
