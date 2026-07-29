@@ -2,6 +2,7 @@
 change: portal-brand-claim
 design-doc: docs/superpowers/specs/2026-07-29-portal-brand-claim-design.md
 base-ref: 335ec6d8baa8b7b45c833c48bff629d2eaf91316
+archived-with: 2026-07-29-portal-brand-claim
 ---
 
 # Implementation Plan: Portal Brand Unification + Logout Fix + Claim Your Company

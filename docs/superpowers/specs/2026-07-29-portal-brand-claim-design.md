@@ -2,6 +2,8 @@
 comet_change: portal-brand-claim
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-29-portal-brand-claim
+status: final
 ---
 
 # Design Doc: Portal Brand Unification + Logout Fix + Claim Your Company
