@@ -11,6 +11,7 @@ export interface EquipmentFormState {
   external_url: string;
   sort_order: string; // string for input control; converted to number on submit
   category_id: string;
+  applicable_specs_json: string;
 }
 
 interface EquipmentFormFieldsProps {
@@ -102,6 +103,26 @@ export function EquipmentFormFields({ value, onChange, errors, categories }: Equ
           className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
         />
         {errors.sort_order && <p className="mt-1 text-sm text-red-600">{errors.sort_order}</p>}
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">Applicable Specs (JSON)</label>
+        <p className="mb-1 text-xs text-gray-500">
+          Array of spec rule objects, e.g. <code>{`[{ "spec_key": "conductor_area", "min": 0.1, "max": 1.0 }]`}</code>
+        </p>
+        <textarea
+          value={value.applicable_specs_json}
+          onChange={(e) => onChange({ applicable_specs_json: e.target.value })}
+          placeholder='[{"spec_key":"conductor_area","min":0.1,"max":1.0}]'
+          className={`font-mono text-sm min-h-[150px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
+            errors.applicable_specs_json
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+          }`}
+        />
+        {errors.applicable_specs_json && (
+          <p className="mt-1 text-sm text-red-600">{errors.applicable_specs_json}</p>
+        )}
       </div>
     </div>
   );

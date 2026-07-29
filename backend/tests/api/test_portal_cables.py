@@ -126,3 +126,254 @@ def test_portal_delete_cable_out_of_scope_404(client, cable_manager_headers):
     """Deleting a non-existent or out-of-scope cable returns 404."""
     res = client.delete("/api/portal/cables/nonexistent-cable-id", headers=cable_manager_headers)
     assert res.status_code == 404
+
+
+def test_portal_create_cable_with_specs(client, cable_manager_headers):
+    """POST with common_specs and variants persists specs and returns them in the response."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    unique_slug = f"test-portal-cable-specs-{uuid.uuid4().hex[:8]}"
+    res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Spec Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "common_specs": [
+            {"spec_key": "voltage_rating", "label": "Voltage Rating", "value_string": "600V", "spec_type": "string", "filterable": True, "sort_order": 0},
+        ],
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Red", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert res.status_code == 201, f"Create failed: {res.text}"
+    data = res.json()
+    assert len(data["common_specs"]) == 1
+    assert data["common_specs"][0]["spec_key"] == "voltage_rating"
+    assert data["common_specs"][0]["value_string"] == "600V"
+    assert len(data["variants"]) == 1
+    assert data["variants"][0]["slug"] == "red"
+    assert len(data["variants"][0]["specs"]) == 1
+    assert data["variants"][0]["specs"][0]["spec_key"] == "color"
+
+
+def test_portal_update_cable_replace_common_specs(client, cable_manager_headers):
+    """PUT with common_specs fully replaces existing common specs."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    # Create a cable with one common spec.
+    unique_slug = f"test-portal-cable-replace-{uuid.uuid4().hex[:8]}"
+    create_res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Replace Specs Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "common_specs": [
+            {"spec_key": "old_spec", "label": "Old", "value_string": "old", "spec_type": "string", "sort_order": 0},
+        ],
+    })
+    assert create_res.status_code == 201
+    cable_id = create_res.json()["id"]
+
+    # PUT with a new common_specs list.
+    put_res = client.put(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers, json={
+        "common_specs": [
+            {"spec_key": "new_spec", "label": "New", "value_string": "new", "spec_type": "string", "sort_order": 0},
+        ],
+    })
+    assert put_res.status_code == 200, f"PUT failed: {put_res.text}"
+    data = put_res.json()
+    assert len(data["common_specs"]) == 1
+    assert data["common_specs"][0]["spec_key"] == "new_spec"
+    # The old spec is gone (full replacement, not append).
+    assert all(s["spec_key"] != "old_spec" for s in data["common_specs"])
+
+
+def test_portal_update_cable_variants_preserve_id(client, cable_manager_headers):
+    """PUT with variants matching existing slug preserves variant id and replaces specs only."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    # Create a cable with a "red" variant.
+    unique_slug = f"test-portal-cable-varid-{uuid.uuid4().hex[:8]}"
+    create_res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Variant ID Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Red", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert create_res.status_code == 201
+    cable_id = create_res.json()["id"]
+    original_variant_id = create_res.json()["variants"][0]["id"]
+    assert create_res.json()["variants"][0]["specs"][0]["value_string"] == "Red"
+
+    # PUT with the same slug but different specs.
+    put_res = client.put(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers, json={
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Crimson", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert put_res.status_code == 200, f"PUT failed: {put_res.text}"
+    data = put_res.json()
+    assert len(data["variants"]) == 1
+    # Variant id preserved.
+    assert data["variants"][0]["id"] == original_variant_id
+    assert data["variants"][0]["slug"] == "red"
+    # Specs replaced.
+    assert len(data["variants"][0]["specs"]) == 1
+    assert data["variants"][0]["specs"][0]["value_string"] == "Crimson"
+
+
+def test_portal_create_cable_without_specs(client, cable_manager_headers):
+    """POST without spec fields is backward-compatible — returns empty spec lists."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    unique_slug = f"test-portal-cable-nospecs-{uuid.uuid4().hex[:8]}"
+    res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "No Spec Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+    })
+    assert res.status_code == 201, f"Create failed: {res.text}"
+    data = res.json()
+    assert data["common_specs"] == []
+    assert data["variants"] == []
+
+
+def test_portal_update_cable_variants_ignore_unknown_slug(client, cable_manager_headers):
+    """PUT with variants whose slug doesn't match any existing variant ignores the payload variant."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    unique_slug = f"test-portal-cable-unknown-{uuid.uuid4().hex[:8]}"
+    create_res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "Unknown Slug Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Red", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert create_res.status_code == 201
+    cable_id = create_res.json()["id"]
+    original_variant_id = create_res.json()["variants"][0]["id"]
+
+    # PUT with an unknown slug.
+    put_res = client.put(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers, json={
+        "variants": [
+            {"slug": "blue", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Blue", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert put_res.status_code == 200, f"PUT failed: {put_res.text}"
+    data = put_res.json()
+    # Existing "red" variant unchanged; "blue" not created.
+    assert len(data["variants"]) == 1
+    assert data["variants"][0]["slug"] == "red"
+    assert data["variants"][0]["id"] == original_variant_id
+    assert data["variants"][0]["specs"][0]["value_string"] == "Red"
+
+
+def test_portal_update_cable_without_variants_preserves_existing(client, cable_manager_headers):
+    """PUT without a variants field preserves existing variants (exclude_unset)."""
+    tax_res = client.get("/api/taxonomy")
+    industries = tax_res.json()
+    if not industries or not industries[0].get("categories") or not industries[0]["categories"][0].get("product_types"):
+        pytest.skip("No taxonomy data seeded")
+    industry = industries[0]
+    category = industry["categories"][0]
+    product_type = category["product_types"][0]
+
+    unique_slug = f"test-portal-cable-novar-{uuid.uuid4().hex[:8]}"
+    create_res = client.post("/api/portal/cables", headers=cable_manager_headers, json={
+        "product_type_id": product_type["id"],
+        "industry_id": industry["id"],
+        "category_id": category["id"],
+        "model": "No Variant PUT Cable",
+        "slug": unique_slug,
+        "size_system": "awg",
+        "variants": [
+            {"slug": "red", "sort_order": 0, "specs": [
+                {"spec_key": "color", "label": "Color", "value_string": "Red", "spec_type": "string", "sort_order": 0},
+            ]},
+        ],
+    })
+    assert create_res.status_code == 201
+    cable_id = create_res.json()["id"]
+    original_variant_id = create_res.json()["variants"][0]["id"]
+
+    # PUT updating only the model field — no variants key in payload.
+    put_res = client.put(f"/api/portal/cables/{cable_id}", headers=cable_manager_headers, json={
+        "model": "Renamed Cable",
+    })
+    assert put_res.status_code == 200, f"PUT failed: {put_res.text}"
+    data = put_res.json()
+    assert data["model"] == "Renamed Cable"
+    # Existing variant preserved.
+    assert len(data["variants"]) == 1
+    assert data["variants"][0]["id"] == original_variant_id
+    assert data["variants"][0]["slug"] == "red"
+    assert data["variants"][0]["specs"][0]["value_string"] == "Red"
+
+
+def test_portal_update_cable_cross_scope_404(client, cable_manager_headers):
+    """PUT on another manufacturer's cable returns 404 (no information leakage)."""
+    # Non-existent cable id exercises the same _check_cable_ownership code path
+    # as a real out-of-scope cable id (both return 404).
+    res = client.put("/api/portal/cables/nonexistent-cable-id", headers=cable_manager_headers, json={
+        "common_specs": [
+            {"spec_key": "x", "label": "X", "value_string": "y", "spec_type": "string", "sort_order": 0},
+        ],
+    })
+    assert res.status_code == 404

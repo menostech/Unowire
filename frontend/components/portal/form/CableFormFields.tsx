@@ -14,6 +14,8 @@ export interface CableFormState {
   industry_id: string;
   category_id: string;
   product_type_id: string;
+  common_specs_json: string;
+  variants_json: string;
 }
 
 interface CableFormFieldsProps {
@@ -148,6 +150,44 @@ export function CableFormFields({ value, onChange, errors, taxonomy }: CableForm
         value={value.image_url}
         onChange={(v) => onChange({ image_url: v })}
       />
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">Common Specs (JSON)</label>
+        <p className="mb-1 text-xs text-gray-500">
+          Array of spec objects: <code>{`[{ "spec_key", "label", "value_string", "value_number", "unit", "spec_type", "filterable" }]`}</code>
+        </p>
+        <textarea
+          value={value.common_specs_json}
+          onChange={(e) => onChange({ common_specs_json: e.target.value })}
+          className={`font-mono text-sm min-h-[200px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
+            errors.common_specs_json
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+          }`}
+        />
+        {errors.common_specs_json && (
+          <p className="mt-1 text-sm text-red-600">{errors.common_specs_json}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">Variants (JSON)</label>
+        <p className="mb-1 text-xs text-gray-500">
+          Array of variant objects: <code>{`[{ "slug", "sort_order", "specs": [{ "spec_key", "label", ... }] }]`}</code>
+        </p>
+        <textarea
+          value={value.variants_json}
+          onChange={(e) => onChange({ variants_json: e.target.value })}
+          className={`font-mono text-sm min-h-[200px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
+            errors.variants_json
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+          }`}
+        />
+        {errors.variants_json && (
+          <p className="mt-1 text-sm text-red-600">{errors.variants_json}</p>
+        )}
+      </div>
     </div>
   );
 }
