@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_equipment, portal_equipment_import, portal_inquiries, portal_media, portal_messages
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_inquiries, portal_media, portal_messages
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -106,6 +106,7 @@ app.include_router(member.router)
 app.include_router(admin_inquiries.router)
 app.include_router(admin_email.router)
 app.include_router(admin_members.router)
+app.include_router(admin_claims.router)
 app.include_router(admin_messages.router)
 app.include_router(pages.router, prefix=f"{settings.api_prefix}/admin/pages", tags=["admin-pages"])
 app.include_router(pages.public_router, prefix=f"{settings.api_prefix}/pages", tags=["public-pages"])
@@ -121,6 +122,7 @@ app.include_router(portal_equipment_import.router)
 app.include_router(portal_inquiries.router)
 app.include_router(portal_media.router)
 app.include_router(portal_messages.router)
+app.include_router(portal_claim.router)
 
 # Mount media directory for static file serving
 media_dir = os.environ.get("MEDIA_DIR", "/app/media")

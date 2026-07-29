@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Cable, Wrench, Mail, Image as ImageIcon, Megaphone,
   Settings, LogOut, ExternalLink, type LucideIcon,
@@ -48,16 +48,9 @@ export function PortalSidebar({
   allowedModules: string[];
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [unread, setUnread] = useState<number | null>(null);
 
   const scopeType = user?.scope_type ?? null;
-  const subtitle =
-    user?.scope_type === 'manufacturer'
-      ? 'Cable Portal'
-      : user?.scope_type === 'equipment_manufacturer'
-        ? 'Equipment Portal'
-        : '';
   const baseNav = scopeType === 'equipment_manufacturer' ? EQUIPMENT_MANUFACTURER_NAV : MANUFACTURER_NAV;
   const nav = baseNav.filter((item) => allowedModules.includes(item.module));
 
@@ -83,13 +76,15 @@ export function PortalSidebar({
     } catch {
       // ignore
     }
-    router.push('/portal/login');
+    // Full page reload ensures server-side layout re-evaluates auth state,
+    // preventing the sidebar from persisting on the login page.
+    window.location.href = '/portal/login';
   }
 
   return (
     <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-blue-900 p-4 text-blue-100">
       <div className="mb-6 px-2 text-lg font-bold tracking-tight">
-        Unowire <span className="text-blue-300">{subtitle}</span>
+        Unowire <span className="text-blue-300">Portal</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1">
         {nav.map((item) => {

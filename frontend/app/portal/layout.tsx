@@ -10,11 +10,12 @@ export default async function PortalLayout({ children }: { children: React.React
   ]);
   const pathname = (await headers()).get('x-pathname') || '';
 
-  if (!user && pathname !== '/portal/login') {
+  const isPublicPortalPath = pathname === '/portal/login' || pathname === '/portal/claim';
+  if (!user && !isPublicPortalPath) {
     redirect(`/portal/login?from=${encodeURIComponent(pathname)}`);
   }
   if (!user) {
-    return <>{children}</>; // login page renders without sidebar
+    return <>{children}</>; // login/claim pages render without sidebar
   }
 
   return (

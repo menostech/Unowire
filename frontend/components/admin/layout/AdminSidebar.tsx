@@ -48,6 +48,7 @@ const PAGE_ID_TO_MODULE_ID: Record<string, string> = {
   roles: 'roles',
   pages: 'pages',
   'site-menu': 'menu_config',
+  claims: 'claims',
 };
 
 function filterTreeByPermissions(

@@ -144,6 +144,22 @@ interface BackendEquipment {
   category: BackendEquipmentCategory | null;
 }
 
+interface ClaimRequestWithManufacturer {
+  id: string;
+  manufacturer_type: string;
+  manufacturer_id: string;
+  manufacturer_name: string;
+  contact_name: string;
+  contact_email: string;
+  contact_phone: string | null;
+  proof_description: string;
+  status: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface ListResponse<T> {
   items: T[];
   total: number;
@@ -939,6 +955,13 @@ export const adminApi = {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `API ${res.status}`);
       }
+    },
+  },
+
+  claims: {
+    async all(status?: string): Promise<ClaimRequestWithManufacturer[]> {
+      const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+      return adminGet<ClaimRequestWithManufacturer[]>(`/api/admin/claims${qs}`);
     },
   },
 };

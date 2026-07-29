@@ -19,8 +19,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // Portal routes: skip login page
-  if (pathname.startsWith('/portal') && pathname === '/portal/login') {
+  // Portal routes: skip login and claim pages (claim is public)
+  if (pathname.startsWith('/portal') && (pathname === '/portal/login' || pathname === '/portal/claim')) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
