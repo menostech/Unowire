@@ -58,8 +58,11 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
         page_size: int = 20,
         category_id: str | None = None,
         manufacturer_id: str | None = None,
+        q: str | None = None,
     ) -> tuple[list[RecommendedEquipment], int]:
         stmt = select(RecommendedEquipment)
+        if q:
+            stmt = stmt.where(RecommendedEquipment.model.ilike(f"%{q}%"))
         if category_id is not None:
             stmt = stmt.where(RecommendedEquipment.category_id == category_id)
         if manufacturer_id is not None:
@@ -74,17 +77,32 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
         return list(result.scalars().all()), total
 
     async def list_by_manufacturer(
-        self, db: AsyncSession, *, scope_id: str, skip: int = 0, limit: int = 50
-    ) -> list[RecommendedEquipment]:
+        self,
+        db: AsyncSession,
+        *,
+        scope_id: str,
+        skip: int = 0,
+        limit: int = 50,
+        search: str | None = None,
+        category_id: str | None = None,
+    ) -> tuple[list[RecommendedEquipment], int]:
         """List equipment where manufacturer_id == scope_id. For portal routes.
 
         Eager-loads `manufacturer` and `category` to avoid async lazy-load
         (MissingGreenlet) errors during response serialization.
+        Returns (items, total) so the route can build a PaginatedResponse.
         """
+        stmt = select(RecommendedEquipment).where(RecommendedEquipment.manufacturer_id == scope_id)
+        if search:
+            stmt = stmt.where(RecommendedEquipment.model.ilike(f"%{search}%"))
+        if category_id:
+            stmt = stmt.where(RecommendedEquipment.category_id == category_id)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await db.execute(count_stmt)).scalar() or 0
+
         stmt = (
-            select(RecommendedEquipment)
-            .where(RecommendedEquipment.manufacturer_id == scope_id)
-            .options(
+            stmt.options(
                 selectinload(RecommendedEquipment.manufacturer),
                 selectinload(RecommendedEquipment.category),
             )
@@ -93,7 +111,7 @@ class CRUDEquipment(CRUDBase[RecommendedEquipment, RecommendedEquipmentCreate, R
             .limit(limit)
         )
         result = await db.execute(stmt)
-        return list(result.scalars().all())
+        return list(result.scalars().all()), total
 
     async def count_by_manufacturer(self, db: AsyncSession, *, scope_id: str) -> int:
         stmt = (

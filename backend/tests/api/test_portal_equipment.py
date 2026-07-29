@@ -30,7 +30,13 @@ def _ensure_equipment_manufacturer():
 def test_portal_equipment_list(client, equipment_manager_headers):
     res = client.get("/api/portal/equipment", headers=equipment_manager_headers)
     assert res.status_code == 200
-    assert isinstance(res.json(), list)
+    data = res.json()
+    assert isinstance(data, dict)
+    assert "items" in data
+    assert "total" in data
+    assert "page" in data
+    assert "page_size" in data
+    assert isinstance(data["items"], list)
 
 
 def test_portal_equipment_requires_portal_token(client, admin_headers):

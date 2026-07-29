@@ -11,6 +11,7 @@ from app.core.database import get_db
 from app.crud.equipment import crud_equipment, crud_equipment_manufacturer
 from app.models.equipment import RecommendedEquipment as EquipmentModel
 from app.models.user import User
+from app.schemas.common import PaginatedResponse
 from app.schemas.equipment import (
     PortalEquipmentCreate,
     RecommendedEquipmentRead,
@@ -35,13 +36,24 @@ async def _generate_equipment_id(db: AsyncSession, manufacturer_slug: str, equip
     return f"{base}-{suffix}"
 
 
-@router.get("", response_model=list[RecommendedEquipmentRead])
+@router.get("", response_model=PaginatedResponse[RecommendedEquipmentRead])
 async def list_equipment(
+    page: int = 1,
+    page_size: int = 20,
+    search: str | None = None,
+    category_id: str | None = None,
     user: User = Depends(require_factory_module("equipment")),
     db: AsyncSession = Depends(get_db),
 ):
-    equipment = await crud_equipment.list_by_manufacturer(db, scope_id=user.scope_id)
-    return equipment
+    items, total = await crud_equipment.list_by_manufacturer(
+        db,
+        scope_id=user.scope_id,
+        skip=(page - 1) * page_size,
+        limit=page_size,
+        search=search,
+        category_id=category_id,
+    )
+    return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
 @router.get("/{equipment_id}", response_model=RecommendedEquipmentRead)

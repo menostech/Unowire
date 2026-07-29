@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import { EquipmentSearchBox } from '@/components/admin/list/EquipmentSearchBox';
 
 interface PageProps {
-  searchParams: Promise<{ page?: string; manufacturer_id?: string; category_id?: string }>;
+  searchParams: Promise<{ page?: string; manufacturer_id?: string; category_id?: string; q?: string }>;
 }
 
 const PAGE_SIZE = 20;
@@ -12,11 +14,13 @@ export default async function EquipmentPage({ searchParams }: PageProps) {
   const page = parseInt(sp.page || '1', 10);
   const manufacturerId = sp.manufacturer_id;
   const categoryId = sp.category_id;
+  const q = sp.q;
 
   const [equipmentResult, manufacturersResult, categoryTree] = await Promise.all([
     adminApi.equipment.all(page, PAGE_SIZE, {
       manufacturer_id: manufacturerId,
       category_id: categoryId,
+      q,
     }),
     adminApi.equipmentManufacturers.all(1, 999),
     adminApi.equipmentCategories.all(),
@@ -47,6 +51,7 @@ export default async function EquipmentPage({ searchParams }: PageProps) {
     const params = new URLSearchParams({ page: String(p) });
     if (manufacturerId) params.set('manufacturer_id', manufacturerId);
     if (categoryId) params.set('category_id', categoryId);
+    if (q) params.set('q', q);
     return `/admin/equipment?${params.toString()}`;
   }
 
@@ -54,12 +59,23 @@ export default async function EquipmentPage({ searchParams }: PageProps) {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Equipment</h1>
-        <Link
-          href="/admin/equipment/new"
-          className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-        >
-          New
-        </Link>
+        <div className="flex items-center gap-2">
+          <Suspense fallback={null}>
+            <EquipmentSearchBox />
+          </Suspense>
+          <Link
+            href="/admin/equipment/import"
+            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            Import
+          </Link>
+          <Link
+            href="/admin/equipment/new"
+            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+          >
+            New
+          </Link>
+        </div>
       </div>
 
       {/* Filter form (GET) */}

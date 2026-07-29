@@ -11,6 +11,7 @@ import type {
   PortalUploadPage,
   PortalMessage,
   PortalMessageListResponse,
+  EquipmentCategoryTree,
 } from '@/lib/types/portal';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -79,11 +80,22 @@ export const portalApi = {
     },
   },
   equipment: {
-    async all(): Promise<PortalEquipment[]> {
-      return portalGet<PortalEquipment[]>('/api/portal/equipment');
+    async all(params?: { search?: string; category_id?: string; page?: number; page_size?: number }): Promise<{ items: PortalEquipment[]; total: number; page: number; page_size: number }> {
+      const qs = new URLSearchParams();
+      if (params?.search) qs.set('search', params.search);
+      if (params?.category_id) qs.set('category_id', params.category_id);
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.page_size != null) qs.set('page_size', String(params.page_size));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return portalGet<{ items: PortalEquipment[]; total: number; page: number; page_size: number }>(`/api/portal/equipment${suffix}`);
     },
     async getById(id: string): Promise<PortalEquipment> {
       return portalGet<PortalEquipment>(`/api/portal/equipment/${id}`);
+    },
+  },
+  equipmentCategories: {
+    async all(): Promise<EquipmentCategoryTree[]> {
+      return portalGet<EquipmentCategoryTree[]>('/api/equipment-categories');
     },
   },
   inquiries: {

@@ -48,3 +48,36 @@
 - Spec gap found: DB column applicable_specs is nullable=False with server_default=[]. Passing None via model_dump() breaks response schema. Plan Task 2.3 expanded from verification-only to include POST route fix (exclude + conditional set). Design doc updated.
 - Review stages passed: coordinator review (spec gap identified, plan updated)
 - Unresolved feedback: none (route fix deferred to expanded Task 2.3)
+### Task 2.1 — Update portal cable POST (backend route)
+- Status: complete
+- Stage: done
+- Commits: ba36630 (initial), a2a4571 (fix: re-read via get_detail for nested eager loading)
+- Changed files: backend/app/api/routes/portal_cables.py, backend/tests/api/test_portal_cables.py
+- RED: test_portal_create_cable_with_specs — initially failed with MissingGreenlet on variant.specs serialization (db.refresh doesn't load nested selectin chain)
+- GREEN: 11 portal cable tests pass (10 existing + 1 new spec test) after switching post-commit to crud_cable.get_detail
+- review_mode: standard
+- Risk signals: MissingGreenlet on nested relationship (fixed), no per-task reviewer dispatched (mechanical fix matching admin pattern)
+- Review stages passed: coordinator diff review + test run
+- Unresolved feedback: none
+### Task 2.2 — Update portal cable PUT (backend route)
+- Status: complete
+- Stage: done
+- Commit: af54182
+- Changed files: backend/app/api/routes/portal_cables.py, backend/tests/api/test_portal_cables.py
+- RED: 2 new tests failed (old PUT route stripped common_specs/variants — specs not replaced)
+- GREEN: 13/13 tests pass (11 existing + 2 new: replace_common_specs + variants_preserve_id)
+- review_mode: standard
+- Risk signals: expire_on_commit=False causes stale relationship collections after commit; fixed with db.expire_all() before re-read via crud_cable.get_detail. Used cable_id route param (not cable.id) for re-read to avoid MissingGreenlet on expired scalar.
+- Review stages passed: coordinator diff review + test run
+- Unresolved feedback: none (note for Task 2.3: equipment PUT uses get_with_relations after commit — applicable_specs is a scalar column, not a relationship, so expire_all not needed; but POST route needs exclude+conditional fix for nullable=False column)
+### Task 2.3 — Fix portal equipment POST route
+- Status: complete
+- Stage: done
+- Commit: 4258beb
+- Changed files: backend/app/api/routes/portal_equipment.py, backend/tests/api/test_portal_equipment.py
+- RED: test_portal_create_equipment_without_applicable_specs failed (ResponseValidationError — applicable_specs was None, breaking list[dict] schema)
+- GREEN: 11/11 equipment tests pass (9 existing + 2 new)
+- review_mode: standard
+- Risk signals: JSONB null ≠ SQL NULL — nullable=False only prevents SQL NULL, not JSONB null. Fix correctly excludes applicable_specs from model_dump so server_default="[]" applies. Stale test DB rows with JSONB null cleaned up (one-time UPDATE).
+- Review stages passed: coordinator diff review + test run
+- Unresolved feedback: none (conftest _cleanup_test_data doesn't clean recommended_equipments — minor follow-up, not blocking)
