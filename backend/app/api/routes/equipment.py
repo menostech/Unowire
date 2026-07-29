@@ -20,6 +20,7 @@ async def list_equipment(
     page: int = 1,
     page_size: int = 20,
     cable_id: str | None = None,
+    q: str | None = None,
     category_id: str | None = None,
     manufacturer_id: str | None = None,
     db: AsyncSession = Depends(get_db),
@@ -31,6 +32,7 @@ async def list_equipment(
         db,
         page=page,
         page_size=page_size,
+        q=q,
         category_id=category_id,
         manufacturer_id=manufacturer_id,
     )

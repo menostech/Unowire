@@ -541,10 +541,11 @@ export const adminApi = {
   },
 
   equipment: {
-    async all(page = 1, page_size = 20, filters?: { category_id?: string; manufacturer_id?: string }): Promise<{ items: BackendEquipment[]; total: number }> {
+    async all(page = 1, page_size = 20, filters?: { category_id?: string; manufacturer_id?: string; q?: string }): Promise<{ items: BackendEquipment[]; total: number }> {
       const params = new URLSearchParams({ page: String(page), page_size: String(page_size) });
       if (filters?.category_id) params.set('category_id', filters.category_id);
       if (filters?.manufacturer_id) params.set('manufacturer_id', filters.manufacturer_id);
+      if (filters?.q) params.set('q', filters.q);
       const data = await adminGet<ListResponse<BackendEquipment>>(`/api/recommended-equipments?${params.toString()}`);
       return { items: data.items, total: data.total };
     },

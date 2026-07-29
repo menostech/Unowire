@@ -28,3 +28,6 @@ backend/venv/
 # Misc local files
 cookies.txt
 industries.json
+
+# Comet local state (current-change selection, intent frame, batches)
+.comet/
