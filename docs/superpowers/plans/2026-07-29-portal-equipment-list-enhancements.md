@@ -2,6 +2,7 @@
 change: portal-equipment-list-enhancements
 design-doc: docs/superpowers/specs/2026-07-29-portal-equipment-list-enhancements-design.md
 base-ref: a5637ea53d3c8f401121ecf2890f34b2e235e2ba
+archived-with: 2026-07-29-portal-equipment-list-enhancements
 ---
 
 # Portal & Admin Equipment List Enhancements Implementation Plan

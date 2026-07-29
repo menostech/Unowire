@@ -2,6 +2,7 @@
 change: portal-spec-editing
 design-doc: docs/superpowers/specs/2026-07-27-portal-spec-editing-design.md
 base-ref: bfffd42d2fc43b4e217ba51199bf2a2b49c13a06
+archived-with: 2026-07-29-portal-spec-editing
 ---
 
 # Portal Spec Editing Implementation Plan

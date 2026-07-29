@@ -2,6 +2,8 @@
 comet_change: portal-equipment-list-enhancements
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-29-portal-equipment-list-enhancements
+status: final
 ---
 
 # Design Doc: Portal & Admin Equipment List Enhancements

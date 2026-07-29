@@ -4,7 +4,7 @@
 
 The equipment list page at `/portal/equipment` SHALL display table columns for: Name (model as plain text, not a link), Category, Created date, and an Actions column containing an "Edit" button. The page SHALL include a "New Equipment" button linking to `/portal/equipment/new` and an "Import" button linking to `/portal/equipment/import`. The Name column SHALL NOT be a hyperlink — navigation to the edit/detail page SHALL be via the "Edit" button in the Actions column, which links to `/portal/equipment/{id}`.
 
-#### Scenario: Equipment list shows category and actions columns
+#### Scenario: Equipment list shows category column
 - **WHEN** a user navigates to `/portal/equipment`
 - **THEN** the table includes columns: Name, Category, Created, and Actions
 

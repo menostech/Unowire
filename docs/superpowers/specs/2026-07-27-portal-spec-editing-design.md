@@ -2,6 +2,8 @@
 comet_change: portal-spec-editing
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-29-portal-spec-editing
+status: final
 ---
 
 # Design Doc: Portal Spec Editing
