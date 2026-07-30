@@ -174,7 +174,7 @@ export function MediaLibrary({ initialFolders, initialUploads }: MediaLibraryPro
       {/* Main grid: folder sidebar + uploads grid */}
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Folder sidebar */}
-        <div className="w-full shrink-0 rounded-lg bg-white p-4 shadow-sm lg:w-72">
+        <div className="w-full shrink-0 rounded-lg bg-white p-4 shadow-sm lg:w-96">
           <h2 className="mb-3 text-sm font-semibold text-gray-700">Folders</h2>
           {folders.length === 0 ? (
             <p className="text-xs text-gray-500">No folders.</p>
