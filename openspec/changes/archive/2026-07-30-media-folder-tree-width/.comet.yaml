@@ -1,6 +1,6 @@
 workflow: tweak
 language: en
-phase: build
+phase: archive
 context_compression: off
 build_mode: direct
 build_pause: null
@@ -13,14 +13,14 @@ auto_transition: true
 base_ref: 30792a684283743ef56cd87385b5de2d3c2289ac
 design_doc: null
 plan: null
-verify_result: pending
+verify_result: pass
 verify_failures: 0
-verification_report: null
+verification_report: docs/superpowers/reports/2026-07-30-media-folder-tree-width-verify.md
 branch_status: pending
 created_at: 2026-07-30
-verified_at: null
-archive_confirmation: null
-archived: false
+verified_at: 2026-07-30
+archive_confirmation: confirmed
+archived: true
 bound_branch: master
 direct_override: null
 handoff_context: null
