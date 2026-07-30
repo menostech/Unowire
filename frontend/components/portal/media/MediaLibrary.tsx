@@ -172,9 +172,9 @@ export function MediaLibrary({ initialFolders, initialUploads }: MediaLibraryPro
       )}
 
       {/* Main grid: folder sidebar + uploads grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="flex flex-col gap-6 lg:flex-row">
         {/* Folder sidebar */}
-        <div className="rounded-lg bg-white p-4 shadow-sm">
+        <div className="w-full shrink-0 rounded-lg bg-white p-4 shadow-sm lg:w-72">
           <h2 className="mb-3 text-sm font-semibold text-gray-700">Folders</h2>
           {folders.length === 0 ? (
             <p className="text-xs text-gray-500">No folders.</p>
@@ -214,7 +214,7 @@ export function MediaLibrary({ initialFolders, initialUploads }: MediaLibraryPro
         </div>
 
         {/* Uploads grid + pagination */}
-        <div className="rounded-lg bg-white p-4 shadow-sm lg:col-span-2">
+        <div className="flex-1 min-w-0 rounded-lg bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold text-gray-700">
             Uploads ({uploads.total})
           </h2>

@@ -66,7 +66,7 @@ export default function MediaPage() {
       )}
 
       <div className="flex gap-4">
-        <aside className="w-64 shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-3 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <aside className="w-72 shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-3 max-h-[calc(100vh-200px)] overflow-y-auto">
           <FolderTree
             folders={folders}
             selectedId={selectedFolder}
