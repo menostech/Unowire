@@ -15,6 +15,9 @@ ADMIN_MODULES = [
     {"id": "equipment_mfrs",  "label": "Equipment Mfrs",  "scope_aware": True,  "scope_type": "equipment_manufacturer"},
     {"id": "equipment_cats",  "label": "Equipment Cats",  "scope_aware": False, "scope_type": None},
     {"id": "equipment_list",  "label": "Equipment List",  "scope_aware": True,  "scope_type": "equipment_manufacturer"},
+    {"id": "terminal_mfrs",   "label": "Terminal Mfrs",   "scope_aware": True,  "scope_type": "terminal_manufacturer"},
+    {"id": "terminal_cats",   "label": "Terminal Cats",   "scope_aware": False, "scope_type": None},
+    {"id": "terminal_list",   "label": "Terminal List",   "scope_aware": True,  "scope_type": "terminal_manufacturer"},
     {"id": "media",           "label": "Media",           "scope_aware": True,  "scope_type": None},
     {"id": "menu_config",     "label": "Menu Config",     "scope_aware": False, "scope_type": None},
     {"id": "users",           "label": "Users",           "scope_aware": False, "scope_type": None},
@@ -35,4 +38,4 @@ VALID_MODULE_IDS = {m["id"] for m in ADMIN_MODULES}
 ADMIN_PROTECTED_MODULES = {"users", "menu_config", "roles"}
 
 # Valid scope_type values (null means global role, no scoping).
-VALID_SCOPE_TYPES = {None, "manufacturer", "equipment_manufacturer"}
+VALID_SCOPE_TYPES = {None, "manufacturer", "equipment_manufacturer", "terminal_manufacturer"}
