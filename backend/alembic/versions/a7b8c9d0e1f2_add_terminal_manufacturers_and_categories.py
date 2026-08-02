@@ -77,8 +77,28 @@ def upgrade():
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.func.now()),
     )
 
+    # 4. Seed admin menu: "Terminal & Connector" group + 3 child pages.
+    # Mirrors the equipment menu seed in revision f5a6b7c8d9e0.
+    # Top-level sort_order 9 avoids collision with equipment (5) and claims (8).
+    # Idempotent via ON CONFLICT (id) DO NOTHING.
+    op.execute("""
+        INSERT INTO admin_menu_items (id, parent_id, type, page_id, url, label, icon, sort_order, is_visible, created_at, updated_at)
+        VALUES
+            ('terminal-connector', NULL,                 'group', NULL,            NULL, 'Terminal & Connector', 'Plug',    9, true, NOW(), NOW()),
+            ('terminal-mfrs',      'terminal-connector', 'page',  'terminal-mfrs', NULL, 'Manufacturers',        'Factory', 0, true, NOW(), NOW()),
+            ('terminal-cats',      'terminal-connector', 'page',  'terminal-cats', NULL, 'Categories',           'FolderOpen', 1, true, NOW(), NOW()),
+            ('terminals',          'terminal-connector', 'page',  'terminals',     NULL, 'Terminals',            'Cable',   2, true, NOW(), NOW())
+        ON CONFLICT (id) DO NOTHING
+    """)
+
 
 def downgrade():
+    # Remove seeded admin menu rows (children first, then group) before dropping tables.
+    op.execute("""
+        DELETE FROM admin_menu_items
+        WHERE id IN ('terminals', 'terminal-cats', 'terminal-mfrs', 'terminal-connector')
+    """)
+
     op.drop_table('terminals')
     op.drop_table('terminal_categories')
     op.drop_table('terminal_manufacturers')
