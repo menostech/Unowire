@@ -118,6 +118,7 @@ async def get_current_factory_user(
 _FACTORY_ALLOWED_BY_SCOPE: dict[str, set[str]] = {
     "manufacturer": {"dashboard", "cables", "inquiries", "media", "me", "messages"},
     "equipment_manufacturer": {"dashboard", "equipment", "inquiries", "media", "me", "messages"},
+    "terminal_manufacturer": {"dashboard", "terminals", "inquiries", "media", "me", "messages"},
 }
 
 
