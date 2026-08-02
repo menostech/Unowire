@@ -216,11 +216,11 @@ base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
 - `python -m py_compile backend/app/crud/terminal.py` succeeds.
 
 **Steps:**
-- [ ] **Step 1: Read mirror source.** Read `backend/app/crud/equipment.py` in full.
-- [ ] **Step 2: Create `backend/app/crud/terminal.py`** by mirroring with class/method renames. Bind to `TerminalManufacturer`, `TerminalCategory`, `Terminal` models. Preserve all query logic (joins, JSONB matching, ordering by `sort_order`).
-- [ ] **Step 3: Verify it compiles.** Run: `cd backend && python -m py_compile app/crud/terminal.py`
-- [ ] **Step 4: Verify singletons.** Run: `cd backend && python -c "from app.crud.terminal import crud_terminal_manufacturer, crud_terminal_category, crud_terminal; print('ok')"`
-- [ ] **Step 5: Commit.** `git add backend/app/crud/terminal.py && git commit -m "feat(terminals): add CRUD classes and singletons"`
+- [x] **Step 1: Read mirror source.** Read `backend/app/crud/equipment.py` in full.
+- [x] **Step 2: Create `backend/app/crud/terminal.py`** by mirroring with class/method renames. Bind to `TerminalManufacturer`, `TerminalCategory`, `Terminal` models. Preserve all query logic (joins, JSONB matching, ordering by `sort_order`).
+- [x] **Step 3: Verify it compiles.** Run: `cd backend && python -m py_compile app/crud/terminal.py`
+- [x] **Step 4: Verify singletons.** Run: `cd backend && python -c "from app.crud.terminal import crud_terminal_manufacturer, crud_terminal_category, crud_terminal; print('ok')"`
+- [x] **Step 5: Commit.** `git add backend/app/crud/terminal.py && git commit -m "feat(terminals): add CRUD classes and singletons"`
 
 ---
 
