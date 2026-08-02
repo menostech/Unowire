@@ -164,12 +164,12 @@ base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
 - `downgrade()` removes the seeded rows.
 
 **Steps:**
-- [ ] **Step 1: Inspect equipment menu seed.** Re-read `e3f4a5b6c7d8` and locate the `op.bulk_insert` (or INSERT) block for admin menu items.
-- [ ] **Step 2: Add a terminal menu insert block** to the migration `upgrade()` after table creation, mirroring equipment's menu seed. Add three rows under group label `"Terminal & Connector"`: `terminal-mfrs` (Manufacturers), `terminal-cats` (Categories), `terminals` (Terminals). Use distinct `sort_order` values that do not collide with equipment rows.
-- [ ] **Step 3: Add the matching delete block** to `downgrade()` (delete the three page IDs before dropping tables).
-- [ ] **Step 4: Verify.** Run: `cd backend && alembic downgrade -1 && alembic upgrade head`
+- [x] **Step 1: Inspect equipment menu seed.** Re-read `e3f4a5b6c7d8` and locate the `op.bulk_insert` (or INSERT) block for admin menu items.
+- [x] **Step 2: Add a terminal menu insert block** to the migration `upgrade()` after table creation, mirroring equipment's menu seed. Add three rows under group label `"Terminal & Connector"`: `terminal-mfrs` (Manufacturers), `terminal-cats` (Categories), `terminals` (Terminals). Use distinct `sort_order` values that do not collide with equipment rows.
+- [x] **Step 3: Add the matching delete block** to `downgrade()` (delete the three page IDs before dropping tables).
+- [x] **Step 4: Verify.** Run: `cd backend && alembic downgrade -1 && alembic upgrade head`
   Then confirm via DB query / Swagger that the three menu rows exist.
-- [ ] **Step 5: Commit.** `git add backend/alembic/versions/<new_file>.py && git commit -m "feat(terminals): seed admin menu entries in migration"`
+- [x] **Step 5: Commit.** `git add backend/alembic/versions/<new_file>.py && git commit -m "feat(terminals): seed admin menu entries in migration"`
 
 ---
 
