@@ -9,6 +9,7 @@ To add a new scope type:
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud.terminal import crud_terminal_manufacturer
 from app.models.equipment import EquipmentManufacturer
 from app.models.manufacturer import Manufacturer
 
@@ -27,10 +28,16 @@ async def validate_equipment_manufacturer_exists(db: AsyncSession, scope_id: str
     return result.scalar_one_or_none() is not None
 
 
+async def validate_terminal_manufacturer_exists(db: AsyncSession, scope_id: str) -> bool:
+    obj = await crud_terminal_manufacturer.get(db, scope_id)
+    return obj is not None
+
+
 # scope_type → async validator function (returns True if scope_id is valid)
 SCOPE_RESOLVERS = {
     "manufacturer": validate_manufacturer_exists,
     "equipment_manufacturer": validate_equipment_manufacturer_exists,
+    "terminal_manufacturer": validate_terminal_manufacturer_exists,
 }
 
 
