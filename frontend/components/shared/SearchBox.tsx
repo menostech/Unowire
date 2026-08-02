@@ -3,16 +3,18 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 
-type Category = 'cable' | 'equipment';
+type Category = 'cable' | 'equipment' | 'terminal';
 
 const PLACEHOLDERS: Record<Category, string> = {
   cable: 'Search cable model, spec...',
   equipment: 'Search equipment model, brand...',
+  terminal: 'Search terminal model, brand...',
 };
 
 const ROUTES: Record<Category, string> = {
   cable: '/cables',
   equipment: '/equipment',
+  terminal: '/terminals',
 };
 
 function SearchBoxInner() {
@@ -41,6 +43,7 @@ function SearchBoxInner() {
       >
         <option value="cable">Cable</option>
         <option value="equipment">Equipment</option>
+        <option value="terminal">Terminal</option>
       </select>
       <div className="absolute left-[6.5rem] top-1/2 -translate-y-1/2 h-6 w-px bg-gray-200" aria-hidden="true" />
       <input

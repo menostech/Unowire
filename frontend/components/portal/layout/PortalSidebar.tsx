@@ -35,6 +35,15 @@ const EQUIPMENT_MANUFACTURER_NAV: NavItem[] = [
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
 
+const TERMINAL_MANUFACTURER_NAV: NavItem[] = [
+  { label: 'Dashboard', href: '/portal', icon: LayoutDashboard, module: 'dashboard' },
+  { label: 'Terminals', href: '/portal/terminals', icon: Wrench, module: 'terminals' },
+  { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
+  { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
+  { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
+  { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
+];
+
 function isActive(pathname: string, href: string): boolean {
   if (href === '/portal') return pathname === '/portal';
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -51,7 +60,12 @@ export function PortalSidebar({
   const [unread, setUnread] = useState<number | null>(null);
 
   const scopeType = user?.scope_type ?? null;
-  const baseNav = scopeType === 'equipment_manufacturer' ? EQUIPMENT_MANUFACTURER_NAV : MANUFACTURER_NAV;
+  const baseNav =
+    scopeType === 'equipment_manufacturer'
+      ? EQUIPMENT_MANUFACTURER_NAV
+      : scopeType === 'terminal_manufacturer'
+        ? TERMINAL_MANUFACTURER_NAV
+        : MANUFACTURER_NAV;
   const nav = baseNav.filter((item) => allowedModules.includes(item.module));
 
   useEffect(() => {
