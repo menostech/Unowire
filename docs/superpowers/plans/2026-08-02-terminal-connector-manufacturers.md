@@ -192,11 +192,11 @@ base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
 - `python -m py_compile backend/app/schemas/terminal.py` succeeds.
 
 **Steps:**
-- [ ] **Step 1: Read mirror source.** Read `backend/app/schemas/equipment.py` in full.
-- [ ] **Step 2: Create `backend/app/schemas/terminal.py`** by mirroring with `Equipment`→`Terminal` renames. Keep all field names identical. Add `PortalTerminalCreate` mirroring `PortalEquipmentCreate` (omit `id`, `manufacturer_id`).
-- [ ] **Step 3: Verify it compiles.** Run: `cd backend && python -m py_compile app/schemas/terminal.py`
-- [ ] **Step 4: Verify importability.** Run: `cd backend && python -c "from app.schemas.terminal import TerminalManufacturerRead, TerminalCategoryTreeNode, TerminalRead, PortalTerminalCreate; print('ok')"`
-- [ ] **Step 5: Commit.** `git add backend/app/schemas/terminal.py && git commit -m "feat(terminals): add pydantic schemas"`
+- [x] **Step 1: Read mirror source.** Read `backend/app/schemas/equipment.py` in full.
+- [x] **Step 2: Create `backend/app/schemas/terminal.py`** by mirroring with `Equipment`→`Terminal` renames. Keep all field names identical. Add `PortalTerminalCreate` mirroring `PortalEquipmentCreate` (omit `id`, `manufacturer_id`).
+- [x] **Step 3: Verify it compiles.** Run: `cd backend && python -m py_compile app/schemas/terminal.py`
+- [x] **Step 4: Verify importability.** Run: `cd backend && python -c "from app.schemas.terminal import TerminalManufacturerRead, TerminalCategoryTreeNode, TerminalRead, PortalTerminalCreate; print('ok')"`
+- [x] **Step 5: Commit.** `git add backend/app/schemas/terminal.py && git commit -m "feat(terminals): add pydantic schemas"`
 
 ### Task 2.2: Create `backend/app/crud/terminal.py`
 

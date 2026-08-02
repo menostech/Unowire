@@ -9,7 +9,7 @@
 
 ## 2. Backend Schemas & CRUD
 
-- [ ] 2.1 Create `backend/app/schemas/terminal.py` with all Pydantic schemas: `TerminalManufacturer*`, `TerminalCategory*` (flat + tree read), `Terminal*` (read/create/update), `PortalTerminalCreate` (omits id + manufacturer_id) — mirror `schemas/equipment.py`
+- [x] 2.1 Create `backend/app/schemas/terminal.py` with all Pydantic schemas: `TerminalManufacturer*`, `TerminalCategory*` (flat + tree read), `Terminal*` (read/create/update), `PortalTerminalCreate` (omits id + manufacturer_id) — mirror `schemas/equipment.py`
 - [ ] 2.2 Create `backend/app/crud/terminal.py` with `CRUDTerminalManufacturer`, `CRUDTerminalCategory` (get_with_children, get_all_top_level_with_children, get_all_flat), `CRUDTerminal` (get_with_relations, get_all_with_relations, list_by_manufacturer, count_by_manufacturer, get_matching_cable) — mirror `crud/equipment.py`; export singletons `crud_terminal_manufacturer`, `crud_terminal_category`, `crud_terminal`
 
 ## 3. Backend Core Registration
