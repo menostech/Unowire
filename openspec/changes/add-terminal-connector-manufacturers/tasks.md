@@ -45,9 +45,9 @@
 
 ## 7. Frontend Public Pages & Components
 
-- [ ] 7.1 Create `frontend/app/(site)/terminals/page.tsx` — listing with category/manufacturer/spec filters, server-side data load — mirror `equipment/page.tsx`
-- [ ] 7.2 Create `frontend/app/(site)/terminals/[slug]/page.tsx` — product detail with image, manufacturer link, category badge, applicable specs table, inquiry form (`recipientType="terminal_manufacturer"`), JSON-LD — mirror `equipment/[slug]/page.tsx`
-- [ ] 7.3 Create `frontend/app/(site)/terminals/manufacturers/[slug]/page.tsx` — manufacturer profile with contact info and product grid — mirror `equipment/manufacturers/[slug]/page.tsx`
+- [x] 7.1 Create `frontend/app/(site)/terminals/page.tsx` — listing with category/manufacturer/spec filters, server-side data load — mirror `equipment/page.tsx`
+- [x] 7.2 Create `frontend/app/(site)/terminals/[slug]/page.tsx` — product detail with image, manufacturer link, category badge, applicable specs table, inquiry form (`recipientType="terminal_manufacturer"`), JSON-LD — mirror `equipment/[slug]/page.tsx`
+- [x] 7.3 Create `frontend/app/(site)/terminals/manufacturers/[slug]/page.tsx` — manufacturer profile with contact info and product grid — mirror `equipment/manufacturers/[slug]/page.tsx`
 - [x] 7.4 Create terminal components in `frontend/components/terminals/`: `TerminalCard.tsx`, `TerminalListClient.tsx`, `TerminalFilters.tsx`, `TerminalCategoryNav.tsx` — mirror `components/equipment/`
 
 ## 8. Frontend Admin Pages & Components
