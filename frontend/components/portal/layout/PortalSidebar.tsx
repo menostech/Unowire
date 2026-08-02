@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Cable, Wrench, Mail, Image as ImageIcon, Megaphone,
-  Settings, LogOut, ExternalLink, type LucideIcon,
+  Settings, LogOut, ExternalLink, FileText, type LucideIcon,
 } from 'lucide-react';
 import type { PortalUser } from '@/lib/types/portal';
 import { PortalMessagesUnreadBadge } from '@/components/portal/PortalMessagesUnreadBadge';
@@ -23,6 +23,7 @@ const MANUFACTURER_NAV: NavItem[] = [
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
   { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
+  { label: 'Resources', href: '/portal/resources', icon: FileText, module: 'resources' },
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
 
@@ -32,6 +33,7 @@ const EQUIPMENT_MANUFACTURER_NAV: NavItem[] = [
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
   { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
+  { label: 'Resources', href: '/portal/resources', icon: FileText, module: 'resources' },
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
 
@@ -41,6 +43,7 @@ const TERMINAL_MANUFACTURER_NAV: NavItem[] = [
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
   { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
+  { label: 'Resources', href: '/portal/resources', icon: FileText, module: 'resources' },
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
 

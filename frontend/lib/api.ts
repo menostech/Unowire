@@ -234,6 +234,48 @@ interface BackendTerminal {
   category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
 }
 
+interface BackendResource {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  file_filename: string | null;
+  file_content_type: string | null;
+  file_size_bytes: number | null;
+  file_url_path: string | null;
+  external_url: string | null;
+  thumbnail_url: string | null;
+  scope_type: string | null;
+  scope_id: string | null;
+  download_count: number;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  category?: BackendResourceCategory | null;
+}
+
+interface BackendResourceCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  children?: BackendResourceCategory[];
+}
+
+interface BackendResourceListResponse {
+  items: BackendResource[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 interface BackendCableListResponse {
   items: BackendCable[];
   total: number;
@@ -703,6 +745,36 @@ export const api = {
       try {
         const data = await fetchWithCache<BackendTerminalCategory>(`/api/terminal-categories/${encodeURIComponent(id)}`);
         return adaptTerminalCategory(data);
+      } catch {
+        return null;
+      }
+    },
+  },
+
+  resourceCategories: {
+    async tree(): Promise<BackendResourceCategory[]> {
+      const data = await fetchWithCache<BackendResourceCategory[]>('/api/resource-categories');
+      return data ?? [];
+    },
+    async flat(): Promise<BackendResourceCategory[]> {
+      const data = await fetchWithCache<BackendResourceCategory[]>('/api/resource-categories/flat');
+      return data ?? [];
+    },
+  },
+
+  resources: {
+    async all(params?: { page?: number; page_size?: number; category_id?: string; q?: string }): Promise<BackendResourceListResponse> {
+      const qs = new URLSearchParams();
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.page_size != null) qs.set('page_size', String(params.page_size));
+      if (params?.category_id) qs.set('category_id', params.category_id);
+      if (params?.q) qs.set('q', params.q);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return fetchWithCache<BackendResourceListResponse>(`/api/resources${suffix}`);
+    },
+    async getBySlug(slug: string): Promise<BackendResource | null> {
+      try {
+        return await fetchWithCache<BackendResource>(`/api/resources/${encodeURIComponent(slug)}`);
       } catch {
         return null;
       }

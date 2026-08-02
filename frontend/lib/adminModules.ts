@@ -28,6 +28,8 @@ export const ADMIN_MODULES: AdminModule[] = [
   { id: "members",      label: "Members",      scopeAware: false, scopeType: null },
   { id: "pages",        label: "Pages",        scopeAware: false, scopeType: null },
   { id: "messages",     label: "Messages",      scopeAware: false, scopeType: null },
+  { id: "resource_cats", label: "Resource Cats", scopeAware: false, scopeType: null },
+  { id: "resource_list", label: "Resource List", scopeAware: true,  scopeType: null },
 ];
 
 export const MODULE_BY_ID: Record<string, AdminModule> = Object.fromEntries(

@@ -186,6 +186,42 @@ interface BackendTerminal {
   category: BackendTerminalCategory | null;
 }
 
+export interface BackendResource {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  file_filename: string | null;
+  file_content_type: string | null;
+  file_size_bytes: number | null;
+  file_url_path: string | null;
+  external_url: string | null;
+  thumbnail_url: string | null;
+  scope_type: string | null;
+  scope_id: string | null;
+  download_count: number;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  category?: BackendResourceCategory | null;
+}
+
+export interface BackendResourceCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  // Present on tree endpoints (list/get), absent on flat reads (POST/PUT/nested)
+  children?: BackendResourceCategory[];
+}
+
 interface ClaimRequestWithManufacturer {
   id: string;
   manufacturer_type: string;
@@ -716,6 +752,94 @@ export const adminApi = {
     async remove(id: string): Promise<void> {
       const res = await adminFetch(`/api/terminals/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`API ${res.status}: /api/terminals/${id}`);
+    },
+  },
+
+  resourceCategories: {
+    async all(): Promise<BackendResourceCategory[]> {
+      return await adminGet<BackendResourceCategory[]>('/api/resource-categories');
+    },
+    async tree(): Promise<BackendResourceCategory[]> {
+      return await adminGet<BackendResourceCategory[]>('/api/resource-categories');
+    },
+    async flat(): Promise<BackendResourceCategory[]> {
+      return await adminGet<BackendResourceCategory[]>('/api/resource-categories/flat');
+    },
+    async getById(id: string): Promise<BackendResourceCategory | null> {
+      try {
+        return await adminGet<BackendResourceCategory>(`/api/resource-categories/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendResourceCategory> {
+      const res = await adminFetch('/api/resource-categories', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/resource-categories`);
+      return await res.json() as BackendResourceCategory;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendResourceCategory> {
+      const res = await adminFetch(`/api/resource-categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/resource-categories/${id}`);
+      return await res.json() as BackendResourceCategory;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/resource-categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/resource-categories/${id}`);
+    },
+  },
+
+  resources: {
+    async all(
+      page = 1,
+      page_size = 20,
+      filters?: { category_id?: string; q?: string; scope_type?: string; scope_id?: string; is_published?: boolean },
+    ): Promise<ListResponse<BackendResource>> {
+      const params = new URLSearchParams({ page: String(page), page_size: String(page_size) });
+      if (filters?.category_id) params.set('category_id', filters.category_id);
+      if (filters?.q) params.set('q', filters.q);
+      if (filters?.scope_type) params.set('scope_type', filters.scope_type);
+      if (filters?.scope_id) params.set('scope_id', filters.scope_id);
+      if (filters?.is_published !== undefined) params.set('is_published', String(filters.is_published));
+      return adminGet<ListResponse<BackendResource>>(`/api/resources/admin?${params.toString()}`);
+    },
+    async getById(id: string): Promise<BackendResource | null> {
+      try {
+        return await adminGet<BackendResource>(`/api/resources/admin/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    // Multipart create: forwards FormData as-is. Do NOT set Content-Type so the
+    // browser can attach the multipart boundary automatically.
+    async create(formData: FormData): Promise<BackendResource> {
+      const cookieStore = await cookies();
+      const token = cookieStore.get('admin_token')?.value;
+      const res = await fetch(`${API_BASE}/api/resources/admin`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+        next: { revalidate: 0 },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json() as BackendResource;
+    },
+    // Multipart update: forwards FormData as-is. Do NOT set Content-Type so the
+    // browser can attach the multipart boundary automatically.
+    async update(id: string, formData: FormData): Promise<BackendResource> {
+      const cookieStore = await cookies();
+      const token = cookieStore.get('admin_token')?.value;
+      const res = await fetch(`${API_BASE}/api/resources/admin/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+        next: { revalidate: 0 },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json() as BackendResource;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/resources/admin/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/resources/admin/${id}`);
     },
   },
 

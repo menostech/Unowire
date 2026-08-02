@@ -28,6 +28,8 @@ ADMIN_MODULES = [
     {"id": "pages",          "label": "Pages",           "scope_aware": False, "scope_type": None},
     {"id": "messages",         "label": "Messages",         "scope_aware": False, "scope_type": None},
     {"id": "claims",         "label": "Claims",         "scope_aware": False, "scope_type": None},
+    {"id": "resource_cats",  "label": "Resource Cats",  "scope_aware": False, "scope_type": None},
+    {"id": "resource_list",  "label": "Resource List",  "scope_aware": True,  "scope_type": None},
 ]
 
 MODULE_BY_ID = {m["id"]: m for m in ADMIN_MODULES}

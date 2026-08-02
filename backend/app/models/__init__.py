@@ -7,6 +7,7 @@ from app.models.inquiry import Inquiry
 from app.models.manufacturer import Manufacturer
 from app.models.member import Member
 from app.models.menu import AdminMenuItem
+from app.models.resource import Resource, ResourceCategory
 from app.models.role import Role, RolePermission
 from app.models.system_message import SystemMessage, SystemMessageRead, SystemMessageUserRead
 from app.models.taxonomy import Category, Industry, ProductType
@@ -30,6 +31,8 @@ __all__ = [
     "Member",
     "ProductType",
     "RecommendedEquipment",
+    "Resource",
+    "ResourceCategory",
     "Role",
     "RolePermission",
     "SpecItem",

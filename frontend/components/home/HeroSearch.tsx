@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
 
-type TabKey = 'cable' | 'equipment';
+type TabKey = 'cable' | 'equipment' | 'terminal' | 'resources';
 
 const TABS: { key: TabKey; label: string; placeholder: string; action: string }[] = [
   {
@@ -19,10 +19,20 @@ const TABS: { key: TabKey; label: string; placeholder: string; action: string }[
     placeholder: 'Search equipment model or manufacturer...',
     action: '/equipment',
   },
+  {
+    key: 'terminal',
+    label: 'Terminal',
+    placeholder: 'Search terminal model or manufacturer...',
+    action: '/terminals',
+  },
 ];
 
-const POPULAR_CABLE_SEARCHES = ['UL1007', 'AVSS', 'UL1015', 'UL2468'];
-const POPULAR_EQUIPMENT_SEARCHES = ['Komax', 'Alpha 488', 'Gamma 333', 'KMV'];
+const POPULAR_SEARCHES: Record<TabKey, string[]> = {
+  cable: ['UL1007', 'AVSS', 'UL1015', 'UL2468'],
+  equipment: ['Komax', 'Alpha 488', 'Gamma 333', 'KMV'],
+  terminal: ['Ring Terminal', 'Butt Connector', 'Spade Terminal', 'Pin Terminal'],
+  resources: ['Installation Guide', 'Datasheet', 'CAD Drawing', 'Manual'],
+};
 
 export function HeroSearch() {
   const router = useRouter();
@@ -53,10 +63,10 @@ export function HeroSearch() {
     >
       <div className="w-full px-8 md:px-12 py-[120px] text-center">
         <h1 className="mb-3 text-4xl font-bold">
-          Cable &amp; Equipment Specs Database
+          Cable, Equipment &amp; Terminal Specs Database
         </h1>
         <p className="mb-8 text-lg opacity-90">
-          Query cable and equipment specifications. Browse by brand, category, and technical parameters.
+          Query cable, equipment and terminal specifications. Browse by brand, category, and technical parameters.
         </p>
 
         {/* Tabs */}
@@ -116,8 +126,8 @@ export function HeroSearch() {
 
         {/* Popular searches — per active tab */}
         {(() => {
-          const popular = activeTab === 'cable' ? POPULAR_CABLE_SEARCHES : POPULAR_EQUIPMENT_SEARCHES;
-          const basePath = activeTab === 'cable' ? '/cables' : '/equipment';
+          const popular = POPULAR_SEARCHES[activeTab];
+          const basePath = currentTab.action;
           return (
             <div className="mt-4 text-xs opacity-90">
               <span className="mr-2">Popular:</span>

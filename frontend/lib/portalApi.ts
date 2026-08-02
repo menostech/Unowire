@@ -40,6 +40,51 @@ async function portalGet<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+// === Backend response shapes (raw, un-adapted) ===
+// Portal resource endpoints return the same snake_case shape as the admin API.
+// Portal pages handle any adaptation needed for display.
+interface BackendResource {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  file_filename: string | null;
+  file_content_type: string | null;
+  file_size_bytes: number | null;
+  file_url_path: string | null;
+  external_url: string | null;
+  thumbnail_url: string | null;
+  scope_type: string | null;
+  scope_id: string | null;
+  download_count: number;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  category?: BackendResourceCategory | null;
+}
+
+interface BackendResourceCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  children?: BackendResourceCategory[];
+}
+
+interface PortalResourceListResponse {
+  items: BackendResource[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 export const portalApi = {
   auth: {
     async me(): Promise<PortalUser | null> {
@@ -117,6 +162,62 @@ export const portalApi = {
   terminalCategories: {
     async all(): Promise<TerminalCategoryTree[]> {
       return portalGet<TerminalCategoryTree[]>('/api/terminal-categories');
+    },
+  },
+  resourceCategories: {
+    // Public endpoint; portal users can read but not write categories.
+    // portal_token is forwarded anyway for consistency.
+    async all(): Promise<BackendResourceCategory[]> {
+      return portalGet<BackendResourceCategory[]>('/api/resource-categories');
+    },
+    async flat(): Promise<BackendResourceCategory[]> {
+      return portalGet<BackendResourceCategory[]>('/api/resource-categories/flat');
+    },
+  },
+  resources: {
+    async all(params?: { search?: string; category_id?: string; page?: number; page_size?: number }): Promise<PortalResourceListResponse> {
+      const qs = new URLSearchParams();
+      if (params?.search) qs.set('search', params.search);
+      if (params?.category_id) qs.set('category_id', params.category_id);
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.page_size != null) qs.set('page_size', String(params.page_size));
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return portalGet<PortalResourceListResponse>(`/api/portal/resources${suffix}`);
+    },
+    async getById(id: string): Promise<BackendResource> {
+      return portalGet<BackendResource>(`/api/portal/resources/${encodeURIComponent(id)}`);
+    },
+    // Multipart create: forwards FormData as-is. Do NOT set Content-Type so the
+    // browser can attach the multipart boundary automatically.
+    async create(formData: FormData): Promise<BackendResource> {
+      const cookieStore = await cookies();
+      const token = cookieStore.get('portal_token')?.value;
+      const res = await fetch(`${API_BASE}/api/portal/resources`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+        next: { revalidate: 0 },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json() as BackendResource;
+    },
+    // Multipart update: forwards FormData as-is. Do NOT set Content-Type so the
+    // browser can attach the multipart boundary automatically.
+    async update(id: string, formData: FormData): Promise<BackendResource> {
+      const cookieStore = await cookies();
+      const token = cookieStore.get('portal_token')?.value;
+      const res = await fetch(`${API_BASE}/api/portal/resources/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+        next: { revalidate: 0 },
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json() as BackendResource;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await portalFetch(`/api/portal/resources/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/portal/resources/${id}`);
     },
   },
   inquiries: {

@@ -27,6 +27,8 @@ export const ADMIN_PAGES: PageRegistryEntry[] = [
   { pageId: "site-menu",    href: "/admin/site-menu",                      defaultLabel: "Site Menu",    defaultIcon: "Menu" },
   { pageId: "messages",   href: "/admin/messages",                      defaultLabel: "Messages",      defaultIcon: "Megaphone" },
   { pageId: "claims",         href: "/admin/claims",                        defaultLabel: "Claims",           defaultIcon: "Shield" },
+  { pageId: "resources-list", href: "/admin/resources",                    defaultLabel: "Resources",        defaultIcon: "FileText" },
+  { pageId: "resources-cats", href: "/admin/resources/categories",         defaultLabel: "Categories",       defaultIcon: "FileText" },
 ];
 
 export const PAGE_BY_ID: Record<string, PageRegistryEntry> = Object.fromEntries(

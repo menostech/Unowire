@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, resource, resource_categories, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages, portal_resource
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -130,8 +130,12 @@ app.include_router(portal_inquiries.router)
 app.include_router(portal_media.router)
 app.include_router(portal_messages.router)
 app.include_router(portal_claim.router)
+app.include_router(resource.router, prefix=f"{settings.api_prefix}/resources", tags=["resources"])
+app.include_router(resource_categories.router, prefix=f"{settings.api_prefix}/resource-categories", tags=["resource-categories"])
+app.include_router(portal_resource.router)  # prefix baked in router
 
 # Mount media directory for static file serving
 media_dir = os.environ.get("MEDIA_DIR", "/app/media")
 os.makedirs(os.path.join(media_dir, "uploads"), exist_ok=True)
+os.makedirs(os.path.join(media_dir, "resources"), exist_ok=True)
 app.mount("/media", StaticFiles(directory=media_dir), name="media")
