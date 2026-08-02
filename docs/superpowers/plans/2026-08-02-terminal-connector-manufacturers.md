@@ -140,13 +140,13 @@ base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
 - `down_revision` points at the current Alembic head (verify with `alembic heads` before generating).
 
 **Steps:**
-- [ ] **Step 1: Read mirror source.** Read `backend/alembic/versions/e3f4a5b6c7d8_add_equipment_manufacturers_and_categories.py`.
-- [ ] **Step 2: Determine current head.** Run: `cd backend && alembic heads`
+- [x] **Step 1: Read mirror source.** Read `backend/alembic/versions/e3f4a5b6c7d8_add_equipment_manufacturers_and_categories.py`.
+- [x] **Step 2: Determine current head.** Run: `cd backend && alembic heads`
   Note the current head revision ID — it becomes `down_revision`.
-- [ ] **Step 3: Create the migration file.** Mirror the equipment migration: rename tables to `terminal_manufacturers`, `terminal_categories`, `terminals`; keep identical column definitions, FK `ondelete` rules, and unique constraints. Set `revision = "<new_id>"` and `down_revision = "<current_head>"`. Create tables in dependency order (manufacturers, categories, terminals); drop in reverse.
-- [ ] **Step 4: Apply and verify.** Run: `cd backend && alembic upgrade head`
+- [x] **Step 3: Create the migration file.** Mirror the equipment migration: rename tables to `terminal_manufacturers`, `terminal_categories`, `terminals`; keep identical column definitions, FK `ondelete` rules, and unique constraints. Set `revision = "<new_id>"` and `down_revision = "<current_head>"`. Create tables in dependency order (manufacturers, categories, terminals); drop in reverse.
+- [x] **Step 4: Apply and verify.** Run: `cd backend && alembic upgrade head`
   Expected: applies the new revision with no errors. Then run `alembic downgrade -1 && alembic upgrade head` to confirm reversibility.
-- [ ] **Step 5: Commit.** `git add backend/alembic/versions/<new_file>.py && git commit -m "feat(terminals): add alembic migration for terminal tables"`
+- [x] **Step 5: Commit.** `git add backend/alembic/versions/<new_file>.py && git commit -m "feat(terminals): add alembic migration for terminal tables"`
 
 ### Task 1.4: Add admin menu seed entries to the migration
 

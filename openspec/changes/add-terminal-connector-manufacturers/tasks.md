@@ -4,7 +4,7 @@
 
 - [x] 1.1 Create `backend/app/models/terminal.py` with `TerminalManufacturer`, `TerminalCategory` (2-level self-ref tree), and `Terminal` (product with `applicable_specs` JSONB) — mirror `equipment.py` field shapes
 - [x] 1.2 Export new models in `backend/app/models/__init__.py`
-- [ ] 1.3 Create Alembic migration for `terminal_manufacturers`, `terminal_categories`, `terminals` tables (mirror `e3f4a5b6c7d8` structure: FKs with RESTRICT on delete, unique constraints on slug, self-ref FK on categories)
+- [x] 1.3 Create Alembic migration for `terminal_manufacturers`, `terminal_categories`, `terminals` tables (mirror `e3f4a5b6c7d8` structure: FKs with RESTRICT on delete, unique constraints on slug, self-ref FK on categories)
 - [ ] 1.4 Add admin menu seed entries to the migration: `terminal-mfrs`, `terminal-cats`, `terminals` page IDs under a "Terminal & Connector" group
 
 ## 2. Backend Schemas & CRUD
