@@ -263,11 +263,11 @@ base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
 - Behavior (returns bool / raises) matches the equipment resolver exactly.
 
 **Steps:**
-- [ ] **Step 1: Read the file.** Read `backend/app/core/scope_resolvers.py`; note the equipment resolver's signature and return/raise convention.
-- [ ] **Step 2: Add `validate_terminal_manufacturer_exists`** mirroring the equipment resolver, using `crud_terminal_manufacturer.get(db, scope_id)`.
-- [ ] **Step 3: Register it** in `SCOPE_RESOLVERS` under `"terminal_manufacturer"`.
-- [ ] **Step 4: Verify.** Run: `cd backend && python -c "from app.core.scope_resolvers import SCOPE_RESOLVERS, validate_terminal_manufacturer_exists; assert 'terminal_manufacturer' in SCOPE_RESOLVERS; print('ok')"`
-- [ ] **Step 5: Commit.** `git add backend/app/core/scope_resolvers.py && git commit -m "feat(terminals): add terminal_manufacturer scope resolver"`
+- [x] **Step 1: Read the file.** Read `backend/app/core/scope_resolvers.py`; note the equipment resolver's signature and return/raise convention.
+- [x] **Step 2: Add `validate_terminal_manufacturer_exists`** mirroring the equipment resolver, using `crud_terminal_manufacturer.get(db, scope_id)`.
+- [x] **Step 3: Register it** in `SCOPE_RESOLVERS` under `"terminal_manufacturer"`.
+- [x] **Step 4: Verify.** Run: `cd backend && python -c "from app.core.scope_resolvers import SCOPE_RESOLVERS, validate_terminal_manufacturer_exists; assert 'terminal_manufacturer' in SCOPE_RESOLVERS; print('ok')"`
+- [x] **Step 5: Commit.** `git add backend/app/core/scope_resolvers.py && git commit -m "feat(terminals): add terminal_manufacturer scope resolver"`
 
 ### Task 3.3: Add portal permission matrix entry in `deps.py`
 
