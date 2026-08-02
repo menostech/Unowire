@@ -1,7 +1,8 @@
 """Seed portal test users for local development.
 
-Creates cable_manager@test.com and equip_manager@test.com with password
-test123456, idempotent. Run inside the backend container:
+Creates cable_manager@test.com, equip_manager@test.com, and
+terminal_manager@test.com with password test123456, idempotent.
+Run inside the backend container:
     docker exec unowire-backend-1 python scripts/seed_portal_users.py
 """
 import asyncio
@@ -65,7 +66,32 @@ async def _seed() -> None:
             {"ph": hash_password("test123456")},
         )
 
-    # Ensure media folders exist for both scopes (idempotent)
+        # terminal_manager@test.com (terminal_manufacturer scope)
+        await conn.execute(
+            text(
+                "INSERT INTO roles (id, name, scope_type, is_system) "
+                "VALUES ('terminal_manager_test', 'Terminal Manager Test', 'terminal_manufacturer', false) "
+                "ON CONFLICT (id) DO NOTHING"
+            )
+        )
+        for mod in ("media", "terminal_mfrs"):
+            await conn.execute(
+                text(
+                    "INSERT INTO role_permissions (role_id, module) "
+                    "VALUES ('terminal_manager_test', :mod) ON CONFLICT DO NOTHING"
+                ),
+                {"mod": mod},
+            )
+        await conn.execute(
+            text(
+                "INSERT INTO users (email, password_hash, role_id, scope_id, is_active, created_at, updated_at) "
+                "VALUES ('terminal_manager@test.com', :ph, 'terminal_manager_test', 'panduit', true, NOW(), NOW()) "
+                "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash"
+            ),
+            {"ph": hash_password("test123456")},
+        )
+
+    # Ensure media folders exist for all scopes (idempotent)
     from app.core.database import async_session
 
     async with async_session() as s:
