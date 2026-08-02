@@ -195,11 +195,11 @@ export const portalApiClient = {
         });
         return res.json();
       },
-      async csvTemplate(): Promise<Blob> {
+      async downloadCsvTemplate(): Promise<Blob> {
         const res = await bffFetch('/api/portal/terminals/import/csv-template');
         return res.blob();
       },
-      async jsonExample(): Promise<Blob> {
+      async downloadJsonExample(): Promise<Blob> {
         const res = await bffFetch('/api/portal/terminals/import/json-example');
         return res.blob();
       },
