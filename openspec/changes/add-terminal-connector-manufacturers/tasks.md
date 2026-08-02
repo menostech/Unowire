@@ -27,7 +27,7 @@
 - [x] 4.4 Create `backend/app/api/routes/terminal_import.py` → `/api/admin/terminals/import` — POST /validate, POST /commit (dep `terminal_list`) — mirror `routes/equipment_import.py`
 - [x] 4.5 Create `backend/app/api/routes/terminal_import_templates.py` → `/api/admin/terminals/import` — GET /csv-template, GET /json-example — mirror `routes/equipment_import_templates.py`
 - [x] 4.6 Create `backend/app/services/terminal_import.py` import service — mirror `services/equipment_import.py`
-- [ ] 4.7 Register all public/admin terminal routers in `backend/app/main.py`
+- [x] 4.7 Register all public/admin terminal routers in `backend/app/main.py`
 
 ## 5. Backend API Routes (Portal)
 
