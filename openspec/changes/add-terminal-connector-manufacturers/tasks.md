@@ -14,7 +14,7 @@
 
 ## 3. Backend Core Registration
 
-- [ ] 3.1 Add admin modules `terminal_mfrs`, `terminal_cats`, `terminal_list` to `backend/app/core/modules.py` `ADMIN_MODULES` with scope_type `terminal_manufacturer` for mfrs/list; add `"terminal_manufacturer"` to `VALID_SCOPE_TYPES`
+- [x] 3.1 Add admin modules `terminal_mfrs`, `terminal_cats`, `terminal_list` to `backend/app/core/modules.py` `ADMIN_MODULES` with scope_type `terminal_manufacturer` for mfrs/list; add `"terminal_manufacturer"` to `VALID_SCOPE_TYPES`
 - [ ] 3.2 Add `validate_terminal_manufacturer_exists` to `backend/app/core/scope_resolvers.py` and register in `SCOPE_RESOLVERS` map
 - [ ] 3.3 Add portal permission matrix entry `"terminal_manufacturer": {"dashboard", "terminals", "inquiries", "media", "me", "messages"}` to `_FACTORY_ALLOWED_BY_SCOPE` in `backend/app/api/deps.py`
 - [ ] 3.4 Add `"terminal_manufacturer": "Terminal Manufacturers"` to `CONTAINER_NAMES` in `backend/app/crud/folder.py`

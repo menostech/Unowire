@@ -241,11 +241,11 @@ base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
 - Importing `app.core.modules` succeeds.
 
 **Steps:**
-- [ ] **Step 1: Read the file.** Read `backend/app/core/modules.py`; locate the equipment module definitions and `VALID_SCOPE_TYPES`.
-- [ ] **Step 2: Add the three terminal modules** mirroring the equipment entries (same fields: id, label, scope_aware, scope_type, icon/sort if present).
-- [ ] **Step 3: Append `"terminal_manufacturer"`** to `VALID_SCOPE_TYPES`.
-- [ ] **Step 4: Verify.** Run: `cd backend && python -c "from app.core.modules import ADMIN_MODULES, VALID_SCOPE_TYPES; assert 'terminal_mfrs' in ADMIN_MODULES and 'terminal_manufacturer' in VALID_SCOPE_TYPES; print('ok')"`
-- [ ] **Step 5: Commit.** `git add backend/app/core/modules.py && git commit -m "feat(terminals): register admin modules and scope type"`
+- [x] **Step 1: Read the file.** Read `backend/app/core/modules.py`; locate the equipment module definitions and `VALID_SCOPE_TYPES`.
+- [x] **Step 2: Add the three terminal modules** mirroring the equipment entries (same fields: id, label, scope_aware, scope_type, icon/sort if present).
+- [x] **Step 3: Append `"terminal_manufacturer"`** to `VALID_SCOPE_TYPES`.
+- [x] **Step 4: Verify.** Run: `cd backend && python -c "from app.core.modules import ADMIN_MODULES, VALID_SCOPE_TYPES; assert 'terminal_mfrs' in ADMIN_MODULES and 'terminal_manufacturer' in VALID_SCOPE_TYPES; print('ok')"`
+- [x] **Step 5: Commit.** `git add backend/app/core/modules.py && git commit -m "feat(terminals): register admin modules and scope type"`
 
 ### Task 3.2: Add scope resolver in `scope_resolvers.py`
 
