@@ -91,8 +91,22 @@ def upgrade():
         ON CONFLICT (id) DO NOTHING
     """)
 
+    # 5. Seed the global container folder for terminal manufacturers.
+    # Mirrors the container-folder seeds in revision f6b7c8d9e0f1.
+    # CRUDFolder.provision_for_manufacturer uses scalar_one() to look up this row,
+    # so it must exist before any terminal-manufacturer media operation runs.
+    op.execute(
+        sa.text("INSERT INTO media_folders (name, parent_id, scope_type, scope_id, created_at) "
+                "VALUES ('Terminal Manufacturers', NULL, NULL, NULL, NOW())")
+    )
+
 
 def downgrade():
+    # Remove the terminal-manufacturers container folder seed first.
+    op.execute(
+        sa.text("DELETE FROM media_folders WHERE name = 'Terminal Manufacturers' AND scope_type IS NULL")
+    )
+
     # Remove seeded admin menu rows (children first, then group) before dropping tables.
     op.execute("""
         DELETE FROM admin_menu_items
