@@ -71,11 +71,13 @@ async def _seed() -> None:
     async with async_session() as s:
         await crud_folder.ensure_default(s, scope_type="manufacturer", scope_id="mfr-1")
         await crud_folder.ensure_default(s, scope_type="equipment_manufacturer", scope_id="em-1")
+        await crud_folder.ensure_default(s, scope_type="terminal_manufacturer", scope_id="panduit")
         await s.commit()
 
     print("Portal test users seeded successfully:")
     print("  cable_manager@test.com / test123456 (manufacturer scope, mfr-1)")
     print("  equip_manager@test.com / test123456 (equipment_manufacturer scope, em-1)")
+    print("  terminal_manager@test.com / test123456 (terminal_manufacturer scope, panduit)")
 
 
 if __name__ == "__main__":

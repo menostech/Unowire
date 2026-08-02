@@ -322,6 +322,9 @@ async def main(dry_run: bool):
         print("Seeding recommended equipment...")
         await seed_equipment(db, dry_run)
 
+        print("Seeding recommended terminals...")
+        await seed_terminals(db, dry_run)
+
         print("Seeding admin account...")
         await seed_admin(db, dry_run)
 
