@@ -117,11 +117,11 @@ base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
 - Ordering/naming convention matches the equipment exports.
 
 **Steps:**
-- [ ] **Step 1: Read the current file.** Read `backend/app/models/__init__.py`.
-- [ ] **Step 2: Add exports.** Append imports/exports for the three new classes, mirroring how `EquipmentManufacturer`, `EquipmentCategory`, `Equipment` are exported (same `__all__` ordering style).
-- [ ] **Step 3: Verify import.** Run: `cd backend && python -c "from app.models import TerminalManufacturer, TerminalCategory, Terminal; print('ok')"`
+- [x] **Step 1: Read the current file.** Read `backend/app/models/__init__.py`.
+- [x] **Step 2: Add exports.** Append imports/exports for the three new classes, mirroring how `EquipmentManufacturer`, `EquipmentCategory`, `Equipment` are exported (same `__all__` ordering style).
+- [x] **Step 3: Verify import.** Run: `cd backend && python -c "from app.models import TerminalManufacturer, TerminalCategory, Terminal; print('ok')"`
   Expected: prints `ok`.
-- [ ] **Step 4: Commit.** `git add backend/app/models/__init__.py && git commit -m "feat(terminals): export new models from models package"`
+- [x] **Step 4: Commit.** `git add backend/app/models/__init__.py && git commit -m "feat(terminals): export new models from models package"`
 
 ### Task 1.3: Create Alembic migration for the three tables
 
