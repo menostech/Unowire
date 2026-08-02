@@ -21,9 +21,9 @@
 
 ## 4. Backend API Routes (Public/Admin)
 
-- [ ] 4.1 Create `backend/app/api/routes/terminals.py` → mounted at `/api/terminals` — list (with cable_id matching, q, category_id, manufacturer_id filters), detail, create/update/delete (operator deps `terminal_list`, scope check for terminal_manufacturer role) — mirror `routes/equipment.py`
-- [ ] 4.2 Create `backend/app/api/routes/terminal_manufacturers.py` → `/api/terminal-manufacturers` — CRUD with media folder provisioning on create, rename on update, cleanup on delete; scope check for terminal_manufacturer role — mirror `routes/equipment_manufacturers.py`
-- [ ] 4.3 Create `backend/app/api/routes/terminal_categories.py` → `/api/terminal-categories` — tree list, detail, create/update/delete with 2-level depth enforcement and child-existence delete guard — mirror `routes/equipment_categories.py`
+- [x] 4.1 Create `backend/app/api/routes/terminals.py` → mounted at `/api/terminals` — list (with cable_id matching, q, category_id, manufacturer_id filters), detail, create/update/delete (operator deps `terminal_list`, scope check for terminal_manufacturer role) — mirror `routes/equipment.py`
+- [x] 4.2 Create `backend/app/api/routes/terminal_manufacturers.py` → `/api/terminal-manufacturers` — CRUD with media folder provisioning on create, rename on update, cleanup on delete; scope check for terminal_manufacturer role — mirror `routes/equipment_manufacturers.py`
+- [x] 4.3 Create `backend/app/api/routes/terminal_categories.py` → `/api/terminal-categories` — tree list, detail, create/update/delete with 2-level depth enforcement and child-existence delete guard — mirror `routes/equipment_categories.py`
 - [ ] 4.4 Create `backend/app/api/routes/terminal_import.py` → `/api/admin/terminals/import` — POST /validate, POST /commit (dep `terminal_list`) — mirror `routes/equipment_import.py`
 - [ ] 4.5 Create `backend/app/api/routes/terminal_import_templates.py` → `/api/admin/terminals/import` — GET /csv-template, GET /json-example — mirror `routes/equipment_import_templates.py`
 - [ ] 4.6 Create `backend/app/services/terminal_import.py` import service — mirror `services/equipment_import.py`
