@@ -5,6 +5,9 @@ import type {
   PortalEquipment,
   PortalEquipmentCreate,
   PortalEquipmentUpdate,
+  PortalTerminal,
+  PortalTerminalCreate,
+  PortalTerminalUpdate,
   PortalFolder,
   PortalFolderCreate,
   PortalInquiry,
@@ -147,6 +150,57 @@ export const portalApiClient = {
       },
       async downloadJsonExample(): Promise<Blob> {
         const res = await bffFetch('/api/portal/equipment/import/json-example');
+        return res.blob();
+      },
+    },
+  },
+  terminals: {
+    async create(data: PortalTerminalCreate): Promise<PortalTerminal> {
+      const res = await bffFetch('/api/portal/terminals', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+    async update(id: string, data: PortalTerminalUpdate): Promise<PortalTerminal> {
+      const res = await bffFetch(`/api/portal/terminals/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+    async remove(id: string): Promise<void> {
+      await bffFetch(`/api/portal/terminals/${id}`, { method: 'DELETE' });
+    },
+    import: {
+      async validate(file: File, format: ImportFormat): Promise<ImportPreview> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('format', format);
+        const res = await bffFetch('/api/portal/terminals/import/validate', {
+          method: 'POST',
+          body: formData,
+          skipDefaultContentType: true,
+        });
+        return res.json();
+      },
+      async commit(file: File, format: ImportFormat): Promise<ImportResult> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('format', format);
+        const res = await bffFetch('/api/portal/terminals/import/commit', {
+          method: 'POST',
+          body: formData,
+          skipDefaultContentType: true,
+        });
+        return res.json();
+      },
+      async csvTemplate(): Promise<Blob> {
+        const res = await bffFetch('/api/portal/terminals/import/csv-template');
+        return res.blob();
+      },
+      async jsonExample(): Promise<Blob> {
+        const res = await bffFetch('/api/portal/terminals/import/json-example');
         return res.blob();
       },
     },

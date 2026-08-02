@@ -144,6 +144,48 @@ interface BackendEquipment {
   category: BackendEquipmentCategory | null;
 }
 
+interface BackendTerminalManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+}
+
+interface BackendTerminalCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  // Present on tree endpoints (list/get), absent on flat reads (POST/PUT/nested)
+  children?: BackendTerminalCategory[];
+}
+
+interface BackendTerminal {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: Record<string, unknown>[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: BackendTerminalManufacturer | null;
+  category: BackendTerminalCategory | null;
+}
+
 interface ClaimRequestWithManufacturer {
   id: string;
   manufacturer_type: string;
@@ -585,6 +627,95 @@ export const adminApi = {
     async remove(id: string): Promise<void> {
       const res = await adminFetch(`/api/recommended-equipments/${encodeURIComponent(id)}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`API ${res.status}: /api/recommended-equipments/${id}`);
+    },
+  },
+
+  terminalManufacturers: {
+    async all(page = 1, page_size = 20): Promise<{ items: BackendTerminalManufacturer[]; total: number }> {
+      const data = await adminGet<ListResponse<BackendTerminalManufacturer>>(
+        `/api/terminal-manufacturers?page=${page}&page_size=${page_size}`
+      );
+      return { items: data.items, total: data.total };
+    },
+    async getById(id: string): Promise<BackendTerminalManufacturer | null> {
+      try {
+        return await adminGet<BackendTerminalManufacturer>(`/api/terminal-manufacturers/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendTerminalManufacturer> {
+      const res = await adminFetch('/api/terminal-manufacturers', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-manufacturers`);
+      return await res.json() as BackendTerminalManufacturer;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendTerminalManufacturer> {
+      const res = await adminFetch(`/api/terminal-manufacturers/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-manufacturers/${id}`);
+      return await res.json() as BackendTerminalManufacturer;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/terminal-manufacturers/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-manufacturers/${id}`);
+    },
+  },
+
+  terminalCategories: {
+    async all(): Promise<BackendTerminalCategory[]> {
+      return await adminGet<BackendTerminalCategory[]>('/api/terminal-categories');
+    },
+    async getById(id: string): Promise<BackendTerminalCategory | null> {
+      try {
+        return await adminGet<BackendTerminalCategory>(`/api/terminal-categories/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendTerminalCategory> {
+      const res = await adminFetch('/api/terminal-categories', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-categories`);
+      return await res.json() as BackendTerminalCategory;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendTerminalCategory> {
+      const res = await adminFetch(`/api/terminal-categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-categories/${id}`);
+      return await res.json() as BackendTerminalCategory;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/terminal-categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-categories/${id}`);
+    },
+  },
+
+  terminals: {
+    async all(page = 1, page_size = 20, filters?: { category_id?: string; manufacturer_id?: string; q?: string }): Promise<{ items: BackendTerminal[]; total: number }> {
+      const params = new URLSearchParams({ page: String(page), page_size: String(page_size) });
+      if (filters?.category_id) params.set('category_id', filters.category_id);
+      if (filters?.manufacturer_id) params.set('manufacturer_id', filters.manufacturer_id);
+      if (filters?.q) params.set('q', filters.q);
+      const data = await adminGet<ListResponse<BackendTerminal>>(`/api/terminals?${params.toString()}`);
+      return { items: data.items, total: data.total };
+    },
+    async getById(id: string): Promise<BackendTerminal | null> {
+      try {
+        return await adminGet<BackendTerminal>(`/api/terminals/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendTerminal> {
+      const res = await adminFetch('/api/terminals', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminals`);
+      return await res.json() as BackendTerminal;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendTerminal> {
+      const res = await adminFetch(`/api/terminals/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminals/${id}`);
+      return await res.json() as BackendTerminal;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/terminals/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/terminals/${id}`);
     },
   },
 

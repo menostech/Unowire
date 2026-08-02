@@ -4,6 +4,7 @@ import type {
   Industry, Manufacturer, ProductTypeConfig, RecommendedEquipment,
   SizeSystem, SpecItem, SpecType, Taxonomy, TaxonomyCategory,
   TaxonomyIndustry,
+  Terminal, TerminalCategory, TerminalManufacturer,
 } from './types';
 
 import categoriesData from '@/data/categories.json';
@@ -188,6 +189,48 @@ interface BackendEquipment {
   external_url: string | null;
   sort_order: number;
   manufacturer: BackendEquipmentManufacturer | null;
+  category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
+}
+
+interface BackendTerminalManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BackendTerminalCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  children: BackendTerminalCategory[];
+}
+
+interface BackendTerminal {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: ApplicableSpecRule[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: BackendTerminalManufacturer | null;
   category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
 }
 
@@ -386,6 +429,64 @@ function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
   };
 }
 
+function adaptTerminalManufacturer(m: BackendTerminalManufacturer | null | undefined): TerminalManufacturer | null {
+  if (!m) return null;
+  return {
+    id: m.id,
+    name: m.name,
+    slug: m.slug,
+    country: m.country ?? null,
+    website: m.website ?? null,
+    image_url: m.image_url ?? null,
+    description: m.description ?? null,
+    founded_year: m.founded_year ?? null,
+    address: m.address ?? null,
+    phone: m.phone ?? null,
+    email: m.email ?? null,
+    sort_order: m.sort_order ?? 0,
+    created_at: m.created_at ?? '',
+    updated_at: m.updated_at ?? '',
+  };
+}
+
+function adaptTerminalCategory(c: BackendTerminalCategory | null | undefined): TerminalCategory | null {
+  if (!c) return null;
+  return {
+    id: c.id,
+    parent_id: c.parent_id ?? null,
+    label: c.label,
+    slug: c.slug,
+    description: c.description ?? null,
+    image_url: c.image_url ?? null,
+    children: (c.children ?? []).map(child => adaptTerminalCategory(child)!),
+  };
+}
+
+function adaptTerminal(e: BackendTerminal): Terminal {
+  return {
+    id: e.id,
+    manufacturer_id: e.manufacturer_id,
+    category_id: e.category_id,
+    model: e.model,
+    slug: e.slug,
+    applicable_specs: e.applicable_specs ?? [],
+    description: e.description ?? null,
+    image_url: e.image_url ?? null,
+    external_url: e.external_url ?? null,
+    sort_order: e.sort_order ?? 0,
+    manufacturer: adaptTerminalManufacturer(e.manufacturer),
+    category: e.category ? {
+      id: e.category.id,
+      parent_id: e.category.parent_id,
+      label: e.category.label,
+      slug: e.category.slug,
+      description: e.category.description,
+      image_url: e.category.image_url,
+      children: [],
+    } : null,
+  };
+}
+
 // === Helper functions ===
 export function getCableUrl(cable: Cable): string {
   const manufacturerSlug = (cable as unknown as Record<string, unknown>).manufacturer_slug as string | undefined;
@@ -543,6 +644,65 @@ export const api = {
       try {
         const data = await fetchWithCache<BackendEquipmentCategory>(`/api/equipment-categories/${encodeURIComponent(id)}`);
         return adaptEquipmentCategory(data);
+      } catch {
+        return null;
+      }
+    },
+  },
+
+  terminals: {
+    async all(): Promise<Terminal[]> {
+      const res = await fetchWithCache<{ items: BackendTerminal[] }>(
+        '/api/terminals?page_size=999'
+      );
+      return res.items.map(adaptTerminal);
+    },
+    async byCable(cableId: string): Promise<Terminal[]> {
+      const res = await fetchWithCache<{ items: BackendTerminal[] }>(
+        `/api/terminals?cable_id=${encodeURIComponent(cableId)}`
+      );
+      return res.items.map(adaptTerminal);
+    },
+    async getBySlug(slug: string): Promise<Terminal | null> {
+      try {
+        const data = await fetchWithCache<BackendTerminal>(`/api/terminals/${encodeURIComponent(slug)}`);
+        return adaptTerminal(data);
+      } catch {
+        return null;
+      }
+    },
+  },
+
+  terminalManufacturers: {
+    async all(): Promise<TerminalManufacturer[]> {
+      const res = await fetchWithCache<{ items: BackendTerminalManufacturer[]; total: number; page: number; page_size: number }>(
+        '/api/terminal-manufacturers?page_size=999'
+      );
+      return (res.items ?? []).map(adaptTerminalManufacturer).filter((m): m is TerminalManufacturer => m !== null);
+    },
+    async getById(id: string): Promise<TerminalManufacturer | null> {
+      try {
+        const data = await fetchWithCache<BackendTerminalManufacturer>(`/api/terminal-manufacturers/${encodeURIComponent(id)}`);
+        return adaptTerminalManufacturer(data);
+      } catch {
+        return null;
+      }
+    },
+    async getBySlug(slug: string): Promise<TerminalManufacturer | null> {
+      const all = await this.all();
+      return all.find((m) => m.slug === slug) ?? null;
+    },
+  },
+
+  terminalCategories: {
+    async tree(): Promise<TerminalCategory[]> {
+      const data = await fetchWithCache<BackendTerminalCategory[]>('/api/terminal-categories');
+      return (data ?? []).map(c => adaptTerminalCategory(c)!).filter((c): c is TerminalCategory => c !== null);
+    },
+    async getById(id: string): Promise<TerminalCategory | null> {
+      try {
+        const data = await fetchWithCache<BackendTerminalCategory>(`/api/terminal-categories/${encodeURIComponent(id)}`);
+        return adaptTerminalCategory(data);
       } catch {
         return null;
       }

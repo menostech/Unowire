@@ -165,6 +165,76 @@ export interface RecommendedEquipmentResult {
   explanation: { spec_key: string; label: string; matched_value: string | number }[];
 }
 
+// === Terminals ===
+export interface TerminalManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TerminalCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  // `children` is present on the tree endpoint (list), absent on flat reads
+  // (e.g. nested category inside Terminal). Always use `?? []`.
+  children?: TerminalCategory[];
+}
+
+export interface Terminal {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: ApplicableSpecRule[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: TerminalManufacturer | null;
+  category: TerminalCategory | null;
+}
+
+export interface TerminalFilterParams {
+  q?: string;
+  category_ids?: string[];
+  manufacturer_ids?: string[];
+  spec_filters?: Record<string, { min?: number; max?: number; values?: string[] }>;
+}
+
+export interface TerminalFilterFacets {
+  manufacturers: { id: string; name: string; count: number }[];
+  categories: { id: string; label: string; parent_id: string | null; count: number }[];
+  spec_facets: Record<string, {
+    type: "range" | "enum";
+    min?: number; max?: number;
+    values?: { value: string; count: number }[];
+  }>;
+}
+
+export interface TerminalListResponse {
+  items: Terminal[];
+  total: number;
+  page: number;
+  page_size: number;
+  facets: TerminalFilterFacets;
+}
+
 // === Filter / Query Params ===
 // NOTE: industry/category/product_type are REQUIRED route params (not query string).
 // They are part of this interface so filterCables receives a single params object.
