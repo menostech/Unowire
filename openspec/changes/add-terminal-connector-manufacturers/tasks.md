@@ -31,9 +31,9 @@
 
 ## 5. Backend API Routes (Portal)
 
-- [ ] 5.1 Create `backend/app/api/routes/portal_terminals.py` → prefix `/api/portal/terminals`, tag `portal-termals` (dep `require_factory_module("terminals")`) — scope-filtered list/detail/update/create/delete, force manufacturer_id on create, server-generate ID — mirror `routes/portal_equipment.py`
-- [ ] 5.2 Create `backend/app/api/routes/portal_terminal_import.py` → prefix `/api/portal/terminals/import` — POST /validate, POST /commit with `_force_manufacturer_id`, GET /csv-template, GET /json-example — mirror `routes/portal_equipment_import.py`
-- [ ] 5.3 Register portal terminal routers in `backend/app/main.py`
+- [x] 5.1 Create `backend/app/api/routes/portal_terminals.py` → prefix `/api/portal/terminals`, tag `portal-termals` (dep `require_factory_module("terminals")`) — scope-filtered list/detail/update/create/delete, force manufacturer_id on create, server-generate ID — mirror `routes/portal_equipment.py`
+- [x] 5.2 Create `backend/app/api/routes/portal_terminal_import.py` → prefix `/api/portal/terminals/import` — POST /validate, POST /commit with `_force_manufacturer_id`, GET /csv-template, GET /json-example — mirror `routes/portal_equipment_import.py`
+- [x] 5.3 Register portal terminal routers in `backend/app/main.py`
 
 ## 6. Frontend API Clients & Lib
 
