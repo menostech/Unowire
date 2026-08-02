@@ -10,6 +10,7 @@ from app.models.menu import AdminMenuItem
 from app.models.role import Role, RolePermission
 from app.models.system_message import SystemMessage, SystemMessageRead, SystemMessageUserRead
 from app.models.taxonomy import Category, Industry, ProductType
+from app.models.terminal import Terminal, TerminalCategory, TerminalManufacturer
 from app.models.upload import Upload
 from app.models.user import AuditLog, User
 
@@ -35,6 +36,9 @@ __all__ = [
     "SystemMessage",
     "SystemMessageRead",
     "SystemMessageUserRead",
+    "Terminal",
+    "TerminalCategory",
+    "TerminalManufacturer",
     "Upload",
     "User",
 ]
