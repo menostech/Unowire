@@ -37,9 +37,9 @@
 
 ## 6. Frontend API Clients & Lib
 
-- [ ] 6.1 Add `terminals`, `terminalManufacturers`, `terminalCategories` namespaces to `frontend/lib/api.ts` (public client) with adapter functions — mirror equipment namespaces
-- [ ] 6.2 Add `adminApi.terminals`, `adminApi.terminalManufacturers`, `adminApi.terminalCategories` to `frontend/lib/adminApi.ts` — mirror equipment admin namespaces
-- [ ] 6.3 Add portal terminal API methods to portal API client (list, getById, create, update, delete, import validate/commit, csv-template, json-example) — mirror portal equipment methods
+- [x] 6.1 Add `terminals`, `terminalManufacturers`, `terminalCategories` namespaces to `frontend/lib/api.ts` (public client) with adapter functions — mirror equipment namespaces
+- [x] 6.2 Add `adminApi.terminals`, `adminApi.terminalManufacturers`, `adminApi.terminalCategories` to `frontend/lib/adminApi.ts` — mirror equipment admin namespaces
+- [x] 6.3 Add portal terminal API methods to portal API client (list, getById, create, update, delete, import validate/commit, csv-template, json-example) — mirror portal equipment methods
 - [ ] 6.4 Create `frontend/lib/terminalFilter.ts` — pure in-memory filter + facet builder — mirror `lib/equipmentFilter.ts`
 - [ ] 6.5 Create `frontend/lib/clientTerminalImport.ts` — import client — mirror `lib/clientEquipmentImport.ts`
 
