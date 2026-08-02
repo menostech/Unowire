@@ -1,4 +1,4 @@
-export type PortalScopeType = 'manufacturer' | 'equipment_manufacturer';
+export type PortalScopeType = 'manufacturer' | 'equipment_manufacturer' | 'terminal_manufacturer';
 
 export interface PortalUser {
   id: number;
