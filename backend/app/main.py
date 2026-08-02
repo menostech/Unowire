@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_inquiries, portal_media, portal_messages
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_inquiries, portal_media, portal_messages
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -94,6 +94,11 @@ app.include_router(equipment_manufacturers.router, prefix=f"{settings.api_prefix
 app.include_router(equipment_categories.router, prefix=f"{settings.api_prefix}/equipment-categories", tags=["equipment-categories"])
 app.include_router(equipment_import.router, prefix=f"{settings.api_prefix}/admin/equipment/import", tags=["equipment-import"])
 app.include_router(equipment_import_templates.router, prefix=f"{settings.api_prefix}/admin/equipment/import", tags=["equipment-import"])
+app.include_router(terminals.router, prefix=f"{settings.api_prefix}/terminals", tags=["terminals"])
+app.include_router(terminal_manufacturers.router, prefix=f"{settings.api_prefix}/terminal-manufacturers", tags=["terminal-manufacturers"])
+app.include_router(terminal_categories.router, prefix=f"{settings.api_prefix}/terminal-categories", tags=["terminal-categories"])
+app.include_router(terminal_import.router, prefix=f"{settings.api_prefix}/admin/terminals/import", tags=["terminal-import"])
+app.include_router(terminal_import_templates.router, prefix=f"{settings.api_prefix}/admin/terminals/import", tags=["terminal-import"])
 app.include_router(admin_menu.router, prefix=f"{settings.api_prefix}/admin/menu", tags=["admin-menu"])
 app.include_router(admin_roles.router, prefix=f"{settings.api_prefix}/admin/roles", tags=["admin-roles"])
 app.include_router(admin_users.router, prefix=f"{settings.api_prefix}/admin/users", tags=["admin-users"])
