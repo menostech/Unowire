@@ -1,4 +1,6 @@
 import logging
+import asyncio
+from contextlib import asynccontextmanager
 import mimetypes
 
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
@@ -50,6 +52,7 @@ async def http_exception_handler(request: Request, exc: FastAPIHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.detail if isinstance(exc.detail, dict) else {"code": exc.status_code, "message": str(exc.detail)},
+        headers=exc.headers,
     )
 
 
