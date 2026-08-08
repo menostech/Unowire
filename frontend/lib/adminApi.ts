@@ -1348,7 +1348,6 @@ export const adminApi = {
     },
   },
 
-
   subscriptions: {
     async list(params?: { plan?: string; status?: string }): Promise<any[]> {
       const qs = new URLSearchParams();
