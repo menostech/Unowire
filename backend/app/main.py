@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, resource, resource_categories, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages, portal_resource
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, post, post_categories, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, member_subscription, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, resource, resource_categories, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages, portal_resource
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -108,6 +108,8 @@ app.include_router(folders.router, prefix=f"{settings.api_prefix}/admin/folders"
 app.include_router(cable_import.router, prefix=f"{settings.api_prefix}/admin/cables/import", tags=["cable-import"])
 app.include_router(cable_import_templates.router, prefix=f"{settings.api_prefix}/admin/cables/import", tags=["cable-import"])
 app.include_router(member.router)
+app.include_router(member_subscription.router)
+app.include_router(member_subscription.enterprise_router)
 app.include_router(admin_inquiries.router)
 app.include_router(admin_email.router)
 app.include_router(admin_members.router)
@@ -133,6 +135,8 @@ app.include_router(portal_claim.router)
 app.include_router(resource.router, prefix=f"{settings.api_prefix}/resources", tags=["resources"])
 app.include_router(resource_categories.router, prefix=f"{settings.api_prefix}/resource-categories", tags=["resource-categories"])
 app.include_router(portal_resource.router)  # prefix baked in router
+app.include_router(post.router, prefix=f"{settings.api_prefix}/posts", tags=["posts"])
+app.include_router(post_categories.router, prefix=f"{settings.api_prefix}/post-categories", tags=["post-categories"])
 
 # Mount media directory for static file serving
 media_dir = os.environ.get("MEDIA_DIR", "/app/media")
