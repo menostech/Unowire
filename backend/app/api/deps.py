@@ -155,6 +155,23 @@ async def get_current_member(
     return member
 
 
+async def get_optional_current_member(
+    token: str | None = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Member | None:
+    """Like get_current_member but returns None for anonymous requests instead of 401.
+    Used by require_quota so public endpoints stay anonymous while members are metered."""
+    if token is None:
+        return None
+    payload = decode_member_token(token)
+    if payload is None:
+        return None
+    member = await db.get(Member, int(payload["sub"]))
+    if member is None or not member.is_active:
+        return None
+    return member
+
+
 def get_media_scope(user: User = Depends(get_current_user)) -> tuple[str | None, str | None]:
     """Returns (scope_type, scope_id) for media filtering.
 
@@ -164,3 +181,48 @@ def get_media_scope(user: User = Depends(get_current_user)) -> tuple[str | None,
     if user.role and user.role.scope_type in ("manufacturer", "equipment_manufacturer"):
         return (user.role.scope_type, user.scope_id)
     return (None, None)
+
+
+def require_quota(action: str):
+    """Factory: FastAPI dependency that meters a member action (search/detail_view/download).
+
+    Anonymous requests pass through unmetered. Authenticated members are checked
+    against their effective plan limits and incremented atomically. Over-limit
+    raises HTTP 429 with X-RateLimit-Remaining: 0."""
+    if action not in ("search", "detail_view", "download"):
+        raise ValueError(f"unknown quota action: {action}")
+
+    async def checker(
+        member: Member | None = Depends(get_optional_current_member),
+        db: AsyncSession = Depends(get_db),
+    ) -> Member | None:
+        if member is None:
+            return None  # anonymous — no metering
+
+        from app.services.subscription import SubscriptionService
+        from app.services.usage import UsageService
+
+        tier, limits = await SubscriptionService(db).resolve_effective_plan(member.id)
+        limit_map = {
+            "search": limits["search_limit_daily"],
+            "detail_view": limits["detail_view_limit_daily"],
+            "download": limits["download_limit_monthly"],
+        }
+        limit = limit_map[action]
+
+        if limit == 0:
+            # Unlimited — record usage but never block.
+            await UsageService(db).increment_usage(member.id, action)
+            return member
+
+        allowed = await UsageService(db).increment_and_check(member.id, action, limit)
+        if not allowed:
+            period = "Monthly" if action == "download" else "Daily"
+            raise HTTPException(
+                status_code=429,
+                detail={"code": 429, "message": f"{period} {action} limit exceeded"},
+                headers={"X-RateLimit-Remaining": "0"},
+            )
+        return member
+
+    return checker
