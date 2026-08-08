@@ -1,7 +1,7 @@
 import type {
   ApplicableSpecRule, Cable, CableDetailResponse, Category,
   EquipmentManufacturer, EquipmentCategory,
-  Industry, Manufacturer, ProductTypeConfig, RecommendedEquipment,
+  Industry, Manufacturer, Plan, ProductTypeConfig, RecommendedEquipment,
   SizeSystem, SpecItem, SpecType, Taxonomy, TaxonomyCategory,
   TaxonomyIndustry,
   Terminal, TerminalCategory, TerminalManufacturer,
@@ -276,6 +276,43 @@ interface BackendResourceListResponse {
   page_size: number;
 }
 
+export interface BackendPost {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  status: string;
+  is_visible: boolean;
+  sort_order: number;
+  published_at: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  created_at: string;
+  updated_at: string;
+  category?: BackendPostCategory | null;
+}
+
+export interface BackendPostCategory {
+  id: string;
+  slug: string;
+  label: string;
+  description: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BackendPostListResponse {
+  items: BackendPost[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 interface BackendCableListResponse {
   items: BackendCable[];
   total: number;
@@ -288,6 +325,23 @@ interface BackendCableListResponse {
     spec_facets: Record<string, { value: string; count: number }[]>;
     outer_diameter: { min: number; max: number } | null;
   };
+}
+
+interface BackendPlan {
+  id: number;
+  name: string;
+  tier_level: string;
+  price_monthly: number;
+  price_yearly: number;
+  currency: string;
+  search_limit_daily: number;
+  detail_view_limit_daily: number;
+  download_limit_monthly: number;
+  is_sales_led: boolean;
+  is_active: boolean;
+  features: string[];
+  sort_order: number;
+  trial_days: number;
 }
 
 // === Adapter functions: API response -> frontend types ===
@@ -781,6 +835,32 @@ export const api = {
     },
   },
 
+  postCategories: {
+    async all(): Promise<BackendPostCategory[]> {
+      const data = await fetchWithCache<BackendPostCategory[]>('/api/post-categories');
+      return data ?? [];
+    },
+  },
+
+  posts: {
+    async all(params?: { page?: number; page_size?: number; category_slug?: string; q?: string }): Promise<BackendPostListResponse> {
+      const qs = new URLSearchParams();
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.page_size != null) qs.set('page_size', String(params.page_size));
+      if (params?.category_slug) qs.set('category_slug', params.category_slug);
+      if (params?.q) qs.set('q', params.q);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return fetchWithCache<BackendPostListResponse>(`/api/posts${suffix}`);
+    },
+    async getByCategoryAndSlug(categorySlug: string, postSlug: string): Promise<BackendPost | null> {
+      try {
+        return await fetchWithCache<BackendPost>(`/api/posts/${encodeURIComponent(categorySlug)}/${encodeURIComponent(postSlug)}`);
+      } catch {
+        return null;
+      }
+    },
+  },
+
   taxonomy: {
     async all(): Promise<Taxonomy> {
       const tree = await fetchWithCache<unknown>('/api/taxonomy');
@@ -848,6 +928,13 @@ export const api = {
       const category = industry.categories[categoryKey];
       const productType = category.product_types[productTypeKey];
       return { industry, category, productType, industryKey, categoryKey, productTypeKey };
+    },
+  },
+
+  plans: {
+    async all(): Promise<Plan[]> {
+      const res = await fetchWithCache<BackendPlan[]>('/api/plans');
+      return res.map(p => ({ ...p }));
     },
   },
 

@@ -543,3 +543,41 @@ export interface InquiryRead {
   is_member_read: boolean;
   created_at: string;
 }
+
+// === Membership / Plans ===
+export interface Plan {
+  id: number;
+  name: string;
+  tier_level: 'freemium' | 'personal' | 'enterprise' | string;
+  price_monthly: number;
+  price_yearly: number;
+  currency: string;
+  search_limit_daily: number;
+  detail_view_limit_daily: number;
+  download_limit_monthly: number;
+  is_sales_led: boolean;
+  is_active: boolean;
+  features: string[];
+  sort_order: number;
+  trial_days: number;
+}
+
+export interface SubscriptionStatus {
+  id: number;
+  plan_id: number;
+  plan_name: string;
+  tier_level: string;
+  status: 'active' | 'trialing' | 'expired' | 'cancelled' | string;
+  billing_cycle: string | null;
+  trial_end: string | null;
+  current_period_end: string | null;
+  search_limit_daily: number;
+  detail_view_limit_daily: number;
+  download_limit_monthly: number;
+}
+
+export interface UsageSummary {
+  plan: string;
+  today: { search: { used: number; limit: number }; detail_view: { used: number; limit: number } };
+  this_month: { download: { used: number; limit: number } };
+}
