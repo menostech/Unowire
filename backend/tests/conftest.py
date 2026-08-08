@@ -75,6 +75,9 @@ def _cleanup_test_data():
                 "DELETE FROM roles WHERE id IN "
                 "('viewer', 'editor_v2', 'temp', 'bad', 'cable_manager_test', 'equip_manager_test')"
             ))
+            await conn.execute(text("DELETE FROM usage_records WHERE member_id IN (SELECT id FROM members WHERE email LIKE '%@test-member.com')"))
+            await conn.execute(text("DELETE FROM member_subscriptions WHERE member_id IN (SELECT id FROM members WHERE email LIKE '%@test-member.com')"))
+            await conn.execute(text("DELETE FROM subscription_plans WHERE tier_level IN ('pro','tmp_del')"))
             await conn.execute(text("DELETE FROM inquiries WHERE sender_id IN (SELECT id FROM members WHERE email LIKE '%@test-member.com')"))
             await conn.execute(text("DELETE FROM members WHERE email LIKE '%@test-member.com'"))
 

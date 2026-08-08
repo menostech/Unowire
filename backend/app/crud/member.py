@@ -32,6 +32,27 @@ class CRUDMember(CRUDBase[Member, MemberRegister, MemberUpdate]):
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
+
+        # Auto-assign an active freemium subscription.
+        from app.models.member_subscription import MemberSubscription
+        from app.models.subscription_plan import SubscriptionPlan
+        from sqlalchemy import select
+        plan = (
+            await db.execute(
+                select(SubscriptionPlan).where(SubscriptionPlan.tier_level == "freemium")
+            )
+        ).scalar_one_or_none()
+        if plan is not None:
+            db.add(MemberSubscription(
+                member_id=db_obj.id,
+                plan_id=plan.id,
+                status="active",
+                snapshot_search_limit=plan.search_limit_daily,
+                snapshot_detail_limit=plan.detail_view_limit_daily,
+                snapshot_download_limit=plan.download_limit_monthly,
+            ))
+            await db.commit()
+
         return db_obj
 
     # === Admin methods ===
