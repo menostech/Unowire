@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import type { AdminMessage, AdminMessageListResponse, Manufacturer, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem, RecipientTarget, RecipientListResponse } from './types';
+import type { AdminMessage, AdminMessageListResponse, Manufacturer, Cable, MenuItem, MenuItemTree, Role, AdminUserExtended, UserPermissions, ScopeOption, AdminMember, Page, PageListItem, SiteMenuItem, RecipientTarget, RecipientListResponse, Plan } from './types';
 import type { AdminModule } from './adminModules';
 
 const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
@@ -234,6 +234,36 @@ interface ClaimRequestWithManufacturer {
   status: string;
   reviewed_by: string | null;
   reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendPost {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  status: string;
+  is_visible: boolean;
+  sort_order: number;
+  published_at: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  created_at: string;
+  updated_at: string;
+  category?: BackendPostCategory | null;
+}
+
+export interface BackendPostCategory {
+  id: string;
+  slug: string;
+  label: string;
+  description: string | null;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -843,6 +873,69 @@ export const adminApi = {
     },
   },
 
+  postCategories: {
+    async all(): Promise<BackendPostCategory[]> {
+      return await adminGet<BackendPostCategory[]>('/api/post-categories');
+    },
+    async getById(id: string): Promise<BackendPostCategory | null> {
+      try {
+        return await adminGet<BackendPostCategory>(`/api/post-categories/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendPostCategory> {
+      const res = await adminFetch('/api/post-categories', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/post-categories`);
+      return await res.json() as BackendPostCategory;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendPostCategory> {
+      const res = await adminFetch(`/api/post-categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/post-categories/${id}`);
+      return await res.json() as BackendPostCategory;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/post-categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/post-categories/${id}`);
+    },
+  },
+
+  posts: {
+    async all(
+      page = 1,
+      page_size = 20,
+      filters?: { category_id?: string; q?: string; status?: string; is_visible?: boolean },
+    ): Promise<ListResponse<BackendPost>> {
+      const params = new URLSearchParams({ page: String(page), page_size: String(page_size) });
+      if (filters?.category_id) params.set('category_id', filters.category_id);
+      if (filters?.q) params.set('q', filters.q);
+      if (filters?.status) params.set('status', filters.status);
+      if (filters?.is_visible !== undefined) params.set('is_visible', String(filters.is_visible));
+      return adminGet<ListResponse<BackendPost>>(`/api/posts/admin?${params.toString()}`);
+    },
+    async getById(id: string): Promise<BackendPost | null> {
+      try {
+        return await adminGet<BackendPost>(`/api/posts/admin/${encodeURIComponent(id)}`);
+      } catch {
+        return null;
+      }
+    },
+    async create(payload: Record<string, unknown>): Promise<BackendPost> {
+      const res = await adminFetch('/api/posts/admin', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/posts/admin`);
+      return await res.json() as BackendPost;
+    },
+    async update(id: string, payload: Record<string, unknown>): Promise<BackendPost> {
+      const res = await adminFetch(`/api/posts/admin/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/posts/admin/${id}`);
+      return await res.json() as BackendPost;
+    },
+    async remove(id: string): Promise<void> {
+      const res = await adminFetch(`/api/posts/admin/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/posts/admin/${id}`);
+    },
+  },
+
   adminMenu: {
     async tree(): Promise<MenuItemTree[]> {
       return await adminGet<MenuItemTree[]>('/api/admin/menu/tree');
@@ -1213,10 +1306,70 @@ export const adminApi = {
     },
   },
 
+  plans: {
+    async list(): Promise<Plan[]> {
+      return adminGet<Plan[]>('/api/admin/plans');
+    },
+    async create(payload: Partial<Plan>): Promise<Plan> {
+      const res = await adminFetch('/api/admin/plans', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/plans`);
+      }
+      return res.json();
+    },
+    async update(id: number, payload: Partial<Plan>): Promise<Plan> {
+      const res = await adminFetch(`/api/admin/plans/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/plans/${id}`);
+      }
+      return res.json();
+    },
+    async remove(id: number): Promise<void> {
+      const res = await adminFetch(`/api/admin/plans/${id}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}: /api/admin/plans/${id}`);
+      }
+    },
+  },
+
   claims: {
     async all(status?: string): Promise<ClaimRequestWithManufacturer[]> {
       const qs = status ? `?status=${encodeURIComponent(status)}` : '';
       return adminGet<ClaimRequestWithManufacturer[]>(`/api/admin/claims${qs}`);
+    },
+  },
+
+
+  subscriptions: {
+    async list(params?: { plan?: string; status?: string }): Promise<any[]> {
+      const qs = new URLSearchParams();
+      if (params?.plan) qs.set('plan', params.plan);
+      if (params?.status) qs.set('status', params.status);
+      const query = qs.toString();
+      return adminGet<any[]>(`/api/admin/subscriptions${query ? `?${query}` : ''}`);
+    },
+  },
+
+  enterpriseSubscription: {
+    async create(memberId: number, periodEnd: string): Promise<any> {
+      const res = await adminFetch(`/api/admin/members/${memberId}/subscription`, {
+        method: 'POST',
+        body: JSON.stringify({ period_end: periodEnd }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `API ${res.status}`);
+      }
+      return res.json();
     },
   },
 };

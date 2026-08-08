@@ -29,6 +29,10 @@ export const ADMIN_PAGES: PageRegistryEntry[] = [
   { pageId: "claims",         href: "/admin/claims",                        defaultLabel: "Claims",           defaultIcon: "Shield" },
   { pageId: "resources-list", href: "/admin/resources",                    defaultLabel: "Resources",        defaultIcon: "FileText" },
   { pageId: "resources-cats", href: "/admin/resources/categories",         defaultLabel: "Categories",       defaultIcon: "FileText" },
+  { pageId: "posts-list",     href: "/admin/posts",                        defaultLabel: "Posts",            defaultIcon: "FileText" },
+  { pageId: "posts-cats",     href: "/admin/posts/categories",             defaultLabel: "Categories",       defaultIcon: "FileText" },
+  { pageId: "plans",          href: "/admin/settings/plans",               defaultLabel: "Plans",            defaultIcon: "CreditCard" },
+  { pageId: "subscriptions",  href: "/admin/subscriptions",                defaultLabel: "Subscriptions",    defaultIcon: "Repeat" },
 ];
 
 export const PAGE_BY_ID: Record<string, PageRegistryEntry> = Object.fromEntries(

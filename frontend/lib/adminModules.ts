@@ -30,6 +30,10 @@ export const ADMIN_MODULES: AdminModule[] = [
   { id: "messages",     label: "Messages",      scopeAware: false, scopeType: null },
   { id: "resource_cats", label: "Resource Cats", scopeAware: false, scopeType: null },
   { id: "resource_list", label: "Resource List", scopeAware: true,  scopeType: null },
+  { id: "post_cats",     label: "Post Cats",     scopeAware: false, scopeType: null },
+  { id: "post_list",     label: "Post List",     scopeAware: false, scopeType: null },
+  { id: "plans",         label: "Plans",         scopeAware: false, scopeType: null },
+  { id: "subscriptions", label: "Subscriptions", scopeAware: false, scopeType: null },
 ];
 
 export const MODULE_BY_ID: Record<string, AdminModule> = Object.fromEntries(
