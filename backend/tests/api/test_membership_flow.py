@@ -1,4 +1,4 @@
-﻿"""End-to-end: register -> freemium -> trial -> cancel -> (lazy) downgrade."""
+"""End-to-end: register -> freemium -> trial -> cancel -> (lazy) downgrade."""
 import asyncio
 
 import pytest
@@ -25,8 +25,8 @@ def _ensure_plans():
                     is_sales_led, is_active, features, sort_order, trial_days, created_at, updated_at)
                 VALUES
                     ('Freemium', 'freemium', 0, 0, 'USD', 10, 20, 0, false, true, '[]'::jsonb, 0, 0, NOW(), NOW()),
-                    ('Personal', 'personal', 15.00, 149.00, 'USD', 0, 0, 0, false, true, '[]'::jsonb, 1, 14, NOW(), NOW()),
-                    ('Enterprise', 'enterprise', 0, 0, 'USD', 0, 0, 0, true, true, '[]'::jsonb, 2, 0, NOW(), NOW())
+                    ('Personal', 'personal', 15.00, 149.00, 'USD', NULL, NULL, NULL, false, true, '[]'::jsonb, 1, 14, NOW(), NOW()),
+                    ('Enterprise', 'enterprise', 0, 0, 'USD', NULL, NULL, NULL, true, true, '[]'::jsonb, 2, 0, NOW(), NOW())
                 ON CONFLICT (tier_level) DO NOTHING
             """))
 

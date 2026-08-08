@@ -18,9 +18,9 @@ class UsageService:
         self.db = db
 
     async def increment_usage(self, member_id: int, action: str) -> None:
-        """Unconditional atomic upsert — used when limit == 0 (unlimited)."""
+        """Unconditional atomic upsert — used when limit is None (unlimited)."""
         col = _ACTION_COLUMN[action]
-        today = date.today()
+        today = datetime.utcnow().date()
         sql = text(
             f"""
             INSERT INTO usage_records (member_id, record_date, {col})
@@ -34,14 +34,24 @@ class UsageService:
 
     async def increment_and_check(self, member_id: int, action: str, limit: int) -> bool:
         """Atomic conditional increment. Returns True if allowed (and incremented),
-        False if the limit would be exceeded (no increment written)."""
+        False if the limit would be exceeded (no increment written).
+
+        limit semantics: None = unlimited (caller handles), 0 = disabled,
+        positive = enforce. This method is only called when limit is a
+        positive int; the None/0 cases are handled by the caller."""
         col = _ACTION_COLUMN[action]
-        today = date.today()
+        today = datetime.utcnow().date()
 
         if action == "download":
-            # Monthly aggregation: check current-month sum before incrementing.
+            # Monthly aggregation with per-member advisory lock to prevent
+            # TOCTOU: acquire lock, re-read monthly sum, conditionally increment.
+            await self.db.execute(
+                text("SELECT pg_advisory_xact_lock(hashtextextended('dl:' || CAST(:mid AS text), 0))"),
+                {"mid": str(member_id)},
+            )
             used = await self.get_monthly_download_count(member_id)
             if used >= limit:
+                await self.db.rollback()
                 return False
             await self.increment_usage(member_id, action)
             return True
@@ -65,7 +75,7 @@ class UsageService:
         result = await self.db.execute(
             select(UsageRecord).where(
                 UsageRecord.member_id == member_id,
-                UsageRecord.record_date == date.today(),
+                UsageRecord.record_date == datetime.utcnow().date(),
             )
         )
         return result.scalar_one_or_none()

@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -15,9 +15,9 @@ class SubscriptionRead(BaseModel):
     current_period_start: datetime | None = None
     current_period_end: datetime | None = None
     cancelled_at: datetime | None = None
-    search_limit_daily: int
-    detail_view_limit_daily: int
-    download_limit_monthly: int
+    search_limit_daily: int | None
+    detail_view_limit_daily: int | None
+    download_limit_monthly: int | None
 
     model_config = {"from_attributes": True}
 

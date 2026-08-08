@@ -571,13 +571,13 @@ export interface SubscriptionStatus {
   billing_cycle: string | null;
   trial_end: string | null;
   current_period_end: string | null;
-  search_limit_daily: number;
-  detail_view_limit_daily: number;
-  download_limit_monthly: number;
+  search_limit_daily: number | null;
+  detail_view_limit_daily: number | null;
+  download_limit_monthly: number | null;
 }
 
 export interface UsageSummary {
   plan: string;
-  today: { search: { used: number; limit: number }; detail_view: { used: number; limit: number } };
-  this_month: { download: { used: number; limit: number } };
+  today: { search: { used: number; limit: number | null }; detail_view: { used: number; limit: number | null } };
+  this_month: { download: { used: number; limit: number | null } };
 }

@@ -117,7 +117,8 @@ def test_detail_view_quota_blocks_member(client, db_session):
             assert blocked.status_code == 429
 
 
-def test_download_quota_unlimited_for_freemium(client, db_session):
+def test_download_quota_blocks_freemium(client, db_session):
+    """Freemium download limit is 0 (disabled) — members are blocked from downloading."""
     import asyncio
     from app.models.member import Member
     from app.models.member_subscription import MemberSubscription
@@ -146,9 +147,8 @@ def test_download_quota_unlimited_for_freemium(client, db_session):
     res = client.post("/api/member/login", json={"email": "dlfree@test-member.com", "password": "test123456"})
     token = res.json().get("token") or res.cookies.get("member_token")
     h = {"Authorization": f"Bearer {token}"}
-    # Freemium download limit is 0 (unlimited) -> never blocked, but still counted.
+    # Freemium download limit is 0 (disabled) -> 429 for any download attempt.
     resources = client.get("/api/resources?page_size=1").json().get("items", [])
     if resources:
         dl = client.get(f"/api/resources/{resources[0]['id']}/download", headers=h)
-        # 200 (download served) or 404 (no file) — but NOT 429.
-        assert dl.status_code != 429
+        assert dl.status_code == 429

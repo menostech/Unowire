@@ -11,7 +11,7 @@ const API_BASE = process.env.INTERNAL_API_BASE || 'http://backend:8000';
 async function getCurrentSubscription(token: string | undefined): Promise<SubscriptionStatus | null> {
   if (!token) return null;
   const res = await fetch(`${API_BASE}/api/member/subscription`, {
-    headers: { cookie: `member_token=${token}` },
+    headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });
   if (!res.ok) return null;

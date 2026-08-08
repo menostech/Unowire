@@ -183,12 +183,61 @@ def get_media_scope(user: User = Depends(get_current_user)) -> tuple[str | None,
     return (None, None)
 
 
+async def enforce_quota(member: Member, action: str, db: AsyncSession) -> None:
+    """Check and increment quota for an authenticated member.
+
+    Raises HTTPException(429) if the limit is exceeded or the action is
+    disabled (limit == 0). Call this from within a route handler AFTER
+    resource existence checks, so failed/404 requests are not metered.
+    """
+    if action not in ("search", "detail_view", "download"):
+        raise ValueError(f"unknown quota action: {action}")
+
+    from app.services.subscription import SubscriptionService
+    from app.services.usage import UsageService
+
+    _, limits = await SubscriptionService(db).resolve_effective_plan(member.id)
+    limit_map = {
+        "search": limits["search_limit_daily"],
+        "detail_view": limits["detail_view_limit_daily"],
+        "download": limits["download_limit_monthly"],
+    }
+    limit = limit_map[action]
+
+    if limit is None:
+        # NULL = unlimited — record usage but never block.
+        await UsageService(db).increment_usage(member.id, action)
+        return
+
+    if limit == 0:
+        # 0 = disabled (e.g. freemium downloads).
+        period = "Monthly" if action == "download" else "Daily"
+        raise HTTPException(
+            status_code=429,
+            detail={"code": 429, "message": f"{period} {action} limit exceeded"},
+            headers={"X-RateLimit-Remaining": "0"},
+        )
+
+    allowed = await UsageService(db).increment_and_check(member.id, action, limit)
+    if not allowed:
+        period = "Monthly" if action == "download" else "Daily"
+        raise HTTPException(
+            status_code=429,
+            detail={"code": 429, "message": f"{period} {action} limit exceeded"},
+            headers={"X-RateLimit-Remaining": "0"},
+        )
+
+
 def require_quota(action: str):
     """Factory: FastAPI dependency that meters a member action (search/detail_view/download).
 
     Anonymous requests pass through unmetered. Authenticated members are checked
     against their effective plan limits and incremented atomically. Over-limit
-    raises HTTP 429 with X-RateLimit-Remaining: 0."""
+    raises HTTP 429 with X-RateLimit-Remaining: 0.
+
+    NOTE: this increments BEFORE the route handler runs. For endpoints where a
+    404 / failed response should not consume quota (e.g. downloads), use
+    ``enforce_quota`` inside the handler instead."""
     if action not in ("search", "detail_view", "download"):
         raise ValueError(f"unknown quota action: {action}")
 
@@ -198,31 +247,7 @@ def require_quota(action: str):
     ) -> Member | None:
         if member is None:
             return None  # anonymous — no metering
-
-        from app.services.subscription import SubscriptionService
-        from app.services.usage import UsageService
-
-        tier, limits = await SubscriptionService(db).resolve_effective_plan(member.id)
-        limit_map = {
-            "search": limits["search_limit_daily"],
-            "detail_view": limits["detail_view_limit_daily"],
-            "download": limits["download_limit_monthly"],
-        }
-        limit = limit_map[action]
-
-        if limit == 0:
-            # Unlimited — record usage but never block.
-            await UsageService(db).increment_usage(member.id, action)
-            return member
-
-        allowed = await UsageService(db).increment_and_check(member.id, action, limit)
-        if not allowed:
-            period = "Monthly" if action == "download" else "Daily"
-            raise HTTPException(
-                status_code=429,
-                detail={"code": 429, "message": f"{period} {action} limit exceeded"},
-                headers={"X-RateLimit-Remaining": "0"},
-            )
+        await enforce_quota(member, action, db)
         return member
 
     return checker

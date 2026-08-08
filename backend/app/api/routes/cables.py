@@ -79,7 +79,7 @@ async def get_cable_by_url(manufacturer_slug: str, cable_slug: str, db: AsyncSes
 
 
 @router.get("/{id}", response_model=CableRead)
-async def get_cable(id: str, db: AsyncSession = Depends(get_db)):
+async def get_cable(id: str, db: AsyncSession = Depends(get_db), _member=Depends(require_quota("detail_view"))):
     cable = await crud_cable.get_detail(db, id)
     if not cable:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})

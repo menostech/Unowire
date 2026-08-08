@@ -16,9 +16,15 @@ export function PlanForm({ mode, initialData }: PlanFormProps) {
   const [tierLevel, setTierLevel] = useState(initialData?.tier_level ?? '');
   const [priceMonthly, setPriceMonthly] = useState(initialData?.price_monthly ?? 0);
   const [priceYearly, setPriceYearly] = useState(initialData?.price_yearly ?? 0);
-  const [searchLimitDaily, setSearchLimitDaily] = useState(initialData?.search_limit_daily ?? 0);
-  const [detailViewLimitDaily, setDetailViewLimitDaily] = useState(initialData?.detail_view_limit_daily ?? 0);
-  const [downloadLimitMonthly, setDownloadLimitMonthly] = useState(initialData?.download_limit_monthly ?? 0);
+  const [searchLimitDaily, setSearchLimitDaily] = useState<string>(
+    initialData?.search_limit_daily == null ? '' : String(initialData.search_limit_daily)
+  );
+  const [detailViewLimitDaily, setDetailViewLimitDaily] = useState<string>(
+    initialData?.detail_view_limit_daily == null ? '' : String(initialData.detail_view_limit_daily)
+  );
+  const [downloadLimitMonthly, setDownloadLimitMonthly] = useState<string>(
+    initialData?.download_limit_monthly == null ? '' : String(initialData.download_limit_monthly)
+  );
   const [trialDays, setTrialDays] = useState(initialData?.trial_days ?? 0);
   const [isSalesLed, setIsSalesLed] = useState(initialData?.is_sales_led ?? false);
   const [isActive, setIsActive] = useState(initialData?.is_active ?? true);
@@ -39,9 +45,9 @@ export function PlanForm({ mode, initialData }: PlanFormProps) {
       name,
       price_monthly: priceMonthly,
       price_yearly: priceYearly,
-      search_limit_daily: searchLimitDaily,
-      detail_view_limit_daily: detailViewLimitDaily,
-      download_limit_monthly: downloadLimitMonthly,
+      search_limit_daily: searchLimitDaily === '' ? null : parseInt(searchLimitDaily) || 0,
+      detail_view_limit_daily: detailViewLimitDaily === '' ? null : parseInt(detailViewLimitDaily) || 0,
+      download_limit_monthly: downloadLimitMonthly === '' ? null : parseInt(downloadLimitMonthly) || 0,
       trial_days: trialDays,
       is_sales_led: isSalesLed,
       is_active: isActive,
@@ -157,7 +163,8 @@ export function PlanForm({ mode, initialData }: PlanFormProps) {
               type="number"
               min="0"
               value={searchLimitDaily}
-              onChange={(e) => setSearchLimitDaily(parseInt(e.target.value) || 0)}
+              onChange={(e) => setSearchLimitDaily(e.target.value)}
+              placeholder="Empty = unlimited, 0 = disabled"
               className={inputCls}
             />
           </div>
@@ -167,7 +174,8 @@ export function PlanForm({ mode, initialData }: PlanFormProps) {
               type="number"
               min="0"
               value={detailViewLimitDaily}
-              onChange={(e) => setDetailViewLimitDaily(parseInt(e.target.value) || 0)}
+              onChange={(e) => setDetailViewLimitDaily(e.target.value)}
+              placeholder="Empty = unlimited, 0 = disabled"
               className={inputCls}
             />
           </div>
@@ -177,7 +185,8 @@ export function PlanForm({ mode, initialData }: PlanFormProps) {
               type="number"
               min="0"
               value={downloadLimitMonthly}
-              onChange={(e) => setDownloadLimitMonthly(parseInt(e.target.value) || 0)}
+              onChange={(e) => setDownloadLimitMonthly(e.target.value)}
+              placeholder="Empty = unlimited, 0 = disabled"
               className={inputCls}
             />
           </div>

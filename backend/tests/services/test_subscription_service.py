@@ -16,7 +16,7 @@ async def plans(db_session):
     )
     p = SubscriptionPlan(
         name="Personal", tier_level="personal", price_monthly=15, price_yearly=149,
-        search_limit_daily=0, detail_view_limit_daily=0, download_limit_monthly=0,
+        search_limit_daily=None, detail_view_limit_daily=None, download_limit_monthly=None,
         is_sales_led=False, is_active=True, features=[], sort_order=1, trial_days=14,
     )
     db_session.add_all([f, p])
@@ -51,13 +51,13 @@ async def test_resolve_effective_plan_trialing_uses_snapshot(db_session, plans):
     sub = MemberSubscription(
         member_id=m.id, plan_id=plans["personal"].id, status="trialing",
         trial_start=datetime.utcnow(), trial_end=datetime.utcnow() + timedelta(days=14),
-        snapshot_search_limit=0, snapshot_detail_limit=0, snapshot_download_limit=0,
+        snapshot_search_limit=None, snapshot_detail_limit=None, snapshot_download_limit=None,
     )
     db_session.add(sub)
     await db_session.commit()
     tier, limits = await SubscriptionService(db_session).resolve_effective_plan(m.id)
     assert tier == "personal"
-    assert limits["search_limit_daily"] == 0  # unlimited snapshot
+    assert limits["search_limit_daily"] is None  # unlimited snapshot
 
 
 @pytest.mark.asyncio
@@ -67,7 +67,7 @@ async def test_resolve_effective_plan_expired_trial_downgrades(db_session, plans
         member_id=m.id, plan_id=plans["personal"].id, status="trialing",
         trial_start=datetime.utcnow() - timedelta(days=20),
         trial_end=datetime.utcnow() - timedelta(days=6),
-        snapshot_search_limit=0, snapshot_detail_limit=0, snapshot_download_limit=0,
+        snapshot_search_limit=None, snapshot_detail_limit=None, snapshot_download_limit=None,
     )
     db_session.add(sub)
     await db_session.commit()
@@ -86,10 +86,10 @@ async def test_resolve_effective_plan_cancelled_before_period_end_keeps_limits(d
         current_period_start=datetime.utcnow() - timedelta(days=10),
         current_period_end=datetime.utcnow() + timedelta(days=20),
         cancelled_at=datetime.utcnow(),
-        snapshot_search_limit=0, snapshot_detail_limit=0, snapshot_download_limit=0,
+        snapshot_search_limit=None, snapshot_detail_limit=None, snapshot_download_limit=None,
     )
     db_session.add(sub)
     await db_session.commit()
     tier, limits = await SubscriptionService(db_session).resolve_effective_plan(m.id)
     assert tier == "personal"
-    assert limits["search_limit_daily"] == 0
+    assert limits["search_limit_daily"] is None

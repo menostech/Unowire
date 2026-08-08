@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -10,9 +10,9 @@ class SubscriptionPlanBase(BaseModel):
     price_monthly: float = Field(ge=0, default=0)
     price_yearly: float = Field(ge=0, default=0)
     currency: str = Field(min_length=3, max_length=3, default="USD")
-    search_limit_daily: int = Field(ge=0, default=0)
-    detail_view_limit_daily: int = Field(ge=0, default=0)
-    download_limit_monthly: int = Field(ge=0, default=0)
+    search_limit_daily: int | None = Field(default=0, ge=0)
+    detail_view_limit_daily: int | None = Field(default=0, ge=0)
+    download_limit_monthly: int | None = Field(default=0, ge=0)
     is_sales_led: bool = False
     is_active: bool = True
     features: list[Any] = Field(default_factory=list)

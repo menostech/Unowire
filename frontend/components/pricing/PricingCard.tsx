@@ -11,8 +11,10 @@ function priceLabel(plan: Plan): string {
   return `$${plan.price_monthly}/mo`;
 }
 
-function limitLabel(n: number): string {
-  return n === 0 ? 'Unlimited' : String(n);
+function limitLabel(n: number | null): string {
+  if (n === null) return 'Unlimited';
+  if (n === 0) return 'Not included';
+  return String(n);
 }
 
 export function PricingCard({

@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_operator, require_quota
+from app.api.deps import enforce_quota, get_optional_current_member, require_operator
 from app.core.database import get_db
 from app.crud.resource import crud_resource
 from app.models.resource import Resource as ResourceModel
@@ -46,7 +46,11 @@ async def list_resources(
 
 
 @router.get("/{resource_id}/download")
-async def download_resource(resource_id: str, db: AsyncSession = Depends(get_db), _member=Depends(require_quota("download"))):
+async def download_resource(
+    resource_id: str,
+    db: AsyncSession = Depends(get_db),
+    member=Depends(get_optional_current_member),
+):
     resource = await crud_resource.get(db, resource_id)
     if not resource:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Resource not found"})
@@ -55,6 +59,9 @@ async def download_resource(resource_id: str, db: AsyncSession = Depends(get_db)
     file_path = get_resource_file_path(resource.file_url_path)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Resource file not found"})
+    # Meter only after resource existence is confirmed so 404s don't consume quota.
+    if member is not None:
+        await enforce_quota(member, "download", db)
     await crud_resource.increment_download_count(db, resource_id)
     return FileResponse(
         file_path,
