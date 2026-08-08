@@ -104,6 +104,14 @@ def db_session():
 
     async def _seed():
         async with _test_engine.begin() as conn:
+            # Membership/subscription test isolation: tests commit (no per-test
+            # rollback) and the seed migration pre-populates subscription_plans
+            # (freemium/personal/enterprise) plus a freemium member_subscriptions
+            # row per member. That collides with the `plans` fixture's INSERT on
+            # the tier_level unique constraint both with seeded data and across
+            # tests in the same session. Wipe both tables before each test.
+            await conn.execute(text("DELETE FROM member_subscriptions"))
+            await conn.execute(text("DELETE FROM subscription_plans"))
             # cable_manager@test.com (manufacturer scope)
             await conn.execute(text(
                 "INSERT INTO roles (id, name, scope_type, is_system) "
