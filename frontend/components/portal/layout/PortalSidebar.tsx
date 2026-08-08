@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Cable, Wrench, Mail, Image as ImageIcon, Megaphone,
-  Settings, LogOut, ExternalLink, type LucideIcon,
+  Settings, LogOut, ExternalLink, FileText, type LucideIcon,
 } from 'lucide-react';
 import type { PortalUser } from '@/lib/types/portal';
 import { PortalMessagesUnreadBadge } from '@/components/portal/PortalMessagesUnreadBadge';
@@ -23,6 +23,7 @@ const MANUFACTURER_NAV: NavItem[] = [
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
   { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
+  { label: 'Resources', href: '/portal/resources', icon: FileText, module: 'resources' },
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
 
@@ -32,6 +33,17 @@ const EQUIPMENT_MANUFACTURER_NAV: NavItem[] = [
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
   { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
+  { label: 'Resources', href: '/portal/resources', icon: FileText, module: 'resources' },
+  { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
+];
+
+const TERMINAL_MANUFACTURER_NAV: NavItem[] = [
+  { label: 'Dashboard', href: '/portal', icon: LayoutDashboard, module: 'dashboard' },
+  { label: 'Terminals', href: '/portal/terminals', icon: Wrench, module: 'terminals' },
+  { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
+  { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
+  { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
+  { label: 'Resources', href: '/portal/resources', icon: FileText, module: 'resources' },
   { label: 'Settings', href: '/portal/settings', icon: Settings, module: 'me' },
 ];
 
@@ -51,7 +63,12 @@ export function PortalSidebar({
   const [unread, setUnread] = useState<number | null>(null);
 
   const scopeType = user?.scope_type ?? null;
-  const baseNav = scopeType === 'equipment_manufacturer' ? EQUIPMENT_MANUFACTURER_NAV : MANUFACTURER_NAV;
+  const baseNav =
+    scopeType === 'equipment_manufacturer'
+      ? EQUIPMENT_MANUFACTURER_NAV
+      : scopeType === 'terminal_manufacturer'
+        ? TERMINAL_MANUFACTURER_NAV
+        : MANUFACTURER_NAV;
   const nav = baseNav.filter((item) => allowedModules.includes(item.module));
 
   useEffect(() => {
@@ -82,9 +99,9 @@ export function PortalSidebar({
   }
 
   return (
-    <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-blue-900 p-4 text-blue-100">
+    <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-foreground p-4 text-background/70">
       <div className="mb-6 px-2 text-lg font-bold tracking-tight">
-        Unowire <span className="text-blue-300">Portal</span>
+        <span className="text-primary">uno</span><span className="text-background">wire</span> <span className="text-primary">Portal</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1">
         {nav.map((item) => {
@@ -96,8 +113,8 @@ export function PortalSidebar({
               href={item.href}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${
                 active
-                  ? 'bg-blue-800 text-white'
-                  : 'text-blue-100 hover:bg-blue-800 hover:text-white'
+                  ? 'bg-foreground/80 text-white'
+                  : 'text-background/70 hover:bg-foreground/80 hover:text-background'
               }`}
             >
               <Icon className="size-4 shrink-0" />
@@ -115,7 +132,7 @@ export function PortalSidebar({
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-blue-100 transition hover:bg-blue-800 hover:text-white"
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-background/70 transition hover:bg-foreground/80 hover:text-background"
         >
           <ExternalLink className="size-4 shrink-0" />
           View Site
@@ -124,7 +141,7 @@ export function PortalSidebar({
       <button
         type="button"
         onClick={handleLogout}
-        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-blue-100 transition hover:bg-blue-800 hover:text-white"
+        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-background/70 transition hover:bg-foreground/80 hover:text-background"
       >
         <LogOut className="size-4 shrink-0" />
         Logout

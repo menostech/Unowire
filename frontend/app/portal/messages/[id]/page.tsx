@@ -18,7 +18,7 @@ export default async function PortalMessageDetailPage({
     <div>
       <Link
         href="/portal/messages"
-        className="mb-4 inline-block text-sm text-blue-600 hover:underline"
+        className="mb-4 inline-block text-sm text-accent-foreground hover:underline"
       >
         &larr; Back to Messages
       </Link>

@@ -12,31 +12,46 @@ export async function Nav() {
   const tree = await fetchSiteMenu('header');
 
   return (
-    <header className="border-b bg-white sticky top-0 z-50">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
+      {/* Top utility strip — mono technical annotation */}
+      <div className="border-b border-border/60 bg-foreground text-background">
+        <Container className="flex h-7 items-center justify-between text-[11px]">
+          <span className="mono-label opacity-70">
+            SPECS DATABASE · v2.4
+          </span>
+          <span className="mono-label hidden sm:block opacity-70">
+            ENGINEERING REFERENCE
+          </span>
+        </Container>
+      </div>
+
       <Container className="flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="text-xl font-bold text-gray-900 shrink-0">
-          Unowire
+        {/* Logo — wordmark: uno (red) + wire (black) */}
+        <Link href="/" className="flex items-center shrink-0 group">
+          <span className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+            <span className="text-primary">uno</span><span className="text-foreground">wire</span>
+          </span>
         </Link>
-        <nav className="flex gap-6">
+
+        {/* Primary nav */}
+        <nav className="hidden lg:flex items-center gap-0.5">
           {tree.map((item) => {
             if (item.type === 'group') {
               return (
                 <div key={item.id} className="group relative">
                   <button
                     type="button"
-                    className="text-gray-600 hover:text-blue-600 transition text-sm flex items-center gap-1"
+                    className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                   >
                     {item.label}
-                    <svg
-                      className="size-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                    <svg className="size-3.5 opacity-50 transition group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <div className="invisible absolute left-0 top-full z-50 min-w-[160px] rounded-md border border-gray-200 bg-white py-1 shadow-lg group-hover:visible">
+                  <div className="invisible absolute left-0 top-full z-50 min-w-[220px] rounded-lg border border-border bg-popover p-1.5 shadow-lg opacity-0 translate-y-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-y-0">
+                    <div className="mono-label px-2 py-1.5 text-muted-foreground/60">
+                      {item.label}
+                    </div>
                     {item.children.map((child) => {
                       if (!child.url) return null;
                       const external = child.url.startsWith('http');
@@ -46,7 +61,7 @@ export async function Nav() {
                           href={child.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                          className="block rounded-md px-2.5 py-2 text-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                         >
                           {child.label}
                         </a>
@@ -54,7 +69,7 @@ export async function Nav() {
                         <Link
                           key={child.id}
                           href={child.url}
-                          className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                          className="block rounded-md px-2.5 py-2 text-sm text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                         >
                           {child.label}
                         </Link>
@@ -64,7 +79,6 @@ export async function Nav() {
                 </div>
               );
             }
-            // type === 'link'
             if (!item.url) return null;
             const external = item.url.startsWith('http');
             return external ? (
@@ -73,7 +87,7 @@ export async function Nav() {
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-blue-600 transition text-sm"
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
               >
                 {item.label}
               </a>
@@ -81,39 +95,64 @@ export async function Nav() {
               <Link
                 key={item.id}
                 href={item.url}
-                className="text-gray-600 hover:text-blue-600 transition text-sm"
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
               >
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="flex-1 max-w-md">
+
+        {/* Search */}
+        <div className="hidden md:block flex-1 max-w-xl">
           <SearchBox />
         </div>
-        <div className="flex items-center gap-4 shrink-0">
+
+        {/* Auth actions */}
+        <div className="flex items-center gap-1.5 shrink-0">
           {memberToken ? (
             <>
-              <Link href="/member/inbox" className="relative text-gray-600 hover:text-blue-600 transition text-sm">
+              <Link
+                href="/member/inbox"
+                className="relative rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              >
                 Inbox
                 <UnreadBadge />
               </Link>
-              <Link href="/member/profile" className="text-gray-600 hover:text-blue-600 transition text-sm">
-                My Account
+              <Link
+                href="/member/profile"
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              >
+                Account
               </Link>
               <form action="/api/member/auth/logout" method="POST">
-                <button type="submit" className="text-gray-600 hover:text-blue-600 transition text-sm">
+                <button
+                  type="submit"
+                  className="rounded-md border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                >
                   Logout
                 </button>
               </form>
             </>
           ) : (
             <>
-              <Link href="/register" className="text-gray-600 hover:text-blue-600 transition text-sm">
+              <Link
+                href="/pricing"
+                className="hidden sm:block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/register"
+                className="hidden sm:block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              >
                 Register
               </Link>
-              <Link href="/login" className="text-blue-600 hover:text-blue-800 transition text-sm font-medium">
-                Login
+              <Link
+                href="/login"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-95"
+              >
+                Sign in
               </Link>
             </>
           )}

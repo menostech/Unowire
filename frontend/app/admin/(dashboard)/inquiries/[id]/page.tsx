@@ -24,7 +24,7 @@ export default async function AdminInquiryDetailPage({
 
   return (
     <div>
-      <Link href="/admin/inquiries" className="text-sm text-gray-600 hover:text-blue-600 mb-4 inline-block">
+      <Link href="/admin/inquiries" className="text-sm text-gray-600 hover:text-accent-foreground mb-4 inline-block">
         &larr; Back to Inquiries
       </Link>
       <h1 className="text-xl font-bold mb-4">{inquiry.subject}</h1>
@@ -51,8 +51,8 @@ export default async function AdminInquiryDetailPage({
         <p className="text-sm whitespace-pre-wrap">{inquiry.body}</p>
       </div>
       {inquiry.reply_body ? (
-        <div className="border border-blue-200 bg-blue-50 rounded p-4">
-          <p className="text-xs text-blue-600 mb-2">Your reply</p>
+        <div className="border border-accent-foreground/30 bg-accent rounded p-4">
+          <p className="text-xs text-accent-foreground mb-2">Your reply</p>
           <p className="text-sm whitespace-pre-wrap">{inquiry.reply_body}</p>
           {inquiry.replied_at && (
             <p className="text-xs text-gray-400 mt-2">{new Date(inquiry.replied_at).toLocaleString()}</p>

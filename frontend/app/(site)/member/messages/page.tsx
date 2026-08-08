@@ -27,7 +27,7 @@ export default async function MemberMessagesPage() {
               href={`/member/messages/${m.id}`}
               className={`block rounded border p-4 transition hover:shadow-sm ${
                 !m.is_read
-                  ? 'border-blue-400 bg-blue-50'
+                  ? 'border-accent-foreground/60 bg-accent'
                   : 'border-gray-200'
               }`}
             >
@@ -41,7 +41,7 @@ export default async function MemberMessagesPage() {
                   </p>
                 </div>
                 {!m.is_read && (
-                  <span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs text-white">
+                  <span className="rounded-full bg-accent-foreground px-2 py-0.5 text-xs text-background">
                     New
                   </span>
                 )}

@@ -22,13 +22,13 @@ export function PageView({ page }: PageViewProps) {
             p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
             a: ({ href, children }) =>
               href && href.startsWith('/') ? (
-                <Link href={href} className="text-blue-600 hover:underline">{children}</Link>
+                <Link href={href} className="text-accent-foreground hover:underline">{children}</Link>
               ) : (
                 <a
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
+                  className="text-accent-foreground hover:underline"
                 >
                   {children}
                 </a>

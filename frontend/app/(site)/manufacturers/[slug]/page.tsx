@@ -157,7 +157,7 @@ export default async function ManufacturerDetailPage({
                       href={manufacturer.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       Visit website →
                     </a>
@@ -173,7 +173,7 @@ export default async function ManufacturerDetailPage({
                   ) : (
                     <Link
                       href={`/login?from=/manufacturers/${manufacturer.slug}`}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium inline-block"
+                      className="bg-accent-foreground text-background px-4 py-2 rounded hover:brightness-95 text-sm font-medium inline-block"
                     >
                       Login to Contact
                     </Link>
@@ -212,7 +212,7 @@ export default async function ManufacturerDetailPage({
                 {manufacturer.phone && (
                   <div className="flex gap-3">
                     <span className="text-gray-500 w-20 shrink-0">Phone</span>
-                    <a href={`tel:${manufacturer.phone}`} className="text-blue-600 hover:underline">
+                    <a href={`tel:${manufacturer.phone}`} className="text-accent-foreground hover:underline">
                       {manufacturer.phone}
                     </a>
                   </div>
@@ -220,7 +220,7 @@ export default async function ManufacturerDetailPage({
                 {manufacturer.email && (
                   <div className="flex gap-3">
                     <span className="text-gray-500 w-20 shrink-0">Email</span>
-                    <a href={`mailto:${manufacturer.email}`} className="text-blue-600 hover:underline">
+                    <a href={`mailto:${manufacturer.email}`} className="text-accent-foreground hover:underline">
                       {manufacturer.email}
                     </a>
                   </div>
@@ -270,7 +270,7 @@ export default async function ManufacturerDetailPage({
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="text-lg font-semibold text-gray-800">{heading}</h3>
                         {hasMore && viewAllUrl && (
-                          <a href={viewAllUrl} className="text-sm text-blue-600 hover:underline">
+                          <a href={viewAllUrl} className="text-sm text-accent-foreground hover:underline">
                             View all {ptCables.length} →
                           </a>
                         )}

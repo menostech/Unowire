@@ -1,9 +1,10 @@
 import type {
   ApplicableSpecRule, Cable, CableDetailResponse, Category,
   EquipmentManufacturer, EquipmentCategory,
-  Industry, Manufacturer, ProductTypeConfig, RecommendedEquipment,
+  Industry, Manufacturer, Plan, ProductTypeConfig, RecommendedEquipment,
   SizeSystem, SpecItem, SpecType, Taxonomy, TaxonomyCategory,
   TaxonomyIndustry,
+  Terminal, TerminalCategory, TerminalManufacturer,
 } from './types';
 
 import categoriesData from '@/data/categories.json';
@@ -191,6 +192,127 @@ interface BackendEquipment {
   category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
 }
 
+interface BackendTerminalManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BackendTerminalCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  children: BackendTerminalCategory[];
+}
+
+interface BackendTerminal {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: ApplicableSpecRule[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: BackendTerminalManufacturer | null;
+  category: { id: string; parent_id: string | null; label: string; slug: string; description: string | null; image_url: string | null } | null;
+}
+
+interface BackendResource {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  file_filename: string | null;
+  file_content_type: string | null;
+  file_size_bytes: number | null;
+  file_url_path: string | null;
+  external_url: string | null;
+  thumbnail_url: string | null;
+  scope_type: string | null;
+  scope_id: string | null;
+  download_count: number;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  category?: BackendResourceCategory | null;
+}
+
+interface BackendResourceCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  children?: BackendResourceCategory[];
+}
+
+interface BackendResourceListResponse {
+  items: BackendResource[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface BackendPost {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  status: string;
+  is_visible: boolean;
+  sort_order: number;
+  published_at: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  created_at: string;
+  updated_at: string;
+  category?: BackendPostCategory | null;
+}
+
+export interface BackendPostCategory {
+  id: string;
+  slug: string;
+  label: string;
+  description: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BackendPostListResponse {
+  items: BackendPost[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 interface BackendCableListResponse {
   items: BackendCable[];
   total: number;
@@ -203,6 +325,23 @@ interface BackendCableListResponse {
     spec_facets: Record<string, { value: string; count: number }[]>;
     outer_diameter: { min: number; max: number } | null;
   };
+}
+
+interface BackendPlan {
+  id: number;
+  name: string;
+  tier_level: string;
+  price_monthly: number;
+  price_yearly: number;
+  currency: string;
+  search_limit_daily: number;
+  detail_view_limit_daily: number;
+  download_limit_monthly: number;
+  is_sales_led: boolean;
+  is_active: boolean;
+  features: string[];
+  sort_order: number;
+  trial_days: number;
 }
 
 // === Adapter functions: API response -> frontend types ===
@@ -386,6 +525,64 @@ function adaptEquipment(e: BackendEquipment): RecommendedEquipment {
   };
 }
 
+function adaptTerminalManufacturer(m: BackendTerminalManufacturer | null | undefined): TerminalManufacturer | null {
+  if (!m) return null;
+  return {
+    id: m.id,
+    name: m.name,
+    slug: m.slug,
+    country: m.country ?? null,
+    website: m.website ?? null,
+    image_url: m.image_url ?? null,
+    description: m.description ?? null,
+    founded_year: m.founded_year ?? null,
+    address: m.address ?? null,
+    phone: m.phone ?? null,
+    email: m.email ?? null,
+    sort_order: m.sort_order ?? 0,
+    created_at: m.created_at ?? '',
+    updated_at: m.updated_at ?? '',
+  };
+}
+
+function adaptTerminalCategory(c: BackendTerminalCategory | null | undefined): TerminalCategory | null {
+  if (!c) return null;
+  return {
+    id: c.id,
+    parent_id: c.parent_id ?? null,
+    label: c.label,
+    slug: c.slug,
+    description: c.description ?? null,
+    image_url: c.image_url ?? null,
+    children: (c.children ?? []).map(child => adaptTerminalCategory(child)!),
+  };
+}
+
+function adaptTerminal(e: BackendTerminal): Terminal {
+  return {
+    id: e.id,
+    manufacturer_id: e.manufacturer_id,
+    category_id: e.category_id,
+    model: e.model,
+    slug: e.slug,
+    applicable_specs: e.applicable_specs ?? [],
+    description: e.description ?? null,
+    image_url: e.image_url ?? null,
+    external_url: e.external_url ?? null,
+    sort_order: e.sort_order ?? 0,
+    manufacturer: adaptTerminalManufacturer(e.manufacturer),
+    category: e.category ? {
+      id: e.category.id,
+      parent_id: e.category.parent_id,
+      label: e.category.label,
+      slug: e.category.slug,
+      description: e.category.description,
+      image_url: e.category.image_url,
+      children: [],
+    } : null,
+  };
+}
+
 // === Helper functions ===
 export function getCableUrl(cable: Cable): string {
   const manufacturerSlug = (cable as unknown as Record<string, unknown>).manufacturer_slug as string | undefined;
@@ -549,6 +746,121 @@ export const api = {
     },
   },
 
+  terminals: {
+    async all(): Promise<Terminal[]> {
+      const res = await fetchWithCache<{ items: BackendTerminal[] }>(
+        '/api/terminals?page_size=999'
+      );
+      return res.items.map(adaptTerminal);
+    },
+    async byCable(cableId: string): Promise<Terminal[]> {
+      const res = await fetchWithCache<{ items: BackendTerminal[] }>(
+        `/api/terminals?cable_id=${encodeURIComponent(cableId)}`
+      );
+      return res.items.map(adaptTerminal);
+    },
+    async getBySlug(slug: string): Promise<Terminal | null> {
+      try {
+        const data = await fetchWithCache<BackendTerminal>(`/api/terminals/${encodeURIComponent(slug)}`);
+        return adaptTerminal(data);
+      } catch {
+        return null;
+      }
+    },
+  },
+
+  terminalManufacturers: {
+    async all(): Promise<TerminalManufacturer[]> {
+      const res = await fetchWithCache<{ items: BackendTerminalManufacturer[]; total: number; page: number; page_size: number }>(
+        '/api/terminal-manufacturers?page_size=999'
+      );
+      return (res.items ?? []).map(adaptTerminalManufacturer).filter((m): m is TerminalManufacturer => m !== null);
+    },
+    async getById(id: string): Promise<TerminalManufacturer | null> {
+      try {
+        const data = await fetchWithCache<BackendTerminalManufacturer>(`/api/terminal-manufacturers/${encodeURIComponent(id)}`);
+        return adaptTerminalManufacturer(data);
+      } catch {
+        return null;
+      }
+    },
+    async getBySlug(slug: string): Promise<TerminalManufacturer | null> {
+      const all = await this.all();
+      return all.find((m) => m.slug === slug) ?? null;
+    },
+  },
+
+  terminalCategories: {
+    async tree(): Promise<TerminalCategory[]> {
+      const data = await fetchWithCache<BackendTerminalCategory[]>('/api/terminal-categories');
+      return (data ?? []).map(c => adaptTerminalCategory(c)!).filter((c): c is TerminalCategory => c !== null);
+    },
+    async getById(id: string): Promise<TerminalCategory | null> {
+      try {
+        const data = await fetchWithCache<BackendTerminalCategory>(`/api/terminal-categories/${encodeURIComponent(id)}`);
+        return adaptTerminalCategory(data);
+      } catch {
+        return null;
+      }
+    },
+  },
+
+  resourceCategories: {
+    async tree(): Promise<BackendResourceCategory[]> {
+      const data = await fetchWithCache<BackendResourceCategory[]>('/api/resource-categories');
+      return data ?? [];
+    },
+    async flat(): Promise<BackendResourceCategory[]> {
+      const data = await fetchWithCache<BackendResourceCategory[]>('/api/resource-categories/flat');
+      return data ?? [];
+    },
+  },
+
+  resources: {
+    async all(params?: { page?: number; page_size?: number; category_id?: string; q?: string }): Promise<BackendResourceListResponse> {
+      const qs = new URLSearchParams();
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.page_size != null) qs.set('page_size', String(params.page_size));
+      if (params?.category_id) qs.set('category_id', params.category_id);
+      if (params?.q) qs.set('q', params.q);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return fetchWithCache<BackendResourceListResponse>(`/api/resources${suffix}`);
+    },
+    async getBySlug(slug: string): Promise<BackendResource | null> {
+      try {
+        return await fetchWithCache<BackendResource>(`/api/resources/${encodeURIComponent(slug)}`);
+      } catch {
+        return null;
+      }
+    },
+  },
+
+  postCategories: {
+    async all(): Promise<BackendPostCategory[]> {
+      const data = await fetchWithCache<BackendPostCategory[]>('/api/post-categories');
+      return data ?? [];
+    },
+  },
+
+  posts: {
+    async all(params?: { page?: number; page_size?: number; category_slug?: string; q?: string }): Promise<BackendPostListResponse> {
+      const qs = new URLSearchParams();
+      if (params?.page != null) qs.set('page', String(params.page));
+      if (params?.page_size != null) qs.set('page_size', String(params.page_size));
+      if (params?.category_slug) qs.set('category_slug', params.category_slug);
+      if (params?.q) qs.set('q', params.q);
+      const suffix = qs.toString() ? `?${qs}` : '';
+      return fetchWithCache<BackendPostListResponse>(`/api/posts${suffix}`);
+    },
+    async getByCategoryAndSlug(categorySlug: string, postSlug: string): Promise<BackendPost | null> {
+      try {
+        return await fetchWithCache<BackendPost>(`/api/posts/${encodeURIComponent(categorySlug)}/${encodeURIComponent(postSlug)}`);
+      } catch {
+        return null;
+      }
+    },
+  },
+
   taxonomy: {
     async all(): Promise<Taxonomy> {
       const tree = await fetchWithCache<unknown>('/api/taxonomy');
@@ -616,6 +928,13 @@ export const api = {
       const category = industry.categories[categoryKey];
       const productType = category.product_types[productTypeKey];
       return { industry, category, productType, industryKey, categoryKey, productTypeKey };
+    },
+  },
+
+  plans: {
+    async all(): Promise<Plan[]> {
+      const res = await fetchWithCache<BackendPlan[]>('/api/plans');
+      return res.map(p => ({ ...p }));
     },
   },
 

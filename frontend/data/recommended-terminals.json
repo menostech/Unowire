@@ -1,0 +1,72 @@
+[
+  {
+    "id": "rec-tm-1",
+    "brand": "Panduit",
+    "model": "RT-22-10",
+    "type": "ring_terminal",
+    "description": "Vinyl-insulated ring terminal for 22-10 AWG single-core wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.5, "max": 6.0 },
+      { "spec_key": "outer_diameter", "min": 1.5, "max": 5.0 },
+      { "spec_key": "jacket", "allowed_values": ["pvc"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.panduit.com/en/products/terminals/ring-terminals"
+  },
+  {
+    "id": "rec-tm-2",
+    "brand": "Thomas & Betts",
+    "model": "BT-200",
+    "type": "butt_connector",
+    "description": "Nylon-insulated butt connector for 26-18 AWG single-core wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.1, "max": 1.0 },
+      { "spec_key": "outer_diameter", "min": 1.0, "max": 3.0 },
+      { "spec_key": "jacket", "allowed_values": ["pvc"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.tnb.com/conn/products/butt-connectors"
+  },
+  {
+    "id": "rec-tm-3",
+    "brand": "3M",
+    "model": "ST-16-14",
+    "type": "spade_terminal",
+    "description": "Heat-shrink spade terminal for 16-14 AWG single-core wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 1.0, "max": 2.5 },
+      { "spec_key": "outer_diameter", "min": 2.0, "max": 4.0 },
+      { "spec_key": "jacket", "allowed_values": ["pvc", "xlpe"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.3m.com/3M/en_US/p/d/v000057825/"
+  },
+  {
+    "id": "rec-tm-4",
+    "brand": "TE Connectivity",
+    "model": "BC-3M",
+    "type": "bullet_connector",
+    "description": "Snap-in bullet connector for 22-18 AWG single-core wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.3, "max": 1.0 },
+      { "spec_key": "outer_diameter", "min": 1.5, "max": 3.5 },
+      { "spec_key": "shielding", "allowed_values": ["none"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.te.com/en/products/terminals/bullet-connectors.html"
+  },
+  {
+    "id": "rec-tm-5",
+    "brand": "Ideal Industries",
+    "model": "PT-302",
+    "type": "pin_terminal",
+    "description": "Copper pin terminal for 30-26 AWG single-core wires.",
+    "applicable_specs": [
+      { "spec_key": "conductor_area", "min": 0.05, "max": 0.3 },
+      { "spec_key": "outer_diameter", "min": 0.8, "max": 2.0 },
+      { "spec_key": "jacket", "allowed_values": ["pvc"] },
+      { "spec_key": "core_structure", "allowed_values": ["single"] }
+    ],
+    "external_url": "https://www.idealindustries.com/en/products/terminals-pin"
+  }
+]

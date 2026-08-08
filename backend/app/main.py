@@ -1,4 +1,6 @@
 import logging
+import asyncio
+from contextlib import asynccontextmanager
 import mimetypes
 
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
@@ -9,7 +11,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, folders, health, industries, manufacturers, pages, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_inquiries, portal_media, portal_messages
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, post, post_categories, plans, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, member_subscription, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, resource, resource_categories, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages, portal_resource
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -18,10 +20,39 @@ mimetypes.add_type("image/webp", ".webp")
 
 logger = logging.getLogger(__name__)
 
+
+async def _trial_expiry_loop():
+    """Hourly bulk expiry of trialing/cancelled subscriptions past their end time.
+    The primary mechanism is lazy expiry in resolve_effective_plan; this is a backup."""
+    from app.core.database import async_session
+    from app.services.subscription import SubscriptionService
+    while True:
+        try:
+            async with async_session() as s:
+                await SubscriptionService(s).expire_trials_batch()
+        except Exception:
+            logging.getLogger(__name__).exception("trial expiry loop failed")
+        await asyncio.sleep(3600)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(_trial_expiry_loop())
+    try:
+        yield
+    finally:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+
 app = FastAPI(
     title="Unowire API",
     docs_url=f"{settings.api_prefix}/docs",
     openapi_url=f"{settings.api_prefix}/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS for local dev only (production uses same-origin via Nginx)
@@ -50,6 +81,7 @@ async def http_exception_handler(request: Request, exc: FastAPIHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.detail if isinstance(exc.detail, dict) else {"code": exc.status_code, "message": str(exc.detail)},
+        headers=exc.headers,
     )
 
 
@@ -94,6 +126,11 @@ app.include_router(equipment_manufacturers.router, prefix=f"{settings.api_prefix
 app.include_router(equipment_categories.router, prefix=f"{settings.api_prefix}/equipment-categories", tags=["equipment-categories"])
 app.include_router(equipment_import.router, prefix=f"{settings.api_prefix}/admin/equipment/import", tags=["equipment-import"])
 app.include_router(equipment_import_templates.router, prefix=f"{settings.api_prefix}/admin/equipment/import", tags=["equipment-import"])
+app.include_router(terminals.router, prefix=f"{settings.api_prefix}/terminals", tags=["terminals"])
+app.include_router(terminal_manufacturers.router, prefix=f"{settings.api_prefix}/terminal-manufacturers", tags=["terminal-manufacturers"])
+app.include_router(terminal_categories.router, prefix=f"{settings.api_prefix}/terminal-categories", tags=["terminal-categories"])
+app.include_router(terminal_import.router, prefix=f"{settings.api_prefix}/admin/terminals/import", tags=["terminal-import"])
+app.include_router(terminal_import_templates.router, prefix=f"{settings.api_prefix}/admin/terminals/import", tags=["terminal-import"])
 app.include_router(admin_menu.router, prefix=f"{settings.api_prefix}/admin/menu", tags=["admin-menu"])
 app.include_router(admin_roles.router, prefix=f"{settings.api_prefix}/admin/roles", tags=["admin-roles"])
 app.include_router(admin_users.router, prefix=f"{settings.api_prefix}/admin/users", tags=["admin-users"])
@@ -103,6 +140,8 @@ app.include_router(folders.router, prefix=f"{settings.api_prefix}/admin/folders"
 app.include_router(cable_import.router, prefix=f"{settings.api_prefix}/admin/cables/import", tags=["cable-import"])
 app.include_router(cable_import_templates.router, prefix=f"{settings.api_prefix}/admin/cables/import", tags=["cable-import"])
 app.include_router(member.router)
+app.include_router(member_subscription.router)
+app.include_router(member_subscription.enterprise_router)
 app.include_router(admin_inquiries.router)
 app.include_router(admin_email.router)
 app.include_router(admin_members.router)
@@ -119,12 +158,21 @@ app.include_router(portal_cables.router)
 app.include_router(portal_cable_import.router)
 app.include_router(portal_equipment.router)
 app.include_router(portal_equipment_import.router)
+app.include_router(portal_terminals.router)
+app.include_router(portal_terminal_import.router)
 app.include_router(portal_inquiries.router)
 app.include_router(portal_media.router)
 app.include_router(portal_messages.router)
 app.include_router(portal_claim.router)
+app.include_router(resource.router, prefix=f"{settings.api_prefix}/resources", tags=["resources"])
+app.include_router(resource_categories.router, prefix=f"{settings.api_prefix}/resource-categories", tags=["resource-categories"])
+app.include_router(portal_resource.router)  # prefix baked in router
+app.include_router(post.router, prefix=f"{settings.api_prefix}/posts", tags=["posts"])
+app.include_router(post_categories.router, prefix=f"{settings.api_prefix}/post-categories", tags=["post-categories"])
+app.include_router(plans.router)
 
 # Mount media directory for static file serving
 media_dir = os.environ.get("MEDIA_DIR", "/app/media")
 os.makedirs(os.path.join(media_dir, "uploads"), exist_ok=True)
+os.makedirs(os.path.join(media_dir, "resources"), exist_ok=True)
 app.mount("/media", StaticFiles(directory=media_dir), name="media")

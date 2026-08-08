@@ -133,7 +133,7 @@ export default async function EquipmentManufacturerPage({ params }: PageProps) {
                   href={manufacturer.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-sm text-blue-600 hover:underline"
+                  className="block text-sm text-accent-foreground hover:underline"
                 >
                   {manufacturer.website}
                 </a>
@@ -155,7 +155,7 @@ export default async function EquipmentManufacturerPage({ params }: PageProps) {
                 ) : (
                   <Link
                     href={`/login?redirect=${encodeURIComponent(`/equipment/manufacturers/${manufacturer.slug}`)}`}
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-accent-foreground hover:underline"
                   >
                     Login to Inquire
                   </Link>
@@ -195,7 +195,7 @@ export default async function EquipmentManufacturerPage({ params }: PageProps) {
                     <dd>
                       <a
                         href={`mailto:${manufacturer.email}`}
-                        className="text-blue-600 hover:underline"
+                        className="text-accent-foreground hover:underline"
                       >
                         {manufacturer.email}
                       </a>

@@ -56,7 +56,7 @@ export function MemberForm({ initialData }: MemberFormProps) {
             onChange={(e) => setName(e.target.value)}
             required
             maxLength={100}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
         </div>
         <div>
@@ -67,7 +67,7 @@ export function MemberForm({ initialData }: MemberFormProps) {
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             maxLength={200}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
         </div>
         <div>
@@ -78,7 +78,7 @@ export function MemberForm({ initialData }: MemberFormProps) {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             maxLength={50}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
         </div>
       </div>
@@ -93,7 +93,7 @@ export function MemberForm({ initialData }: MemberFormProps) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95 disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>

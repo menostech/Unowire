@@ -114,7 +114,7 @@ export default function PortalClaimPage() {
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search by company name..."
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
                 autoComplete="off"
               />
             </div>
@@ -138,7 +138,7 @@ export default function PortalClaimPage() {
                       <span
                         className={`rounded px-2 py-0.5 text-xs font-medium ${
                           mfr.type === 'cable'
-                            ? 'bg-blue-100 text-blue-700'
+                            ? 'bg-accent text-accent-foreground'
                             : 'bg-green-100 text-green-700'
                         }`}
                       >
@@ -148,7 +148,7 @@ export default function PortalClaimPage() {
                     <button
                       type="button"
                       onClick={() => handleSelectCompany(mfr)}
-                      className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+                      className="rounded bg-accent-foreground px-3 py-1 text-xs font-medium text-background hover:brightness-95"
                     >
                       Claim This Company
                     </button>
@@ -172,7 +172,7 @@ export default function PortalClaimPage() {
                 <span
                   className={`rounded px-2 py-0.5 text-xs font-medium ${
                     selected.type === 'cable'
-                      ? 'bg-blue-100 text-blue-700'
+                      ? 'bg-accent text-accent-foreground'
                       : 'bg-green-100 text-green-700'
                   }`}
                 >
@@ -196,7 +196,7 @@ export default function PortalClaimPage() {
                   required
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
                 />
               </div>
               <div>
@@ -209,7 +209,7 @@ export default function PortalClaimPage() {
                   required
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
                   autoComplete="email"
                 />
               </div>
@@ -222,7 +222,7 @@ export default function PortalClaimPage() {
                   type="tel"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
                   autoComplete="tel"
                 />
               </div>
@@ -236,14 +236,14 @@ export default function PortalClaimPage() {
                   value={proofDescription}
                   onChange={(e) => setProofDescription(e.target.value)}
                   rows={4}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
                   placeholder="Describe how you are associated with this company and any proof you can provide (e.g., business email domain, official documents)."
                 />
               </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="w-full rounded bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95 disabled:opacity-50"
               >
                 {submitting ? 'Submitting...' : 'Submit Claim'}
               </button>
@@ -252,7 +252,7 @@ export default function PortalClaimPage() {
               <button
                 type="button"
                 onClick={backToSearch}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-accent-foreground hover:underline"
               >
                 Back to search
               </button>
@@ -270,7 +270,7 @@ export default function PortalClaimPage() {
             <button
               type="button"
               onClick={resetToSearch}
-              className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="w-full rounded bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
             >
               Search for another company
             </button>

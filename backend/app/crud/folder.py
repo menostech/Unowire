@@ -17,6 +17,7 @@ PROTECTED_SUBFOLDERS = ("logos", "products", "docs")
 CONTAINER_NAMES = {
     "manufacturer": "Cable Manufacturers",
     "equipment_manufacturer": "Equipment Manufacturers",
+    "terminal_manufacturer": "Terminal Manufacturers",
 }
 
 

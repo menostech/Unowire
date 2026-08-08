@@ -42,6 +42,9 @@ const PAGE_ID_TO_MODULE_ID: Record<string, string> = {
   'equipment-mfrs': 'equipment_mfrs',
   'equipment-cats': 'equipment_cats',
   'equipment-list': 'equipment_list',
+  'terminal-mfrs': 'terminal_mfrs',
+  'terminal-cats': 'terminal_cats',
+  'terminals': 'terminal_list',
   media: 'media',
   'menu-config': 'menu_config',
   users: 'users',
@@ -49,6 +52,12 @@ const PAGE_ID_TO_MODULE_ID: Record<string, string> = {
   pages: 'pages',
   'site-menu': 'menu_config',
   claims: 'claims',
+  'resources-list': 'resource_list',
+  'resources-cats': 'resource_cats',
+  'posts-list': 'post_list',
+  'posts-cats': 'post_cats',
+  plans: 'plans',
+  subscriptions: 'subscriptions',
 };
 
 function filterTreeByPermissions(
@@ -268,7 +277,7 @@ export function AdminSidebar() {
   return (
     <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-gray-900 p-4 text-gray-100">
       <div className="mb-6 px-2 text-lg font-bold tracking-tight">
-        Unowire <span className="text-gray-400">Admin</span>
+        <span className="text-red-600">uno</span><span className="text-gray-100">wire</span> <span className="text-gray-400">Admin</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1">
         {loading ? (

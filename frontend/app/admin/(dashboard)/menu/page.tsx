@@ -78,7 +78,7 @@ function Row({ item, isChild = false }: { item: MenuItem; isChild?: boolean }) {
           <MenuSortButtons id={item.id} />
           <Link
             href={`/admin/menu/${encodeURIComponent(item.id)}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             Edit
           </Link>

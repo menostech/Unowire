@@ -10,7 +10,7 @@ export default async function UsersPage() {
         <h1 className="text-2xl font-bold">Users</h1>
         <Link
           href="/admin/users/new"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
         >
           New User
         </Link>
@@ -42,13 +42,13 @@ export default async function UsersPage() {
                 <td className="px-4 py-2 text-right space-x-3">
                   <Link
                     href={`/admin/users/${user.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
                   <Link
                     href={`/admin/messages/new?recipientType=targeted&recipientKind=user&recipientId=${user.id}&recipientLabel=${encodeURIComponent(user.email)}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Message
                   </Link>

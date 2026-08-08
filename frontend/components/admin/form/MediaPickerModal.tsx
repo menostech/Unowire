@@ -80,7 +80,7 @@ export function MediaPickerModal({ open, onClose, onSelect }: MediaPickerModalPr
           <div className="flex items-center gap-3">
             <button
               onClick={() => setUploaderOpen((v) => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-accent-foreground text-background rounded hover:brightness-95 transition-colors"
             >
               <Upload className="w-4 h-4" />
               {uploaderOpen ? 'Close Uploader' : 'Upload'}

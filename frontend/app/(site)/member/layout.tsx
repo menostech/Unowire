@@ -40,6 +40,9 @@ export default async function MemberLayout({ children }: { children: React.React
           <Link href="/member/profile" className="block px-3 py-2 rounded hover:bg-gray-100 text-sm">
             Profile
           </Link>
+          <Link href="/member/subscription" className="block px-3 py-2 rounded hover:bg-gray-100 text-sm">
+            Subscription &amp; Usage
+          </Link>
         </nav>
       </aside>
       <main className="flex-1">{children}</main>

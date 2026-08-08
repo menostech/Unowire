@@ -109,7 +109,7 @@ export function PortalMediaPickerModal({ open, onSelect, onClose }: PortalMediaP
             <button
               type="button"
               onClick={() => setUploaderOpen((v) => !v)}
-              className="flex items-center gap-1.5 rounded bg-blue-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-600"
+              className="flex items-center gap-1.5 rounded bg-accent-foreground px-3 py-1.5 text-sm text-background transition-colors hover:brightness-95"
             >
               <Upload className="h-4 w-4" />
               {uploaderOpen ? 'Close' : 'Upload'}
@@ -152,7 +152,7 @@ export function PortalMediaPickerModal({ open, onSelect, onClose }: PortalMediaP
               onClick={() => setSelectedFolder('all')}
               className={`w-full rounded px-2 py-1.5 text-left text-sm ${
                 selectedFolder === 'all'
-                  ? 'bg-blue-50 text-blue-700'
+                  ? 'bg-accent text-accent-foreground'
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -165,7 +165,7 @@ export function PortalMediaPickerModal({ open, onSelect, onClose }: PortalMediaP
                 onClick={() => setSelectedFolder(f.id)}
                 className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm ${
                   selectedFolder === f.id
-                    ? 'bg-blue-50 text-blue-700'
+                    ? 'bg-accent text-accent-foreground'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -184,7 +184,7 @@ export function PortalMediaPickerModal({ open, onSelect, onClose }: PortalMediaP
                     key={u.id}
                     type="button"
                     onClick={() => handleSelect(u.url_path)}
-                    className="group overflow-hidden rounded border border-gray-200 transition-colors hover:border-blue-300"
+                    className="group overflow-hidden rounded border border-gray-200 transition-colors hover:border-accent-foreground/40"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img

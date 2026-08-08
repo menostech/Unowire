@@ -8,26 +8,37 @@ interface StatsRowProps {
 interface Stat {
   label: string;
   value: number;
+  code: string;
 }
 
 export function StatsRow({ cables, industries, equipment, manufacturers }: StatsRowProps) {
   const stats: Stat[] = [
-    { label: 'Cables', value: cables },
-    { label: 'Industries', value: industries },
-    { label: 'Equipment', value: equipment },
-    { label: 'Manufacturers', value: manufacturers },
+    { code: '01', label: 'Cables', value: cables },
+    { code: '02', label: 'Industries', value: industries },
+    { code: '03', label: 'Equipment', value: equipment },
+    { code: '04', label: 'Manufacturers', value: manufacturers },
   ];
 
   return (
-    <section className="border-b bg-gray-50 py-8">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {stats.map(stat => (
+    <section className="border-b border-border bg-card">
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+        {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm"
+            className="group relative px-6 py-8 transition-colors hover:bg-secondary/50"
           >
-            <p className="text-3xl font-bold text-blue-600">{stat.value}</p>
-            <p className="text-sm text-gray-500">{stat.label}</p>
+            <div className="mono-label text-muted-foreground/50">
+              {stat.code} /
+            </div>
+            <p
+              className="mt-2 text-4xl font-bold tracking-tight tabular-nums text-foreground"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
+              {stat.value.toLocaleString()}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+            {/* Amber underline on hover */}
+            <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-full" />
           </div>
         ))}
       </div>

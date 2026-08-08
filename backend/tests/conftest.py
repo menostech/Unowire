@@ -75,6 +75,9 @@ def _cleanup_test_data():
                 "DELETE FROM roles WHERE id IN "
                 "('viewer', 'editor_v2', 'temp', 'bad', 'cable_manager_test', 'equip_manager_test')"
             ))
+            await conn.execute(text("DELETE FROM usage_records WHERE member_id IN (SELECT id FROM members WHERE email LIKE '%@test-member.com')"))
+            await conn.execute(text("DELETE FROM member_subscriptions WHERE member_id IN (SELECT id FROM members WHERE email LIKE '%@test-member.com')"))
+            await conn.execute(text("DELETE FROM subscription_plans WHERE tier_level IN ('pro','tmp_del')"))
             await conn.execute(text("DELETE FROM inquiries WHERE sender_id IN (SELECT id FROM members WHERE email LIKE '%@test-member.com')"))
             await conn.execute(text("DELETE FROM members WHERE email LIKE '%@test-member.com'"))
 
@@ -104,6 +107,14 @@ def db_session():
 
     async def _seed():
         async with _test_engine.begin() as conn:
+            # Membership/subscription test isolation: tests commit (no per-test
+            # rollback) and the seed migration pre-populates subscription_plans
+            # (freemium/personal/enterprise) plus a freemium member_subscriptions
+            # row per member. That collides with the `plans` fixture's INSERT on
+            # the tier_level unique constraint both with seeded data and across
+            # tests in the same session. Wipe both tables before each test.
+            await conn.execute(text("DELETE FROM member_subscriptions"))
+            await conn.execute(text("DELETE FROM subscription_plans"))
             # cable_manager@test.com (manufacturer scope)
             await conn.execute(text(
                 "INSERT INTO roles (id, name, scope_type, is_system) "
@@ -154,7 +165,15 @@ def db_session():
     try:
         yield session
     finally:
-        asyncio.run(session.close())
+        # When this sync fixture is used from an async test (pytest-asyncio),
+        # the session's connection binds to pytest-asyncio's event loop, which
+        # is closed by the time teardown runs — so `asyncio.run(session.close())`
+        # raises against a closed loop. NullPool means no connection reuse, so
+        # abandoning the close here is safe and keeps teardown pristine.
+        try:
+            asyncio.run(session.close())
+        except Exception:
+            pass
 
 
 @pytest.fixture

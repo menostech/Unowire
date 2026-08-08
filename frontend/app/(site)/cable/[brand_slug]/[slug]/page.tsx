@@ -127,14 +127,14 @@ export default async function CableDetailPage({
           {manufacturer && (
             <div>
               <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Manufacturer</h3>
-              <Link href={`/manufacturers/${manufacturer.slug}`} className="text-sm font-medium text-gray-900 hover:text-blue-600">{manufacturer.name}</Link>
+              <Link href={`/manufacturers/${manufacturer.slug}`} className="text-sm font-medium text-gray-900 hover:text-accent-foreground">{manufacturer.name}</Link>
               <p className="text-sm text-gray-500">{manufacturer.country}</p>
               {manufacturer.website && (
                 <a
                   href={manufacturer.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline text-sm mt-1 inline-block"
+                  className="text-accent-foreground hover:underline text-sm mt-1 inline-block"
                 >
                   Visit website →
                 </a>
@@ -150,7 +150,7 @@ export default async function CableDetailPage({
                 ) : (
                   <Link
                     href={`/login?from=/cable/${brand_slug}/${slug}`}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium inline-block"
+                    className="bg-accent-foreground text-background px-4 py-2 rounded hover:brightness-95 text-sm font-medium inline-block"
                   >
                     Login to Contact
                   </Link>
@@ -169,7 +169,7 @@ export default async function CableDetailPage({
               <ul className="space-y-1">
                 {categories.map(c => (
                   <li key={c.id}>
-                    <a href={`/categories/${api.categories.pathSlugs(c.id).join('/')}`} className="text-sm text-blue-600 hover:underline">
+                    <a href={`/categories/${api.categories.pathSlugs(c.id).join('/')}`} className="text-sm text-accent-foreground hover:underline">
                       {c.name}
                     </a>
                   </li>

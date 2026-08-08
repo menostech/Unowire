@@ -13,6 +13,9 @@ export const ADMIN_PAGES: PageRegistryEntry[] = [
   { pageId: "equipment-mfrs", href: "/admin/equipment/manufacturers",      defaultLabel: "Equipment Mfrs",   defaultIcon: "Wrench" },
   { pageId: "equipment-cats", href: "/admin/equipment/categories",         defaultLabel: "Equipment Cats",   defaultIcon: "Wrench" },
   { pageId: "equipment-list", href: "/admin/equipment",                    defaultLabel: "Equipment",        defaultIcon: "Wrench" },
+  { pageId: "terminal-mfrs", href: "/admin/terminals/manufacturers",       defaultLabel: "Terminal Manufacturers", defaultIcon: "Wrench" },
+  { pageId: "terminal-cats", href: "/admin/terminals/categories",          defaultLabel: "Terminal Categories",   defaultIcon: "Wrench" },
+  { pageId: "terminals",     href: "/admin/terminals",                     defaultLabel: "Terminals",             defaultIcon: "Wrench" },
   { pageId: "media",          href: "/admin/media",                        defaultLabel: "Media",            defaultIcon: "Image" },
   { pageId: "menu-config",    href: "/admin/menu",                         defaultLabel: "Menu Config",      defaultIcon: "Settings" },
   { pageId: "users",          href: "/admin/users",                        defaultLabel: "Users",            defaultIcon: "Users" },
@@ -24,6 +27,12 @@ export const ADMIN_PAGES: PageRegistryEntry[] = [
   { pageId: "site-menu",    href: "/admin/site-menu",                      defaultLabel: "Site Menu",    defaultIcon: "Menu" },
   { pageId: "messages",   href: "/admin/messages",                      defaultLabel: "Messages",      defaultIcon: "Megaphone" },
   { pageId: "claims",         href: "/admin/claims",                        defaultLabel: "Claims",           defaultIcon: "Shield" },
+  { pageId: "resources-list", href: "/admin/resources",                    defaultLabel: "Resources",        defaultIcon: "FileText" },
+  { pageId: "resources-cats", href: "/admin/resources/categories",         defaultLabel: "Categories",       defaultIcon: "FileText" },
+  { pageId: "posts-list",     href: "/admin/posts",                        defaultLabel: "Posts",            defaultIcon: "FileText" },
+  { pageId: "posts-cats",     href: "/admin/posts/categories",             defaultLabel: "Categories",       defaultIcon: "FileText" },
+  { pageId: "plans",          href: "/admin/settings/plans",               defaultLabel: "Plans",            defaultIcon: "CreditCard" },
+  { pageId: "subscriptions",  href: "/admin/subscriptions",                defaultLabel: "Subscriptions",    defaultIcon: "Repeat" },
 ];
 
 export const PAGE_BY_ID: Record<string, PageRegistryEntry> = Object.fromEntries(

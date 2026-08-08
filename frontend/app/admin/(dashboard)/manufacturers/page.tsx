@@ -56,7 +56,7 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
                       href={m.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       {m.website}
                     </a>
@@ -73,7 +73,7 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/manufacturers/${m.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
@@ -95,7 +95,7 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
         {page > 1 ? (
           <Link
             href={`/admin/manufacturers?page=${page - 1}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             ← Prev
           </Link>
@@ -108,7 +108,7 @@ export default async function ManufacturersPage({ searchParams }: PageProps) {
         {page < totalPages ? (
           <Link
             href={`/admin/manufacturers?page=${page + 1}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             Next →
           </Link>

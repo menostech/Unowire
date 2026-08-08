@@ -1,0 +1,1 @@
+﻿- [x] 5.6 Mobile viewport: confirm all three page types collapse to a single stacked column.

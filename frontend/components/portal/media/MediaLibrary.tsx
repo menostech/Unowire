@@ -125,7 +125,7 @@ export function MediaLibrary({ initialFolders, initialUploads }: MediaLibraryPro
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center gap-1.5 rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded bg-accent-foreground px-3 py-1.5 text-sm font-medium text-background hover:brightness-95 disabled:opacity-50"
         >
           <Upload className="h-4 w-4" />
           {uploading ? 'Uploading…' : 'Upload'}
@@ -159,7 +159,7 @@ export function MediaLibrary({ initialFolders, initialUploads }: MediaLibraryPro
             <button
               type="button"
               onClick={handleCreateFolder}
-              className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded bg-accent-foreground px-3 py-1.5 text-sm font-medium text-background hover:brightness-95"
             >
               Create
             </button>
@@ -186,7 +186,7 @@ export function MediaLibrary({ initialFolders, initialUploads }: MediaLibraryPro
                   onClick={() => selectFolder('all')}
                   className={`w-full rounded px-2 py-1.5 text-left text-sm ${
                     selectedFolder === 'all'
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-accent text-accent-foreground'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -200,7 +200,7 @@ export function MediaLibrary({ initialFolders, initialUploads }: MediaLibraryPro
                     onClick={() => selectFolder(f.id)}
                     className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-sm ${
                       selectedFolder === f.id
-                        ? 'bg-blue-50 text-blue-700'
+                        ? 'bg-accent text-accent-foreground'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >

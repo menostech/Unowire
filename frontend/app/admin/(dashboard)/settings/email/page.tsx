@@ -43,7 +43,7 @@ export default async function EmailConfigPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/settings/email/templates/${t.id}`}
-                      className="text-blue-600 hover:underline text-sm"
+                      className="text-accent-foreground hover:underline text-sm"
                     >
                       Edit
                     </Link>

@@ -165,6 +165,76 @@ export interface RecommendedEquipmentResult {
   explanation: { spec_key: string; label: string; matched_value: string | number }[];
 }
 
+// === Terminals ===
+export interface TerminalManufacturer {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  image_url: string | null;
+  description: string | null;
+  founded_year: number | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TerminalCategory {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  // `children` is present on the tree endpoint (list), absent on flat reads
+  // (e.g. nested category inside Terminal). Always use `?? []`.
+  children?: TerminalCategory[];
+}
+
+export interface Terminal {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: ApplicableSpecRule[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: TerminalManufacturer | null;
+  category: TerminalCategory | null;
+}
+
+export interface TerminalFilterParams {
+  q?: string;
+  category_ids?: string[];
+  manufacturer_ids?: string[];
+  spec_filters?: Record<string, { min?: number; max?: number; values?: string[] }>;
+}
+
+export interface TerminalFilterFacets {
+  manufacturers: { id: string; name: string; count: number }[];
+  categories: { id: string; label: string; parent_id: string | null; count: number }[];
+  spec_facets: Record<string, {
+    type: "range" | "enum";
+    min?: number; max?: number;
+    values?: { value: string; count: number }[];
+  }>;
+}
+
+export interface TerminalListResponse {
+  items: Terminal[];
+  total: number;
+  page: number;
+  page_size: number;
+  facets: TerminalFilterFacets;
+}
+
 // === Filter / Query Params ===
 // NOTE: industry/category/product_type are REQUIRED route params (not query string).
 // They are part of this interface so filterCables receives a single params object.
@@ -472,4 +542,42 @@ export interface InquiryRead {
   is_read: boolean;
   is_member_read: boolean;
   created_at: string;
+}
+
+// === Membership / Plans ===
+export interface Plan {
+  id: number;
+  name: string;
+  tier_level: 'freemium' | 'personal' | 'enterprise' | string;
+  price_monthly: number;
+  price_yearly: number;
+  currency: string;
+  search_limit_daily: number;
+  detail_view_limit_daily: number;
+  download_limit_monthly: number;
+  is_sales_led: boolean;
+  is_active: boolean;
+  features: string[];
+  sort_order: number;
+  trial_days: number;
+}
+
+export interface SubscriptionStatus {
+  id: number;
+  plan_id: number;
+  plan_name: string;
+  tier_level: string;
+  status: 'active' | 'trialing' | 'expired' | 'cancelled' | string;
+  billing_cycle: string | null;
+  trial_end: string | null;
+  current_period_end: string | null;
+  search_limit_daily: number | null;
+  detail_view_limit_daily: number | null;
+  download_limit_monthly: number | null;
+}
+
+export interface UsageSummary {
+  plan: string;
+  today: { search: { used: number; limit: number | null }; detail_view: { used: number; limit: number | null } };
+  this_month: { download: { used: number; limit: number | null } };
 }

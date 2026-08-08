@@ -139,3 +139,38 @@ def test_member_token_cannot_access_admin_endpoint(client):
         headers={"Authorization": f"Bearer {member_token}"},
     )
     assert res.status_code == 401
+
+
+def test_register_assigns_freemium_subscription(client):
+    import asyncio
+    from sqlalchemy import text
+    from app.core.database import async_session
+
+    res = client.post("/api/member/register", json={
+        "email": "newfreemium@test-member.com",
+        "password": "test123456",
+        "name": "New Free",
+    })
+    assert res.status_code == 200, res.text
+
+    async def _c():
+        async with async_session() as s:
+            row = await s.execute(text(
+                "SELECT ms.status, sp.tier_level FROM member_subscriptions ms "
+                "JOIN subscription_plans sp ON sp.id = ms.plan_id "
+                "JOIN members m ON m.id = ms.member_id "
+                "WHERE m.email = 'newfreemium@test-member.com'"
+            ))
+            return row.first()
+    row = asyncio.run(_c())
+    assert row is not None
+    assert row[0] == "active"
+    assert row[1] == "freemium"
+
+    # cleanup
+    async def _del():
+        async with async_session() as s:
+            await s.execute(text("DELETE FROM member_subscriptions WHERE member_id IN (SELECT id FROM members WHERE email='newfreemium@test-member.com')"))
+            await s.execute(text("DELETE FROM members WHERE email='newfreemium@test-member.com'"))
+            await s.commit()
+    asyncio.run(_del())

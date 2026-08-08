@@ -23,7 +23,7 @@ export default async function MemberMessageDetailPage({
     return (
       <div>
         <p className="text-sm text-red-600">Failed to load message.</p>
-        <Link href="/member/messages" className="mt-4 inline-block text-sm text-blue-600 hover:underline">
+        <Link href="/member/messages" className="mt-4 inline-block text-sm text-accent-foreground hover:underline">
           ← Back to messages
         </Link>
       </div>
@@ -35,7 +35,7 @@ export default async function MemberMessageDetailPage({
     <div>
       <Link
         href="/member/messages"
-        className="mb-4 inline-block text-sm text-blue-600 hover:underline"
+        className="mb-4 inline-block text-sm text-accent-foreground hover:underline"
       >
         ← Back to messages
       </Link>

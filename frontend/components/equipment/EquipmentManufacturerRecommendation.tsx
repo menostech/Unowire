@@ -39,7 +39,7 @@ export function EquipmentManufacturerRecommendation({
           <li key={m.id}>
             <Link
               href={`/equipment/manufacturers/${encodeURIComponent(m.slug)}`}
-              className="flex items-center justify-between text-sm text-gray-600 hover:text-blue-600"
+              className="flex items-center justify-between text-sm text-gray-600 hover:text-accent-foreground"
             >
               <span>{m.name}</span>
               <span className="text-xs text-gray-400">{m.count}</span>

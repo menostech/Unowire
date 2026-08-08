@@ -1,4 +1,4 @@
-export type PortalScopeType = 'manufacturer' | 'equipment_manufacturer';
+export type PortalScopeType = 'manufacturer' | 'equipment_manufacturer' | 'terminal_manufacturer';
 
 export interface PortalUser {
   id: number;
@@ -143,6 +143,48 @@ export interface PortalEquipmentUpdate {
   applicable_specs?: Record<string, unknown>[];
 }
 
+// Matches backend TerminalRead (backend/app/schemas/terminal.py).
+export interface PortalTerminal {
+  id: string;
+  manufacturer_id: string;
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs: unknown[];
+  description: string | null;
+  image_url: string | null;
+  external_url: string | null;
+  sort_order: number;
+  manufacturer: { id: string; name: string; slug: string } | null;
+  category: { id: string; label: string; slug: string } | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Portal-specific terminal create payload (omits id, manufacturer_id).
+export interface PortalTerminalCreate {
+  category_id: string;
+  model: string;
+  slug: string;
+  applicable_specs?: Record<string, unknown>[];
+  description?: string;
+  image_url?: string;
+  external_url?: string;
+  sort_order?: number;
+}
+
+// Terminal update payload — widened to cover all editable fields.
+export interface PortalTerminalUpdate {
+  model?: string;
+  slug?: string;
+  description?: string | null;
+  image_url?: string | null;
+  external_url?: string | null;
+  sort_order?: number;
+  category_id?: string;
+  applicable_specs?: Record<string, unknown>[];
+}
+
 // Matches backend InquiryRead (backend/app/schemas/inquiry.py).
 export interface PortalInquiry {
   id: number;
@@ -244,6 +286,28 @@ export interface EquipmentCategoryTree {
   sort_order: number;
   image_url: string | null;
   children: EquipmentCategoryChild[];
+}
+
+// Matches backend TerminalCategoryTreeRead (backend/app/schemas/terminal.py).
+export interface TerminalCategoryChild {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  sort_order: number;
+  image_url: string | null;
+}
+
+export interface TerminalCategoryTree {
+  id: string;
+  parent_id: string | null;
+  label: string;
+  slug: string;
+  description: string | null;
+  sort_order: number;
+  image_url: string | null;
+  children: TerminalCategoryChild[];
 }
 
 // Matches backend PortalMessageRead (backend/app/schemas/system_message.py).

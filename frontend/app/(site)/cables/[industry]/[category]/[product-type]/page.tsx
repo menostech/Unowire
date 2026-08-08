@@ -112,7 +112,7 @@ export default async function ProductTypePage({
           {result.items.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
               <p className="mb-4">No cables found. Try adjusting your filters.</p>
-              <a href={basePath} className="text-blue-600 hover:underline text-sm">Clear all filters</a>
+              <a href={basePath} className="text-accent-foreground hover:underline text-sm">Clear all filters</a>
             </div>
           ) : (
             <>

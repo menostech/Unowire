@@ -76,7 +76,7 @@ export function CableListToolbar({ taxonomy }: Props) {
         />
         <button
           type="submit"
-          className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-md bg-accent-foreground px-3 py-1.5 text-sm font-medium text-background hover:brightness-95"
         >
           Search
         </button>

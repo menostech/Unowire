@@ -47,7 +47,7 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
         {result.items.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
             <p className="mb-4">No cables found. Try a different search term.</p>
-            <a href="/cables" className="text-blue-600 hover:underline text-sm">Back to Cable Directory</a>
+            <a href="/cables" className="text-accent-foreground hover:underline text-sm">Back to Cable Directory</a>
           </div>
         ) : (
           <>

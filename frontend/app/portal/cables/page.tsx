@@ -56,7 +56,7 @@ export default async function PortalCablesPage({ searchParams }: PageProps) {
           </Link>
           <Link
             href="/portal/cables/new"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
           >
             New Cable
           </Link>

@@ -28,7 +28,7 @@ export function EquipmentCategoryNav({
             href={`/equipment?category=${encodeURIComponent(cat.id)}#equipment-list`}
             className={`flex w-32 shrink-0 flex-col overflow-hidden rounded-lg border transition ${
               isActive
-                ? 'border-blue-500 ring-2 ring-blue-200'
+                ? 'border-accent-foreground ring-2 ring-accent-foreground/30'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >

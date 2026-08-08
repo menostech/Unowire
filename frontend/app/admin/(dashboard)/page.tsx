@@ -22,7 +22,7 @@ export default async function AdminDashboardPage() {
             <p className="mt-2 text-3xl font-bold text-gray-900">{card.count}</p>
             <Link
               href={card.href}
-              className="mt-4 inline-block text-sm text-blue-600 hover:underline"
+              className="mt-4 inline-block text-sm text-accent-foreground hover:underline"
             >
               Manage →
             </Link>

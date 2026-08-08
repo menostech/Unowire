@@ -44,14 +44,14 @@ function VerifyForm() {
         <>
           <h1 className="text-2xl font-bold mb-4">Verified!</h1>
           <p className="text-gray-600 text-sm mb-4">{message}</p>
-          <Link href="/login" className="text-blue-600 text-sm">Go to Login</Link>
+          <Link href="/login" className="text-accent-foreground text-sm">Go to Login</Link>
         </>
       )}
       {status === 'error' && (
         <>
           <h1 className="text-2xl font-bold mb-4 text-red-600">Error</h1>
           <p className="text-gray-600 text-sm mb-4">{message}</p>
-          <Link href="/register" className="text-blue-600 text-sm">Back to Register</Link>
+          <Link href="/register" className="text-accent-foreground text-sm">Back to Register</Link>
         </>
       )}
     </div>

@@ -137,7 +137,7 @@ export default function EquipmentImportPage() {
                     value="csv"
                     checked={format === 'csv'}
                     onChange={() => setFormat('csv')}
-                    className="text-blue-600"
+                    className="text-accent-foreground"
                   />
                   <span className="text-sm text-gray-700">CSV (basic fields)</span>
                 </label>
@@ -148,7 +148,7 @@ export default function EquipmentImportPage() {
                     value="json"
                     checked={format === 'json'}
                     onChange={() => setFormat('json')}
-                    className="text-blue-600"
+                    className="text-accent-foreground"
                   />
                   <span className="text-sm text-gray-700">JSON (full nested)</span>
                 </label>
@@ -157,7 +157,7 @@ export default function EquipmentImportPage() {
 
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-                dragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
+                dragOver ? 'border-accent-foreground/60 bg-accent' : 'border-gray-300 hover:border-accent-foreground/60'
               }`}
               onDrop={handleDrop}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -191,7 +191,7 @@ export default function EquipmentImportPage() {
               <button
                 type="button"
                 onClick={handleDownloadCsvTemplate}
-                className="flex items-center gap-1 text-blue-600 hover:underline"
+                className="flex items-center gap-1 text-accent-foreground hover:underline"
               >
                 <Download className="h-4 w-4" />
                 Download CSV template
@@ -199,7 +199,7 @@ export default function EquipmentImportPage() {
               <button
                 type="button"
                 onClick={handleDownloadJsonExample}
-                className="flex items-center gap-1 text-blue-600 hover:underline"
+                className="flex items-center gap-1 text-accent-foreground hover:underline"
               >
                 <FileText className="h-4 w-4" />
                 View JSON example
@@ -211,7 +211,7 @@ export default function EquipmentImportPage() {
                 type="button"
                 onClick={handleValidate}
                 disabled={!file || loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-sm font-medium text-background bg-accent-foreground rounded hover:brightness-95 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Validating...' : 'Validate'}
               </button>
@@ -255,7 +255,7 @@ export default function EquipmentImportPage() {
               type="button"
               onClick={handleCommit}
               disabled={preview.valid_count === 0 || loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-background bg-accent-foreground rounded hover:brightness-95 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {loading ? 'Committing...' : `Commit ${preview.valid_count} valid rows`}
             </button>
@@ -283,7 +283,7 @@ export default function EquipmentImportPage() {
             <div className="flex justify-center gap-3 mt-6">
               <Link
                 href="/admin/equipment"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+                className="px-4 py-2 text-sm font-medium text-background bg-accent-foreground rounded hover:brightness-95"
               >
                 View Equipment List
               </Link>

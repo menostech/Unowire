@@ -133,7 +133,7 @@ class CRUDSiteMenuItem(CRUDBase[SiteMenuItem, SiteMenuItemCreate, SiteMenuItemUp
             select(SiteMenuItem)
             .where(parent_filter)
             .where(SiteMenuItem.location == item.location)
-            .order_by(SiteMenuItem.sort_order)
+            .order_by(SiteMenuItem.sort_order, SiteMenuItem.id)
         )
         result = await db.execute(stmt)
         siblings = list(result.scalars().all())

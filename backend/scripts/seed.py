@@ -21,6 +21,7 @@ from app.models.cable import Cable, CableVariant, SpecItem
 from app.models.equipment import EquipmentManufacturer, RecommendedEquipment
 from app.models.manufacturer import Manufacturer
 from app.models.taxonomy import Category, Industry, ProductType
+from app.models.terminal import Terminal, TerminalCategory, TerminalManufacturer
 from app.models.user import User
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "frontend" / "data"
@@ -42,6 +43,7 @@ async def truncate_all(db: AsyncSession):
     tables = [
         "spec_items", "cable_variants", "cables",
         "recommended_equipments",
+        "terminals", "terminal_categories", "terminal_manufacturers",
         "manufacturers", "audit_log",
     ]
     for t in tables:
@@ -284,6 +286,87 @@ async def seed_equipment(db: AsyncSession, dry_run: bool):
         await db.commit()
 
 
+_TERMINAL_TYPE_TO_CATEGORY = {
+    "ring_terminal": ("terminals-by-type/ring-terminals", "Ring Terminals", "ring-terminals"),
+    "butt_connector": ("terminals-by-type/butt-connectors", "Butt Connectors", "butt-connectors"),
+    "spade_terminal": ("terminals-by-type/spade-terminals", "Spade Terminals", "spade-terminals"),
+    "bullet_connector": ("terminals-by-type/bullet-connectors", "Bullet Connectors", "bullet-connectors"),
+    "pin_terminal": ("terminals-by-type/pin-terminals", "Pin Terminals", "pin-terminals"),
+}
+
+
+async def seed_terminals(db: AsyncSession, dry_run: bool):
+    data = load_json("recommended-terminals.json")
+    for idx, item in enumerate(data):
+        brand = item.get("brand")
+        tmfr_id = brand.lower().replace(" ", "-").replace("&", "and") if brand else None
+        if tmfr_id:
+            existing = (
+                await db.execute(
+                    select(TerminalManufacturer).where(TerminalManufacturer.id == tmfr_id)
+                )
+            ).scalar_one_or_none()
+            if existing is None:
+                db.add(TerminalManufacturer(
+                    id=tmfr_id, name=brand, slug=tmfr_id, sort_order=0,
+                ))
+                if not dry_run:
+                    await db.flush()
+
+        # Ensure the parent "terminals-by-type" category exists
+        parent_id = "terminals-by-type"
+        parent_existing = (
+            await db.execute(
+                select(TerminalCategory).where(TerminalCategory.id == parent_id)
+            )
+        ).scalar_one_or_none()
+        if parent_existing is None:
+            db.add(TerminalCategory(
+                id=parent_id, parent_id=None, label="Terminals by Type",
+                slug=parent_id, sort_order=0,
+            ))
+            if not dry_run:
+                await db.flush()
+
+        # Ensure the child category exists
+        cat_tuple = _TERMINAL_TYPE_TO_CATEGORY.get(
+            item.get("type", ""), (f"{parent_id}/general", "General", "general")
+        )
+        category_id, cat_label, cat_slug = cat_tuple
+        cat_existing = (
+            await db.execute(
+                select(TerminalCategory).where(TerminalCategory.id == category_id)
+            )
+        ).scalar_one_or_none()
+        if cat_existing is None:
+            db.add(TerminalCategory(
+                id=category_id, parent_id=parent_id, label=cat_label,
+                slug=cat_slug, sort_order=idx,
+            ))
+            if not dry_run:
+                await db.flush()
+
+        model = item.get("model", "")
+        slug = model.lower().replace(" ", "-") or item.get("id", "")
+        obj = Terminal(
+            id=item.get("id"),
+            manufacturer_id=tmfr_id,
+            category_id=category_id,
+            model=model,
+            slug=slug,
+            applicable_specs=item.get("applicable_specs", []),
+            description=item.get("description"),
+            external_url=item.get("external_url"),
+            sort_order=idx,
+        )
+        if dry_run:
+            print(f"  + Terminal: {obj.id} - {obj.model}")
+            continue
+        db.add(obj)
+    if not dry_run:
+        await db.commit()
+
+
 async def seed_admin(db: AsyncSession, dry_run: bool):
     result = await db.execute(select(User).where(User.email == settings.admin_email))
     if result.scalar_one_or_none() is not None:
@@ -321,6 +404,9 @@ async def main(dry_run: bool):
 
         print("Seeding recommended equipment...")
         await seed_equipment(db, dry_run)
+
+        print("Seeding recommended terminals...")
+        await seed_terminals(db, dry_run)
 
         print("Seeding admin account...")
         await seed_admin(db, dry_run)

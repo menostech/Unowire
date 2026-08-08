@@ -116,8 +116,9 @@ async def get_current_factory_user(
 # factory users see a curated feature set, even if an operator misconfigures
 # their role permissions.
 _FACTORY_ALLOWED_BY_SCOPE: dict[str, set[str]] = {
-    "manufacturer": {"dashboard", "cables", "inquiries", "media", "me", "messages"},
-    "equipment_manufacturer": {"dashboard", "equipment", "inquiries", "media", "me", "messages"},
+    "manufacturer": {"dashboard", "cables", "inquiries", "media", "me", "messages", "resources"},
+    "equipment_manufacturer": {"dashboard", "equipment", "inquiries", "media", "me", "messages", "resources"},
+    "terminal_manufacturer": {"dashboard", "terminals", "inquiries", "media", "me", "messages", "resources"},
 }
 
 
@@ -154,6 +155,23 @@ async def get_current_member(
     return member
 
 
+async def get_optional_current_member(
+    token: str | None = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Member | None:
+    """Like get_current_member but returns None for anonymous requests instead of 401.
+    Used by require_quota so public endpoints stay anonymous while members are metered."""
+    if token is None:
+        return None
+    payload = decode_member_token(token)
+    if payload is None:
+        return None
+    member = await db.get(Member, int(payload["sub"]))
+    if member is None or not member.is_active:
+        return None
+    return member
+
+
 def get_media_scope(user: User = Depends(get_current_user)) -> tuple[str | None, str | None]:
     """Returns (scope_type, scope_id) for media filtering.
 
@@ -163,3 +181,73 @@ def get_media_scope(user: User = Depends(get_current_user)) -> tuple[str | None,
     if user.role and user.role.scope_type in ("manufacturer", "equipment_manufacturer"):
         return (user.role.scope_type, user.scope_id)
     return (None, None)
+
+
+async def enforce_quota(member: Member, action: str, db: AsyncSession) -> None:
+    """Check and increment quota for an authenticated member.
+
+    Raises HTTPException(429) if the limit is exceeded or the action is
+    disabled (limit == 0). Call this from within a route handler AFTER
+    resource existence checks, so failed/404 requests are not metered.
+    """
+    if action not in ("search", "detail_view", "download"):
+        raise ValueError(f"unknown quota action: {action}")
+
+    from app.services.subscription import SubscriptionService
+    from app.services.usage import UsageService
+
+    _, limits = await SubscriptionService(db).resolve_effective_plan(member.id)
+    limit_map = {
+        "search": limits["search_limit_daily"],
+        "detail_view": limits["detail_view_limit_daily"],
+        "download": limits["download_limit_monthly"],
+    }
+    limit = limit_map[action]
+
+    if limit is None:
+        # NULL = unlimited — record usage but never block.
+        await UsageService(db).increment_usage(member.id, action)
+        return
+
+    if limit == 0:
+        # 0 = disabled (e.g. freemium downloads).
+        period = "Monthly" if action == "download" else "Daily"
+        raise HTTPException(
+            status_code=429,
+            detail={"code": 429, "message": f"{period} {action} limit exceeded"},
+            headers={"X-RateLimit-Remaining": "0"},
+        )
+
+    allowed = await UsageService(db).increment_and_check(member.id, action, limit)
+    if not allowed:
+        period = "Monthly" if action == "download" else "Daily"
+        raise HTTPException(
+            status_code=429,
+            detail={"code": 429, "message": f"{period} {action} limit exceeded"},
+            headers={"X-RateLimit-Remaining": "0"},
+        )
+
+
+def require_quota(action: str):
+    """Factory: FastAPI dependency that meters a member action (search/detail_view/download).
+
+    Anonymous requests pass through unmetered. Authenticated members are checked
+    against their effective plan limits and incremented atomically. Over-limit
+    raises HTTP 429 with X-RateLimit-Remaining: 0.
+
+    NOTE: this increments BEFORE the route handler runs. For endpoints where a
+    404 / failed response should not consume quota (e.g. downloads), use
+    ``enforce_quota`` inside the handler instead."""
+    if action not in ("search", "detail_view", "download"):
+        raise ValueError(f"unknown quota action: {action}")
+
+    async def checker(
+        member: Member | None = Depends(get_optional_current_member),
+        db: AsyncSession = Depends(get_db),
+    ) -> Member | None:
+        if member is None:
+            return None  # anonymous — no metering
+        await enforce_quota(member, action, db)
+        return member
+
+    return checker

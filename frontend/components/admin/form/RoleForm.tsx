@@ -104,7 +104,7 @@ export function RoleForm({ mode, initialData }: RoleFormProps) {
               onChange={(e) => setId(e.target.value)}
               required
               placeholder="e.g., viewer, cable_manager"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
             />
           ) : (
             <input
@@ -122,7 +122,7 @@ export function RoleForm({ mode, initialData }: RoleFormProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
         </div>
         <div>
@@ -131,7 +131,7 @@ export function RoleForm({ mode, initialData }: RoleFormProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
         </div>
         <div>
@@ -140,7 +140,7 @@ export function RoleForm({ mode, initialData }: RoleFormProps) {
             value={scopeType ?? ''}
             onChange={(e) => setScopeType(e.target.value || null)}
             disabled={isSystem}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           >
             <option value="">None (global role)</option>
             {Object.entries(SCOPE_TYPE_LABELS).map(([value, label]) => (
@@ -157,7 +157,7 @@ export function RoleForm({ mode, initialData }: RoleFormProps) {
             type="number"
             value={sortOrder}
             onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
-            className="w-32 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-32 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
         </div>
       </div>
@@ -173,7 +173,7 @@ export function RoleForm({ mode, initialData }: RoleFormProps) {
                 <label
                   key={m.id}
                   className={`flex items-center gap-2 rounded p-2 text-sm ${
-                    checked ? 'bg-blue-50' : 'hover:bg-gray-50'
+                    checked ? 'bg-accent' : 'hover:bg-gray-50'
                   } ${isProtected ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                 >
                   <input
@@ -204,7 +204,7 @@ export function RoleForm({ mode, initialData }: RoleFormProps) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95 disabled:opacity-50"
         >
           {saving ? 'Saving...' : mode === 'create' ? 'Create Role' : 'Save Changes'}
         </button>

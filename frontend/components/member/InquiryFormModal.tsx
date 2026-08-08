@@ -54,7 +54,7 @@ export function InquiryFormModal({ recipientType, recipientId, manufacturerName,
     return (
       <button
         onClick={openModal}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium"
+        className="bg-accent-foreground text-background px-4 py-2 rounded hover:brightness-95 text-sm font-medium"
       >
         Contact {manufacturerName}
       </button>
@@ -70,7 +70,7 @@ export function InquiryFormModal({ recipientType, recipientId, manufacturerName,
             <p className="text-sm text-gray-600 mb-4">Your message has been sent to {manufacturerName}.</p>
             <button
               onClick={() => { setIsOpen(false); router.push('/member/inquiries'); }}
-              className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium"
+              className="bg-accent-foreground text-background px-4 py-2 rounded text-sm font-medium"
             >
               View My Inquiries
             </button>
@@ -106,7 +106,7 @@ export function InquiryFormModal({ recipientType, recipientId, manufacturerName,
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+                  className="bg-accent-foreground text-background px-4 py-2 rounded hover:brightness-95 disabled:opacity-50 text-sm font-medium"
                 >
                   {loading ? 'Sending...' : 'Send Inquiry'}
                 </button>
