@@ -19,7 +19,16 @@ async def _seed_freemium_member(db_session, email="quota@test-member.com", used_
     plan = await db_session.execute(
         sqlalchemy.select(SubscriptionPlan).where(SubscriptionPlan.tier_level == "freemium")
     )
-    plan = plan.scalar_one()
+    plan = plan.scalar_one_or_none()
+    if plan is None:
+        plan = SubscriptionPlan(
+            name="Freemium", tier_level="freemium", price_monthly=0, price_yearly=0,
+            search_limit_daily=10, detail_view_limit_daily=20, download_limit_monthly=0,
+            is_sales_led=False, is_active=True, features=[], sort_order=0, trial_days=0,
+        )
+        db_session.add(plan)
+        await db_session.commit()
+        await db_session.refresh(plan)
     db_session.add(MemberSubscription(
         member_id=m.id, plan_id=plan.id, status="active",
         snapshot_search_limit=10, snapshot_detail_limit=20, snapshot_download_limit=0,

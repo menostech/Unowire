@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_operator
+from app.api.deps import require_operator, require_quota
 from app.core.database import get_db
 from app.crud.resource import crud_resource
 from app.models.resource import Resource as ResourceModel
@@ -46,7 +46,7 @@ async def list_resources(
 
 
 @router.get("/{resource_id}/download")
-async def download_resource(resource_id: str, db: AsyncSession = Depends(get_db)):
+async def download_resource(resource_id: str, db: AsyncSession = Depends(get_db), _member=Depends(require_quota("download"))):
     resource = await crud_resource.get(db, resource_id)
     if not resource:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Resource not found"})

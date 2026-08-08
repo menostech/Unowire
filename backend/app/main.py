@@ -20,10 +20,35 @@ mimetypes.add_type("image/webp", ".webp")
 
 logger = logging.getLogger(__name__)
 
+
+async def _trial_expiry_loop():
+    """Hourly bulk expiry of trialing/cancelled subscriptions past their end time.
+    The primary mechanism is lazy expiry in resolve_effective_plan; this is a backup."""
+    from app.core.database import async_session
+    from app.services.subscription import SubscriptionService
+    while True:
+        try:
+            async with async_session() as s:
+                await SubscriptionService(s).expire_trials_batch()
+        except Exception:
+            logging.getLogger(__name__).exception("trial expiry loop failed")
+        await asyncio.sleep(3600)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(_trial_expiry_loop())
+    try:
+        yield
+    finally:
+        task.cancel()
+
+
 app = FastAPI(
     title="Unowire API",
     docs_url=f"{settings.api_prefix}/docs",
     openapi_url=f"{settings.api_prefix}/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS for local dev only (production uses same-origin via Nginx)

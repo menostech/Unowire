@@ -3,7 +3,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_operator
+from app.api.deps import require_operator, require_quota
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.cable import crud_cable
@@ -36,6 +36,7 @@ async def list_cables(
     page: int = 1,
     page_size: int = 20,
     db: AsyncSession = Depends(get_db),
+    _member=Depends(require_quota("search")),
 ):
     parsed_spec_filters = None
     if spec_filters:
@@ -66,7 +67,7 @@ async def list_cables(
 
 
 @router.get("/by-url/{manufacturer_slug}/{cable_slug}", response_model=CableDetailRead)
-async def get_cable_by_url(manufacturer_slug: str, cable_slug: str, db: AsyncSession = Depends(get_db)):
+async def get_cable_by_url(manufacturer_slug: str, cable_slug: str, db: AsyncSession = Depends(get_db), _member=Depends(require_quota("detail_view"))):
     cable = await crud_cable.get_by_url(db, manufacturer_slug, cable_slug)
     if not cable:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Cable not found"})

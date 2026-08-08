@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_operator
+from app.api.deps import require_operator, require_quota
 from app.models.user import User
 from app.core.database import get_db
 from app.crud.terminal import crud_terminal
@@ -24,6 +24,7 @@ async def list_terminals(
     category_id: str | None = None,
     manufacturer_id: str | None = None,
     db: AsyncSession = Depends(get_db),
+    _member=Depends(require_quota("search")),
 ):
     if cable_id:
         items = await crud_terminal.get_matching_cable(db, cable_id)
@@ -40,7 +41,7 @@ async def list_terminals(
 
 
 @router.get("/{id}", response_model=TerminalRead)
-async def get_terminal(id: str, db: AsyncSession = Depends(get_db)):
+async def get_terminal(id: str, db: AsyncSession = Depends(get_db), _member=Depends(require_quota("detail_view"))):
     obj = await crud_terminal.get_with_relations(db, id)
     if not obj:
         raise HTTPException(status_code=404, detail={"code": 404, "message": "Terminal not found"})
