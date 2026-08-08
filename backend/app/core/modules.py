@@ -30,6 +30,10 @@ ADMIN_MODULES = [
     {"id": "claims",         "label": "Claims",         "scope_aware": False, "scope_type": None},
     {"id": "resource_cats",  "label": "Resource Cats",  "scope_aware": False, "scope_type": None},
     {"id": "resource_list",  "label": "Resource List",  "scope_aware": True,  "scope_type": None},
+    {"id": "post_cats",       "label": "Post Cats",       "scope_aware": False, "scope_type": None},
+    {"id": "post_list",       "label": "Post List",       "scope_aware": False, "scope_type": None},
+    {"id": "plans",          "label": "Plans",          "scope_aware": False, "scope_type": None},
+    {"id": "subscriptions",  "label": "Subscriptions",  "scope_aware": False, "scope_type": None},
 ]
 
 MODULE_BY_ID = {m["id"]: m for m in ADMIN_MODULES}

@@ -9,7 +9,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
 
-from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, post, post_categories, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, member_subscription, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, resource, resource_categories, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages, portal_resource
+from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, post, post_categories, plans, product_types, taxonomy, uploads, site_menu, admin_menu, admin_roles, admin_users, member, member_subscription, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, resource, resource_categories, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages, portal_resource
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
 
@@ -137,6 +137,7 @@ app.include_router(resource_categories.router, prefix=f"{settings.api_prefix}/re
 app.include_router(portal_resource.router)  # prefix baked in router
 app.include_router(post.router, prefix=f"{settings.api_prefix}/posts", tags=["posts"])
 app.include_router(post_categories.router, prefix=f"{settings.api_prefix}/post-categories", tags=["post-categories"])
+app.include_router(plans.router)
 
 # Mount media directory for static file serving
 media_dir = os.environ.get("MEDIA_DIR", "/app/media")

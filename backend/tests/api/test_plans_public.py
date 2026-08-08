@@ -115,3 +115,10 @@ def test_enterprise_inquiry_creates_inquiry(client):
     body = res.json()
     assert body["recipient_type"] == "enterprise_sales"
     assert body["subject"] == "Enterprise Subscription Inquiry"
+
+
+def test_public_plans_returns_three_active(client):
+    res = client.get("/api/plans")
+    assert res.status_code == 200, res.text
+    tiers = {p["tier_level"] for p in res.json()}
+    assert tiers == {"freemium", "personal", "enterprise"}
