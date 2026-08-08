@@ -154,7 +154,15 @@ def db_session():
     try:
         yield session
     finally:
-        asyncio.run(session.close())
+        # When this sync fixture is used from an async test (pytest-asyncio),
+        # the session's connection binds to pytest-asyncio's event loop, which
+        # is closed by the time teardown runs — so `asyncio.run(session.close())`
+        # raises against a closed loop. NullPool means no connection reuse, so
+        # abandoning the close here is safe and keeps teardown pristine.
+        try:
+            asyncio.run(session.close())
+        except Exception:
+            pass
 
 
 @pytest.fixture
