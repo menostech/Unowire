@@ -77,7 +77,7 @@ export default async function AdminSiteMenuPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/site-menu/${item.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>

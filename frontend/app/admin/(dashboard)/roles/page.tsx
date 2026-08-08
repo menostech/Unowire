@@ -10,7 +10,7 @@ export default async function RolesPage() {
         <h1 className="text-2xl font-bold">Roles</h1>
         <Link
           href="/admin/roles/new"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
         >
           New Role
         </Link>
@@ -38,7 +38,7 @@ export default async function RolesPage() {
                 <td className="px-4 py-2 text-right">
                   <Link
                     href={`/admin/roles/${role.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>

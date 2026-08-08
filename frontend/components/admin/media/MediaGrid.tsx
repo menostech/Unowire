@@ -119,7 +119,7 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
           {items.map((upload) => (
             <div
               key={upload.id}
-              className={`relative group rounded-lg overflow-hidden border border-gray-200 hover:border-blue-300 transition-colors ${onSelect ? 'cursor-pointer' : ''}`}
+              className={`relative group rounded-lg overflow-hidden border border-gray-200 hover:border-accent-foreground/40 transition-colors ${onSelect ? 'cursor-pointer' : ''}`}
               onClick={onSelect ? (e) => {
                 if (e.target instanceof Element && e.target.closest('button, a')) return;
                 onSelect(upload.url_path);
@@ -185,8 +185,8 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
               </div>
 
               {onSelect && (
-                <div className="absolute inset-0 flex items-center justify-center bg-blue-500/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  <span className="px-3 py-1 bg-white/90 rounded text-sm font-medium text-blue-700">Select</span>
+                <div className="absolute inset-0 flex items-center justify-center bg-accent-foreground/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <span className="px-3 py-1 bg-white/90 rounded text-sm font-medium text-accent-foreground">Select</span>
                 </div>
               )}
 
@@ -201,7 +201,7 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
                       if (e.key === 'Enter') handleRename(upload.id);
                       if (e.key === 'Escape') setRenamingId(null);
                     }}
-                    className="w-full px-1 py-0.5 text-xs border border-blue-400 rounded outline-none"
+                    className="w-full px-1 py-0.5 text-xs border border-accent-foreground/60 rounded outline-none"
                   />
                 ) : (
                   upload.original_filename
@@ -274,7 +274,7 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
               </button>
               <button
                 onClick={() => handleMove(movingId, moveTarget)}
-                className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-3 py-1.5 text-sm bg-accent-foreground text-background rounded hover:brightness-95"
               >
                 Move
               </button>
@@ -297,7 +297,7 @@ export function MediaGrid({ folderId, folders, onToast, onFoldersChanged, refres
               key={page}
               onClick={() => setCurrentPage(page)}
               className={`px-3 py-1 text-sm border rounded ${
-                currentPage === page ? 'bg-blue-500 text-white' : 'hover:bg-gray-50'
+                currentPage === page ? 'bg-accent-foreground text-background' : 'hover:bg-gray-50'
               }`}
             >
               {page}

@@ -162,7 +162,7 @@ export function CableFormFields({ value, onChange, errors, taxonomy }: CableForm
           className={`font-mono text-sm min-h-[200px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
             errors.common_specs_json
               ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+              : 'border-gray-300 focus:border-accent-foreground focus:ring-accent-foreground'
           }`}
         />
         {errors.common_specs_json && (
@@ -181,7 +181,7 @@ export function CableFormFields({ value, onChange, errors, taxonomy }: CableForm
           className={`font-mono text-sm min-h-[200px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
             errors.variants_json
               ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+              : 'border-gray-300 focus:border-accent-foreground focus:ring-accent-foreground'
           }`}
         />
         {errors.variants_json && (

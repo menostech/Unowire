@@ -65,7 +65,7 @@ export function ClaimsListClient({
           id="status-filter"
           value={currentStatus}
           onChange={(e) => handleStatusChange(e.target.value)}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded border border-gray-300 px-3 py-1.5 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
         >
           <option value="">All</option>
           <option value="pending">Pending</option>
@@ -109,7 +109,7 @@ export function ClaimsListClient({
                   <td className="px-4 py-3 text-sm text-gray-500">
                     <span className={`rounded px-2 py-0.5 text-xs font-medium ${
                       claim.manufacturer_type === 'cable'
-                        ? 'bg-blue-100 text-blue-700'
+                        ? 'bg-accent text-accent-foreground'
                         : 'bg-green-100 text-green-700'
                     }`}>
                       {claim.manufacturer_type}

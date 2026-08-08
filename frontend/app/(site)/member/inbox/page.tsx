@@ -24,7 +24,7 @@ export default async function InboxPage() {
             <Link
               key={i.id}
               href={`/member/inquiries/${i.id}`}
-              className={`block border rounded p-4 hover:shadow-sm transition ${!i.is_member_read ? 'border-blue-400 bg-blue-50' : 'border-gray-200'}`}
+              className={`block border rounded p-4 hover:shadow-sm transition ${!i.is_member_read ? 'border-accent-foreground/60 bg-accent' : 'border-gray-200'}`}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -33,7 +33,7 @@ export default async function InboxPage() {
                   <p className="text-xs text-gray-500 mt-1">Reply: {i.reply_body.slice(0, 80)}...</p>
                 </div>
                 {!i.is_member_read && (
-                  <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">New</span>
+                  <span className="bg-accent-foreground text-background text-xs px-2 py-0.5 rounded-full">New</span>
                 )}
               </div>
             </Link>

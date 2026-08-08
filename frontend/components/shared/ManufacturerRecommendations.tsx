@@ -55,7 +55,7 @@ export function ManufacturerRecommendations({ manufacturers }: Props) {
               <li key={m.id}>
                 <Link
                   href={`/manufacturers/${m.slug}`}
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-accent-foreground hover:underline"
                 >
                   {m.name}
                 </Link>
@@ -68,7 +68,7 @@ export function ManufacturerRecommendations({ manufacturers }: Props) {
       <div>
         <Link
           href="/manufacturers"
-          className="text-sm text-blue-600 hover:underline font-medium"
+          className="text-sm text-accent-foreground hover:underline font-medium"
         >
           All Manufacturers →
         </Link>

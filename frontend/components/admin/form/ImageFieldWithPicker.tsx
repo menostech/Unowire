@@ -10,7 +10,7 @@ interface ImageFieldWithPickerProps {
 }
 
 const inputClass =
-  'rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500';
+  'rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground';
 
 export function ImageFieldWithPicker({
   label = 'Image URL',
@@ -33,7 +33,7 @@ export function ImageFieldWithPicker({
         <button
           type="button"
           onClick={() => setPickerOpen(true)}
-          className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+          className="px-3 py-2 text-sm font-medium text-accent-foreground bg-accent border border-accent-foreground/30 rounded-md hover:bg-accent transition-colors"
         >
           Media
         </button>

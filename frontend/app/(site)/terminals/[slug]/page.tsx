@@ -115,7 +115,7 @@ export default async function TerminalDetailPage({ params }: PageProps) {
             {manufacturer && (
               <Link
                 href={`/terminals/manufacturers/${encodeURIComponent(manufacturer.slug)}`}
-                className="block text-blue-600 hover:underline"
+                className="block text-accent-foreground hover:underline"
               >
                 {manufacturer.name}
               </Link>
@@ -152,7 +152,7 @@ export default async function TerminalDetailPage({ params }: PageProps) {
               ) : (
                 <Link
                   href={`/login?redirect=${encodeURIComponent(`/terminals/${terminal.slug}`)}`}
-                  className="inline-block text-sm text-blue-600 hover:underline"
+                  className="inline-block text-sm text-accent-foreground hover:underline"
                 >
                   Login to Inquire
                 </Link>

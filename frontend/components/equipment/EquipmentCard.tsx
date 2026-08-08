@@ -22,7 +22,7 @@ export function EquipmentCard({ equipment }: { equipment: RecommendedEquipment }
         )}
       </div>
       <div className="p-4">
-        <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600">
+        <h3 className="text-base font-semibold text-gray-900 group-hover:text-accent-foreground">
           {equipment.model}
         </h3>
         {equipment.manufacturer && (

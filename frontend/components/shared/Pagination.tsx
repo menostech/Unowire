@@ -42,7 +42,7 @@ export function Pagination({
             <Link
               href={buildUrl(p)}
               className={`px-3 py-1 border rounded ${
-                p === page ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-100'
+                p === page ? 'bg-accent-foreground text-background border-accent-foreground' : 'hover:bg-gray-100'
               }`}
             >
               {p}

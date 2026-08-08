@@ -45,13 +45,13 @@ export default async function IndustriesPage() {
                 <td className="px-4 py-3 space-x-3">
                   <Link
                     href={`/admin/industries/${encodeURIComponent(ind.id)}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
                   <Link
                     href={`/admin/industries/categories?industry_id=${encodeURIComponent(ind.id)}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     View Categories →
                   </Link>

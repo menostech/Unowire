@@ -117,7 +117,7 @@ export function TerminalFormFields({ value, onChange, errors, categories }: Term
           className={`font-mono text-sm min-h-[150px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
             errors.applicable_specs_json
               ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+              : 'border-gray-300 focus:border-accent-foreground focus:ring-accent-foreground'
           }`}
         />
         {errors.applicable_specs_json && (

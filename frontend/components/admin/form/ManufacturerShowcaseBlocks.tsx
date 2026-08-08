@@ -29,7 +29,7 @@ interface ManufacturerShowcaseBlocksProps {
 }
 
 const inputClass =
-  'rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500';
+  'rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground';
 
 const blockClass = 'space-y-4 rounded-lg border border-gray-200 bg-white p-5';
 
@@ -238,7 +238,7 @@ export function ManufacturerShowcaseBlocks({
                   type="checkbox"
                   checked={featuredCableIds.includes(cable.id)}
                   onChange={() => handleCableToggle(cable.id)}
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-accent-foreground focus:ring-accent-foreground"
                 />
                 <div className="text-sm">
                   <div className="font-medium text-gray-900">{cable.model}</div>
@@ -310,7 +310,7 @@ export function ManufacturerShowcaseBlocks({
             type="checkbox"
             checked={featuredImage}
             onChange={(e) => setFeaturedImage(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-gray-300 text-accent-foreground focus:ring-accent-foreground"
           />
           <label htmlFor="featured_image" className={labelClass}>
             Featured Image
@@ -336,7 +336,7 @@ export function ManufacturerShowcaseBlocks({
             type="checkbox"
             checked={featuredText}
             onChange={(e) => setFeaturedText(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-gray-300 text-accent-foreground focus:ring-accent-foreground"
           />
           <label htmlFor="featured_text" className={labelClass}>
             Featured Text

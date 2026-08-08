@@ -103,7 +103,7 @@ function MessageFormInner() {
             <button
               type="button"
               onClick={clearSingleMode}
-              className="text-xs text-blue-600 hover:underline"
+              className="text-xs text-accent-foreground hover:underline"
             >
               Change
             </button>
@@ -160,7 +160,7 @@ function MessageFormInner() {
           onChange={(e) => setTitle(e.target.value)}
           required
           maxLength={200}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
         />
       </div>
       <div>
@@ -173,7 +173,7 @@ function MessageFormInner() {
           onChange={(e) => setBody(e.target.value)}
           required
           rows={8}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
         />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -181,7 +181,7 @@ function MessageFormInner() {
         <button
           type="submit"
           disabled={saving || (mode === 'targeted' && selectedGroups.size === 0)}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95 disabled:opacity-50"
         >
           {saving ? 'Publishing...' : 'Publish'}
         </button>

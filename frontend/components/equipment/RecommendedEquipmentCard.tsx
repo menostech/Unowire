@@ -22,7 +22,7 @@ export function RecommendedEquipmentCard({ result }: RecommendedEquipmentCardPro
             href={equipment.external_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline text-sm shrink-0"
+            className="text-accent-foreground hover:underline text-sm shrink-0"
           >
             View product →
           </a>

@@ -69,13 +69,13 @@ function MemberLoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+          className="w-full bg-accent-foreground text-background py-2 rounded hover:brightness-95 disabled:opacity-50 text-sm font-medium"
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
       <p className="text-center mt-4 text-sm text-gray-600">
-        Don&apos;t have an account? <Link href="/register" className="text-blue-600">Register</Link>
+        Don&apos;t have an account? <Link href="/register" className="text-accent-foreground">Register</Link>
       </p>
     </div>
   );

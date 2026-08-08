@@ -45,7 +45,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
   const hasFile = Boolean(resource.file_url_path && resource.file_filename);
   const hasExternal = Boolean(resource.external_url) && !hasFile;
 
-  const breadcrumbItems = [
+  const breadcrumbItems: { name: string; url?: string }[] = [
     { name: 'Home', url: '/' },
     { name: 'Resources', url: '/resources' },
   ];
@@ -75,7 +75,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
                 {category && (
                   <Link
                     href={`/resources?category_id=${encodeURIComponent(category.id)}`}
-                    className="mt-1 inline-block text-sm text-blue-600 hover:underline"
+                    className="mt-1 inline-block text-sm text-accent-foreground hover:underline"
                   >
                     {category.label}
                   </Link>
@@ -107,7 +107,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
               {hasFile && (
                 <a
                   href={`/api/resources/${encodeURIComponent(resource.id)}/download`}
-                  className="inline-block rounded-md bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                  className="inline-block rounded-md bg-accent-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:brightness-95"
                 >
                   Download ({formatFileSize(resource.file_size_bytes)})
                 </a>
@@ -156,7 +156,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
 
           <Link
             href="/resources"
-            className="inline-block text-sm text-blue-600 hover:underline"
+            className="inline-block text-sm text-accent-foreground hover:underline"
           >
             ← Back to Resources
           </Link>

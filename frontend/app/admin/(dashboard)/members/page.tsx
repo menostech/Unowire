@@ -29,7 +29,7 @@ export default async function MembersPage({
           name="q"
           defaultValue={sp.q ?? ''}
           placeholder="Search email or name..."
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
         />
         <select
           name="is_verified"
@@ -110,13 +110,13 @@ export default async function MembersPage({
                   <td className="px-4 py-2 text-right space-x-3">
                     <Link
                       href={`/admin/members/${member.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       Edit
                     </Link>
                     <Link
                       href={`/admin/messages/new?recipientType=targeted&recipientKind=member&recipientId=${member.id}&recipientLabel=${encodeURIComponent(member.email)}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       Message
                     </Link>

@@ -14,7 +14,7 @@ export default async function TerminalCategoriesPage() {
         <td className="px-4 py-3">
           <Link
             href={`/admin/terminals/categories/${encodeURIComponent(cat.id)}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             Edit
           </Link>
@@ -29,7 +29,7 @@ export default async function TerminalCategoriesPage() {
         <td className="px-4 py-3">
           <Link
             href={`/admin/terminals/categories/${encodeURIComponent(child.id)}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             Edit
           </Link>

@@ -143,7 +143,7 @@ export function PageForm({ initial }: PageFormProps) {
   }
 
   const inputClass =
-    'w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500';
+    'w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground';
   const labelClass = 'block text-sm font-medium text-gray-700 mb-1';
 
   return (
@@ -240,7 +240,7 @@ export function PageForm({ initial }: PageFormProps) {
                 type="text"
                 value={slug}
                 onChange={(e) => handleSlugChange(e.target.value)}
-                className="w-full rounded-r-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-r-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
                 placeholder="about-us"
               />
             </div>
@@ -343,7 +343,7 @@ export function PageForm({ initial }: PageFormProps) {
           <div className="border-t border-gray-200 pt-4">
             <p className="text-xs text-gray-500">
               To add this page to the site menu, go to{' '}
-              <Link href="/admin/menu" className="text-blue-600 hover:underline">Menu → New Item</Link>
+              <Link href="/admin/menu" className="text-accent-foreground hover:underline">Menu → New Item</Link>
               , choose type=link, and set URL to <code className="rounded bg-gray-100 px-1">/{slug || '...'}</code>.
             </p>
           </div>
@@ -373,7 +373,7 @@ export function PageForm({ initial }: PageFormProps) {
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); handleSubmit('publish'); }}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
           disabled={saving || Boolean(slugError)}
         >
           Save and Publish

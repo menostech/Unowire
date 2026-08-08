@@ -81,13 +81,13 @@ export default async function CategoriesPage({ searchParams }: PageProps) {
                   <td className="px-4 py-3 space-x-3">
                     <Link
                       href={`/admin/industries/categories/${encodeURIComponent(cat.id)}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       Edit
                     </Link>
                     <Link
                       href={`/admin/industries/product-types?category_id=${encodeURIComponent(cat.id)}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       View Product Types →
                     </Link>

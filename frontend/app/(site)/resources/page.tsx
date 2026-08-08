@@ -73,7 +73,7 @@ export default async function ResourcesListPage({ searchParams }: PageProps) {
                 href="/resources"
                 className={`block rounded-md px-3 py-2 text-sm transition ${
                   !categoryId
-                    ? 'bg-blue-50 font-medium text-blue-700'
+                    ? 'bg-accent font-medium text-accent-foreground'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -87,7 +87,7 @@ export default async function ResourcesListPage({ searchParams }: PageProps) {
                       href={`/resources?category_id=${encodeURIComponent(parent.id)}`}
                       className={`block rounded-md px-3 py-2 text-sm transition ${
                         parentActive
-                          ? 'bg-blue-50 font-medium text-blue-700'
+                          ? 'bg-accent font-medium text-accent-foreground'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
@@ -101,7 +101,7 @@ export default async function ResourcesListPage({ searchParams }: PageProps) {
                           href={`/resources?category_id=${encodeURIComponent(child.id)}`}
                           className={`block rounded-md py-2 pl-6 pr-3 text-sm transition ${
                             childActive
-                              ? 'bg-blue-50 font-medium text-blue-700'
+                              ? 'bg-accent font-medium text-accent-foreground'
                               : 'text-gray-600 hover:bg-gray-50'
                           }`}
                         >
@@ -126,11 +126,11 @@ export default async function ResourcesListPage({ searchParams }: PageProps) {
                 name="q"
                 defaultValue={q}
                 placeholder="Search resources…"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="shrink-0 rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
               >
                 Search
               </button>
@@ -144,7 +144,7 @@ export default async function ResourcesListPage({ searchParams }: PageProps) {
               {(q || categoryId) && (
                 <Link
                   href="/resources"
-                  className="mt-3 inline-block text-sm text-blue-600 hover:underline"
+                  className="mt-3 inline-block text-sm text-accent-foreground hover:underline"
                 >
                   Clear filters
                 </Link>
@@ -167,7 +167,7 @@ export default async function ResourcesListPage({ searchParams }: PageProps) {
                       {fileExtension(resource.file_filename)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-accent-foreground">
                         {resource.title}
                       </h3>
                       {resource.description && (
@@ -188,7 +188,7 @@ export default async function ResourcesListPage({ searchParams }: PageProps) {
                           <span>{resource.download_count} download{resource.download_count !== 1 ? 's' : ''}</span>
                         )}
                         {resource.external_url && !resource.file_filename && (
-                          <span className="text-blue-600">External link →</span>
+                          <span className="text-accent-foreground">External link →</span>
                         )}
                       </div>
                     </div>

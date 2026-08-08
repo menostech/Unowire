@@ -73,7 +73,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
   return (
     <div className="space-y-4">
       <div
-        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-accent-foreground/60 transition-colors cursor-pointer"
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onClick={() => document.getElementById('media-upload-input')?.click()}
@@ -106,7 +106,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
               ) : (
                 <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
                   {upload.status === 'uploading' && (
-                    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-6 h-6 border-2 border-accent-foreground border-t-transparent rounded-full animate-spin" />
                   )}
                   {upload.status === 'error' && (
                     <X className="w-5 h-5 text-red-500" />
@@ -122,7 +122,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
               <p className="text-sm font-medium text-gray-700 truncate">{upload.file.name}</p>
               {upload.status === 'uploading' && (
                 <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-                  <div className="bg-blue-500 h-1 rounded-full" style={{ width: `${upload.progress}%` }} />
+                  <div className="bg-accent-foreground h-1 rounded-full" style={{ width: `${upload.progress}%` }} />
                 </div>
               )}
               {upload.status === 'error' && (
@@ -137,7 +137,7 @@ export function MediaUploader({ folderId, onUploaded }: MediaUploaderProps) {
               {upload.status === 'success' && upload.url && (
                 <button
                   onClick={() => copyUrl(upload.url!)}
-                  className="p-2 text-gray-500 hover:text-blue-500 transition-colors"
+                  className="p-2 text-gray-500 hover:text-accent-foreground transition-colors"
                   title="Copy URL"
                 >
                   {copiedUrl === upload.url ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}

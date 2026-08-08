@@ -67,7 +67,7 @@ export default async function PortalEquipmentPage({ searchParams }: PageProps) {
           </Link>
           <Link
             href="/portal/equipment/new"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
           >
             New Equipment
           </Link>
@@ -100,7 +100,7 @@ export default async function PortalEquipmentPage({ searchParams }: PageProps) {
                     {e.created_at ? new Date(e.created_at).toLocaleDateString() : '—'}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/portal/equipment/${e.id}`} className="text-blue-600 hover:underline">
+                    <Link href={`/portal/equipment/${e.id}`} className="text-accent-foreground hover:underline">
                       Edit
                     </Link>
                   </td>
@@ -113,13 +113,13 @@ export default async function PortalEquipmentPage({ searchParams }: PageProps) {
 
       <div className="mt-4 flex items-center justify-center gap-4 text-sm">
         {page > 1 ? (
-          <Link href={buildPageHref(page - 1)} className="text-blue-600 hover:underline">← Prev</Link>
+          <Link href={buildPageHref(page - 1)} className="text-accent-foreground hover:underline">← Prev</Link>
         ) : (
           <span className="text-gray-300">← Prev</span>
         )}
         <span className="text-gray-600">Page {page} of {totalPages}</span>
         {page < totalPages ? (
-          <Link href={buildPageHref(page + 1)} className="text-blue-600 hover:underline">Next →</Link>
+          <Link href={buildPageHref(page + 1)} className="text-accent-foreground hover:underline">Next →</Link>
         ) : (
           <span className="text-gray-300">Next →</span>
         )}

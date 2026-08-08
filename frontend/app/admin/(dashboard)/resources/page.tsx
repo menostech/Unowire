@@ -105,7 +105,7 @@ export default async function ResourcesPage({ searchParams }: PageProps) {
             type="text"
             defaultValue={q ?? ''}
             placeholder="Search title or description…"
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -116,7 +116,7 @@ export default async function ResourcesPage({ searchParams }: PageProps) {
             id="category_id"
             name="category_id"
             defaultValue={categoryId ?? ''}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           >
             <option value="">All categories</option>
             {flatCategories.map((c) => (
@@ -134,7 +134,7 @@ export default async function ResourcesPage({ searchParams }: PageProps) {
             id="scope_type"
             name="scope_type"
             defaultValue={scopeType ?? ''}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           >
             <option value="">All scopes</option>
             <option value="manufacturer">Manufacturer</option>
@@ -193,7 +193,7 @@ export default async function ResourcesPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/resources/${encodeURIComponent(r.id)}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
@@ -213,7 +213,7 @@ export default async function ResourcesPage({ searchParams }: PageProps) {
 
       <div className="mt-4 flex items-center justify-center gap-4 text-sm">
         {page > 1 ? (
-          <Link href={buildPageHref(page - 1)} className="text-blue-600 hover:underline">
+          <Link href={buildPageHref(page - 1)} className="text-accent-foreground hover:underline">
             ← Prev
           </Link>
         ) : (
@@ -223,7 +223,7 @@ export default async function ResourcesPage({ searchParams }: PageProps) {
           Page {page} of {totalPages}
         </span>
         {page < totalPages ? (
-          <Link href={buildPageHref(page + 1)} className="text-blue-600 hover:underline">
+          <Link href={buildPageHref(page + 1)} className="text-accent-foreground hover:underline">
             Next →
           </Link>
         ) : (

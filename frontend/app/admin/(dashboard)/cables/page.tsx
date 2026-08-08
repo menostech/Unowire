@@ -76,7 +76,7 @@ export default async function CablesPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/cables/${c.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
@@ -96,7 +96,7 @@ export default async function CablesPage({ searchParams }: PageProps) {
 
       <div className="mt-4 flex items-center justify-center gap-4 text-sm">
         {page > 1 ? (
-          <Link href={pageHref(page - 1)} className="text-blue-600 hover:underline">
+          <Link href={pageHref(page - 1)} className="text-accent-foreground hover:underline">
             ← Prev
           </Link>
         ) : (
@@ -106,7 +106,7 @@ export default async function CablesPage({ searchParams }: PageProps) {
           Page {page} of {totalPages}
         </span>
         {page < totalPages ? (
-          <Link href={pageHref(page + 1)} className="text-blue-600 hover:underline">
+          <Link href={pageHref(page + 1)} className="text-accent-foreground hover:underline">
             Next →
           </Link>
         ) : (

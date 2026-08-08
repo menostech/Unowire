@@ -11,7 +11,7 @@ export default async function AdminMessagesPage() {
         <h1 className="text-2xl font-bold">Messages</h1>
         <Link
           href="/admin/messages/new"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-md bg-accent-foreground px-4 py-2 text-sm font-medium text-background hover:brightness-95"
         >
           New Message
         </Link>
@@ -41,7 +41,7 @@ export default async function AdminMessagesPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/messages/${m.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       {m.title}
                     </Link>
@@ -58,7 +58,7 @@ export default async function AdminMessagesPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/messages/${m.id}`}
-                      className="text-blue-600 hover:underline text-sm"
+                      className="text-accent-foreground hover:underline text-sm"
                     >
                       View
                     </Link>

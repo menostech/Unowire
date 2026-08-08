@@ -38,7 +38,7 @@ export function RecentInquiries({ inquiries }: { inquiries: RecentInquiry[] }) {
       </ul>
       <Link
         href="/portal/inquiries"
-        className="mt-3 inline-block text-xs text-blue-600 hover:underline"
+        className="mt-3 inline-block text-xs text-accent-foreground hover:underline"
       >
         View all →
       </Link>

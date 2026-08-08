@@ -75,7 +75,7 @@ export function FolderTree({ folders, selectedId, onSelect, onRefresh, onToast }
       {/* Virtual nodes */}
       <TreeRow
         label="All Files"
-        icon={<FolderIcon className="w-4 h-4 text-blue-500" />}
+        icon={<FolderIcon className="w-4 h-4 text-accent-foreground" />}
         active={selectedId === 'all'}
         onClick={() => onSelect('all')}
       />
@@ -191,7 +191,7 @@ function FolderNodeRow(props: FolderNodeRowProps) {
           {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
         </button>
         {isSelected ? (
-          <FolderOpenIcon className="w-4 h-4 text-blue-500" />
+          <FolderOpenIcon className="w-4 h-4 text-accent-foreground" />
         ) : (
           <FolderIcon className="w-4 h-4 text-gray-500" />
         )}
@@ -205,11 +205,11 @@ function FolderNodeRow(props: FolderNodeRowProps) {
               if (e.key === 'Enter') onRename(node.id, renameValue);
               if (e.key === 'Escape') setRenamingId(null);
             }}
-            className="flex-1 px-1 py-0.5 text-sm border border-blue-400 rounded outline-none"
+            className="flex-1 px-1 py-0.5 text-sm border border-accent-foreground/60 rounded outline-none"
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className={`flex-1 truncate ${isSelected ? 'font-medium text-blue-600' : ''}`}>
+          <span className={`flex-1 truncate ${isSelected ? 'font-medium text-accent-foreground' : ''}`}>
             {node.name}
           </span>
         )}
@@ -305,11 +305,11 @@ function NewFolderInput({ depth = 0, value, setValue, onCancel, onCreate }: NewF
           if (e.key === 'Escape') onCancel();
         }}
         placeholder="Folder name"
-        className="flex-1 px-1 py-0.5 text-sm border border-blue-400 rounded outline-none"
+        className="flex-1 px-1 py-0.5 text-sm border border-accent-foreground/60 rounded outline-none"
       />
       <button
         onClick={() => value.trim() && onCreate(value.trim())}
-        className="p-0.5 text-blue-600 hover:bg-blue-50 rounded"
+        className="p-0.5 text-accent-foreground hover:bg-accent rounded"
       >
         <Plus className="w-3.5 h-3.5" />
       </button>
@@ -332,7 +332,7 @@ function TreeRow({ label, icon, active, onClick }: TreeRowProps) {
     <div
       onClick={onClick}
       className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer hover:bg-gray-100 ${
-        active ? 'bg-blue-50 text-blue-700 font-medium' : ''
+        active ? 'bg-accent text-accent-foreground font-medium' : ''
       }`}
     >
       {icon}

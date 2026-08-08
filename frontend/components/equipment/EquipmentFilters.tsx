@@ -145,7 +145,7 @@ export function EquipmentFilters({ facets, allCategoryTree }: Props) {
         <button
           type="button"
           onClick={clearAll}
-          className="text-xs text-blue-600 hover:underline"
+          className="text-xs text-accent-foreground hover:underline"
         >
           Clear all filters
         </button>

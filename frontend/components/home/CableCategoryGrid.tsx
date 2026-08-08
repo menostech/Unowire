@@ -9,17 +9,34 @@ export function CableCategoryGrid({ taxonomy }: CableCategoryGridProps) {
   const industries = Object.values(taxonomy);
 
   return (
-    <section className="py-12">
-      <h2 className="mb-6 inline-block border-b-2 border-blue-600 pb-1 text-xl font-bold text-gray-900">
-        Browse Cables by Industry
-      </h2>
+    <section className="py-16">
+      <div className="mb-8 flex items-end justify-between border-b border-border pb-4">
+        <div>
+          <div className="mono-label text-primary mb-2">
+            SECTION / 02
+          </div>
+          <h2
+            className="text-3xl font-bold tracking-tight text-foreground"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Cables by industry
+          </h2>
+        </div>
+        <Link
+          href="/cables"
+          className="group flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+        >
+          View all
+          <span className="transition-transform group-hover:translate-x-0.5">→</span>
+        </Link>
+      </div>
 
       {industries.length === 0 ? (
-        <p className="text-gray-500">Categories unavailable.</p>
+        <p className="text-muted-foreground">Categories unavailable.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {industries.map(industry => (
-            <IndustryCard key={industry.slug} industry={industry} />
+        <div className="grid grid-cols-1 gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
+          {industries.map((industry, i) => (
+            <IndustryCard key={industry.slug} industry={industry} index={i} />
           ))}
         </div>
       )}
@@ -27,22 +44,31 @@ export function CableCategoryGrid({ taxonomy }: CableCategoryGridProps) {
   );
 }
 
-function IndustryCard({ industry }: { industry: TaxonomyIndustry }) {
+function IndustryCard({ industry, index }: { industry: TaxonomyIndustry; index: number }) {
   const categories = Object.values(industry.categories);
   const industryHref = `/cables?industry=${encodeURIComponent(industry.slug)}`;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-      <h3 className="mb-2 border-b border-gray-200 pb-2">
-        <Link href={industryHref} className="font-bold text-blue-600 hover:underline">
+    <div className="group relative bg-card p-6 transition-colors hover:bg-secondary/30">
+      {/* Index number — top right, mono */}
+      <span className="absolute right-6 top-6 font-mono text-[11px] text-muted-foreground/40">
+        {(index + 1).toString().padStart(2, '0')}
+      </span>
+
+      <h3 className="mb-4 pr-8">
+        <Link
+          href={industryHref}
+          className="text-lg font-semibold text-foreground transition hover:text-primary"
+          style={{ fontFamily: 'var(--font-heading)' }}
+        >
           {industry.label}
         </Link>
       </h3>
 
       {categories.length === 0 ? (
-        <p className="text-xs italic text-gray-400">(No categories yet)</p>
+        <p className="font-mono text-[12px] text-muted-foreground/60">— No categories yet</p>
       ) : (
-        <ul className="space-y-1">
+        <ul className="space-y-2">
           {categories.map(category => (
             <CategoryListItem
               key={category.slug}
@@ -51,6 +77,14 @@ function IndustryCard({ industry }: { industry: TaxonomyIndustry }) {
             />
           ))}
         </ul>
+      )}
+
+      {categories.length > 0 && (
+        <div className="mt-4 border-t border-border pt-3">
+          <span className="mono-label text-muted-foreground/50">
+            {categories.length} CATEGORIES
+          </span>
+        </div>
       )}
     </div>
   );
@@ -70,12 +104,15 @@ function CategoryListItem({
     <li>
       <Link
         href={categoryHref}
-        className="text-sm text-gray-700 hover:text-blue-600 hover:underline"
+        className="group/cat flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"
       >
-        ▸ {category.label}
+        <span className="font-mono text-[10px] text-muted-foreground/40 group-hover/cat:text-primary">
+          ▸
+        </span>
+        {category.label}
       </Link>
       {productTypes.length > 0 && (
-        <ul className="ml-4 mt-0.5 space-y-0.5">
+        <ul className="ml-5 mt-1 space-y-1 border-l border-border/60 pl-3">
           {productTypes.map(pt => (
             <ProductTypeListItem
               key={pt.slug}
@@ -105,7 +142,7 @@ function ProductTypeListItem({
     <li>
       <Link
         href={ptHref}
-        className="text-xs text-gray-500 hover:text-blue-600 hover:underline"
+        className="font-mono text-[12px] text-muted-foreground/70 transition hover:text-primary"
       >
         {productType.label}
       </Link>

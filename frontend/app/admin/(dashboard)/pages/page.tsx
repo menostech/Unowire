@@ -92,7 +92,7 @@ export default async function AdminPagesPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/pages/${p.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
@@ -114,7 +114,7 @@ export default async function AdminPagesPage({ searchParams }: PageProps) {
         {page > 1 ? (
           <Link
             href={`/admin/pages?page=${page - 1}${statusFilter ? `&status=${statusFilter}` : ''}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             ← Prev
           </Link>
@@ -127,7 +127,7 @@ export default async function AdminPagesPage({ searchParams }: PageProps) {
         {page < totalPages ? (
           <Link
             href={`/admin/pages?page=${page + 1}${statusFilter ? `&status=${statusFilter}` : ''}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             Next →
           </Link>

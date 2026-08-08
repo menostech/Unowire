@@ -84,7 +84,7 @@ export function ImportPreviewTable({ rows }: ImportPreviewTableProps) {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className={page === 1 ? 'text-gray-300' : 'text-blue-600 hover:underline'}
+            className={page === 1 ? 'text-gray-300' : 'text-accent-foreground hover:underline'}
           >
             ← Prev
           </button>
@@ -95,7 +95,7 @@ export function ImportPreviewTable({ rows }: ImportPreviewTableProps) {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className={page === totalPages ? 'text-gray-300' : 'text-blue-600 hover:underline'}
+            className={page === totalPages ? 'text-gray-300' : 'text-accent-foreground hover:underline'}
           >
             Next →
           </button>

@@ -22,7 +22,7 @@ export function TerminalCard({ terminal }: { terminal: Terminal }) {
         )}
       </div>
       <div className="p-4">
-        <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600">
+        <h3 className="text-base font-semibold text-gray-900 group-hover:text-accent-foreground">
           {terminal.model}
         </h3>
         {terminal.manufacturer && (

@@ -99,9 +99,9 @@ export function PortalSidebar({
   }
 
   return (
-    <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-blue-900 p-4 text-blue-100">
+    <aside className="sticky top-0 z-40 flex h-screen w-[268px] shrink-0 flex-col bg-foreground p-4 text-background/70">
       <div className="mb-6 px-2 text-lg font-bold tracking-tight">
-        Unowire <span className="text-blue-300">Portal</span>
+        <span className="text-primary">uno</span><span className="text-background">wire</span> <span className="text-primary">Portal</span>
       </div>
       <nav className="flex flex-1 flex-col gap-1">
         {nav.map((item) => {
@@ -113,8 +113,8 @@ export function PortalSidebar({
               href={item.href}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${
                 active
-                  ? 'bg-blue-800 text-white'
-                  : 'text-blue-100 hover:bg-blue-800 hover:text-white'
+                  ? 'bg-foreground/80 text-white'
+                  : 'text-background/70 hover:bg-foreground/80 hover:text-background'
               }`}
             >
               <Icon className="size-4 shrink-0" />
@@ -132,7 +132,7 @@ export function PortalSidebar({
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-blue-100 transition hover:bg-blue-800 hover:text-white"
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-background/70 transition hover:bg-foreground/80 hover:text-background"
         >
           <ExternalLink className="size-4 shrink-0" />
           View Site
@@ -141,7 +141,7 @@ export function PortalSidebar({
       <button
         type="button"
         onClick={handleLogout}
-        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-blue-100 transition hover:bg-blue-800 hover:text-white"
+        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-background/70 transition hover:bg-foreground/80 hover:text-background"
       >
         <LogOut className="size-4 shrink-0" />
         Logout

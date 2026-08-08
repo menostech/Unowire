@@ -88,7 +88,7 @@ export default async function TerminalsPage({ searchParams }: PageProps) {
             id="manufacturer_id"
             name="manufacturer_id"
             defaultValue={manufacturerId ?? ''}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           >
             <option value="">All manufacturers</option>
             {manufacturersResult.items.map((m) => (
@@ -106,7 +106,7 @@ export default async function TerminalsPage({ searchParams }: PageProps) {
             id="category_id"
             name="category_id"
             defaultValue={categoryId ?? ''}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           >
             <option value="">All categories</option>
             {flatCategories.map((c) => (
@@ -159,7 +159,7 @@ export default async function TerminalsPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/terminals/${encodeURIComponent(t.id)}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
@@ -179,7 +179,7 @@ export default async function TerminalsPage({ searchParams }: PageProps) {
 
       <div className="mt-4 flex items-center justify-center gap-4 text-sm">
         {page > 1 ? (
-          <Link href={buildPageHref(page - 1)} className="text-blue-600 hover:underline">
+          <Link href={buildPageHref(page - 1)} className="text-accent-foreground hover:underline">
             ← Prev
           </Link>
         ) : (
@@ -189,7 +189,7 @@ export default async function TerminalsPage({ searchParams }: PageProps) {
           Page {page} of {totalPages}
         </span>
         {page < totalPages ? (
-          <Link href={buildPageHref(page + 1)} className="text-blue-600 hover:underline">
+          <Link href={buildPageHref(page + 1)} className="text-accent-foreground hover:underline">
             Next →
           </Link>
         ) : (

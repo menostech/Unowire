@@ -54,7 +54,7 @@ export default async function EquipmentManufacturersPage({ searchParams }: PageP
                       href={m.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       {m.website}
                     </a>
@@ -65,7 +65,7 @@ export default async function EquipmentManufacturersPage({ searchParams }: PageP
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/equipment/manufacturers/${encodeURIComponent(m.id)}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent-foreground hover:underline"
                   >
                     Edit
                   </Link>
@@ -87,7 +87,7 @@ export default async function EquipmentManufacturersPage({ searchParams }: PageP
         {page > 1 ? (
           <Link
             href={`/admin/equipment/manufacturers?page=${page - 1}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             ← Prev
           </Link>
@@ -100,7 +100,7 @@ export default async function EquipmentManufacturersPage({ searchParams }: PageP
         {page < totalPages ? (
           <Link
             href={`/admin/equipment/manufacturers?page=${page + 1}`}
-            className="text-blue-600 hover:underline"
+            className="text-accent-foreground hover:underline"
           >
             Next →
           </Link>

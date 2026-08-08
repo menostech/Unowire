@@ -161,7 +161,7 @@ export function CableForm({ initial, manufacturers, taxonomy }: CableFormProps) 
   }
 
   const inputClass =
-    'rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500';
+    'rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground';
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl space-y-4">
@@ -354,7 +354,7 @@ export function CableForm({ initial, manufacturers, taxonomy }: CableFormProps) 
           onChange={(e) => handleCommonSpecsChange(e.target.value)}
           className={`font-mono text-sm min-h-[200px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
             commonSpecsValid
-              ? 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+              ? 'border-gray-300 focus:border-accent-foreground focus:ring-accent-foreground'
               : 'border-red-500 focus:border-red-500 focus:ring-red-500'
           }`}
         />
@@ -374,7 +374,7 @@ export function CableForm({ initial, manufacturers, taxonomy }: CableFormProps) 
           onChange={(e) => handleVariantsChange(e.target.value)}
           className={`font-mono text-sm min-h-[200px] w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
             variantsValid
-              ? 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+              ? 'border-gray-300 focus:border-accent-foreground focus:ring-accent-foreground'
               : 'border-red-500 focus:border-red-500 focus:ring-red-500'
           }`}
         />

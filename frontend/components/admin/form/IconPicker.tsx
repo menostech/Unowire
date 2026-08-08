@@ -88,7 +88,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="flex w-full items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
       >
         {SelectedIcon ? (
           <>
@@ -106,7 +106,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
             placeholder="Search icons..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="mb-2 w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mb-2 w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
           />
           <div className="grid max-h-60 grid-cols-6 gap-1 overflow-y-auto">
             <button
@@ -123,7 +123,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
                 type="button"
                 onClick={() => handleSelect(name)}
                 className={`flex flex-col items-center gap-1 rounded p-2 text-xs hover:bg-gray-100 ${
-                  value === name ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                  value === name ? 'bg-accent text-accent-foreground' : 'text-gray-700'
                 }`}
                 title={name}
               >

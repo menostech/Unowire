@@ -11,7 +11,7 @@ export function CategoryCard({ category, count }: CategoryCardProps) {
   return (
     <Link
       href={getCategoryUrl(category.id)}
-      className="block border rounded-lg p-5 hover:shadow-md hover:border-blue-300 transition bg-white"
+      className="block border rounded-lg p-5 hover:shadow-md hover:border-accent-foreground/40 transition bg-white"
     >
       <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
       {count !== undefined && (

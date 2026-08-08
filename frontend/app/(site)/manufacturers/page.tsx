@@ -58,7 +58,7 @@ export default async function ManufacturersPage() {
                       <li key={m.id}>
                         <Link
                           href={`/manufacturers/${m.slug}`}
-                          className="text-blue-600 hover:underline"
+                          className="text-accent-foreground hover:underline"
                         >
                           {m.name}
                         </Link>

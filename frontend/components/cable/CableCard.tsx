@@ -78,7 +78,7 @@ export function CableCard({ cable, manufacturer }: CableCardProps) {
                 );
               })}
               {variantCount > 3 && (
-                <div className="text-xs text-blue-600">+{variantCount - 3} more</div>
+                <div className="text-xs text-accent-foreground">+{variantCount - 3} more</div>
               )}
             </div>
           </div>

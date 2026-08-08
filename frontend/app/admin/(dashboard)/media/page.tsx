@@ -44,12 +44,12 @@ export default function MediaPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <ImageIcon className="h-6 w-6 text-blue-600" />
+          <ImageIcon className="h-6 w-6 text-accent-foreground" />
           <h1 className="text-xl font-semibold text-gray-900">Media Library</h1>
         </div>
         <button
           onClick={() => setUploaderOpen((v) => !v)}
-          className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="px-3 py-1.5 text-sm bg-accent-foreground text-background rounded hover:brightness-95 transition-colors"
         >
           {uploaderOpen ? 'Close Uploader' : 'Upload'}
         </button>

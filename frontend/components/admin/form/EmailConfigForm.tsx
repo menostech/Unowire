@@ -179,7 +179,7 @@ export function EmailConfigForm() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+            className="bg-accent-foreground text-background py-2 px-4 rounded hover:brightness-95 disabled:opacity-50 text-sm font-medium"
           >
             {saving ? 'Saving...' : 'Save Config'}
           </button>

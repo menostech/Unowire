@@ -84,7 +84,7 @@ export default async function ProductTypesPage({ searchParams }: PageProps) {
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/industries/product-types/${encodeURIComponent(pt.id)}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-accent-foreground hover:underline"
                     >
                       Edit
                     </Link>

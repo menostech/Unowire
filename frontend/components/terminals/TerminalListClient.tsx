@@ -126,7 +126,7 @@ export function TerminalListClient({
                           href={`/terminals?${params.toString()}#terminals-list`}
                           className={`rounded border px-3 py-1 text-sm ${
                             p === response.page
-                              ? 'border-blue-600 bg-blue-600 text-white'
+                              ? 'border-accent-foreground bg-accent-foreground text-background'
                               : 'border-gray-300 hover:bg-gray-100'
                           }`}
                         >
