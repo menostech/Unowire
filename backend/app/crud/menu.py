@@ -191,7 +191,7 @@ class CRUDMenuItem(CRUDBase[AdminMenuItem, MenuItemCreate, MenuItemUpdate]):
         stmt = (
             select(AdminMenuItem)
             .where(parent_filter)
-            .order_by(AdminMenuItem.sort_order)
+            .order_by(AdminMenuItem.sort_order, AdminMenuItem.id)
         )
         result = await db.execute(stmt)
         siblings = list(result.scalars().all())

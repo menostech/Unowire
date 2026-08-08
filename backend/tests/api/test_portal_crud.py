@@ -33,8 +33,9 @@ def test_cable_count_by_manufacturer():
 def test_equipment_list_by_manufacturer():
     async def _run():
         async with async_session() as db:
-            equipment = await crud_equipment.list_by_manufacturer(db, scope_id="em-1", skip=0, limit=20)
-            for e in equipment:
+            equipment_items, total = await crud_equipment.list_by_manufacturer(db, scope_id="em-1", skip=0, limit=20)
+            assert isinstance(total, int)
+            for e in equipment_items:
                 assert e.manufacturer_id == "em-1"
     asyncio.run(_run())
 

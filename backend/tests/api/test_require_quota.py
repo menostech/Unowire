@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 import pytest
 
@@ -6,6 +6,11 @@ from app.models.member import Member
 from app.models.subscription_plan import SubscriptionPlan
 from app.models.usage_record import UsageRecord
 from app.core.security import hash_password
+
+
+def _utc_today():
+    """Consistent UTC-based date used by UsageService (matches N8 fix)."""
+    return datetime.utcnow().date()
 
 
 async def _seed_freemium_member(db_session, email="quota@test-member.com", used_search=0):
@@ -34,7 +39,7 @@ async def _seed_freemium_member(db_session, email="quota@test-member.com", used_
         snapshot_search_limit=10, snapshot_detail_limit=20, snapshot_download_limit=0,
     ))
     if used_search:
-        db_session.add(UsageRecord(member_id=m.id, record_date=date.today(), search_count=used_search))
+        db_session.add(UsageRecord(member_id=m.id, record_date=_utc_today(), search_count=used_search))
     await db_session.commit()
     return m
 
@@ -73,7 +78,6 @@ def test_require_quota_allows_member_under_limit(client, db_session):
 
 def test_detail_view_quota_blocks_member(client, db_session):
     import asyncio
-    from datetime import date
     from app.models.member import Member
     from app.models.member_subscription import MemberSubscription
     from app.models.subscription_plan import SubscriptionPlan
@@ -97,7 +101,7 @@ def test_detail_view_quota_blocks_member(client, db_session):
             await db_session.refresh(plan)
         db_session.add(MemberSubscription(member_id=m.id, plan_id=plan.id, status="active",
             snapshot_search_limit=10, snapshot_detail_limit=1, snapshot_download_limit=0))
-        db_session.add(UsageRecord(member_id=m.id, record_date=date.today(), detail_view_count=1))
+        db_session.add(UsageRecord(member_id=m.id, record_date=_utc_today(), detail_view_count=1))
         await db_session.commit()
         return m
     asyncio.run(_c())

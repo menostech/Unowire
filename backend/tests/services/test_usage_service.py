@@ -1,8 +1,12 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pytest
 
 from app.services.usage import UsageService
+
+
+def _utc_today():
+    return datetime.utcnow().date()
 
 
 async def _make_member(db_session, email="usage@test-member.com"):
@@ -39,7 +43,7 @@ async def test_increment_usage_unconditional(db_session):
 async def test_get_monthly_download_count_sums_current_month(db_session):
     from app.models.usage_record import UsageRecord
     m = await _make_member(db_session, "monthly@test-member.com")
-    today = date.today()
+    today = _utc_today()
     first_of_month = today.replace(day=1)
     # One record today, one earlier this month, one last month (should be excluded).
     db_session.add_all([
