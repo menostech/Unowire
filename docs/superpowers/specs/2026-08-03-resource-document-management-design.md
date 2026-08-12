@@ -2,6 +2,8 @@
 comet_change: add-resource-document-management
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-08-12-add-resource-document-management
+status: final
 ---
 
 # Resource Document Management — Technical Design Doc

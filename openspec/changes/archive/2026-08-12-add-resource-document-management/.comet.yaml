@@ -19,8 +19,8 @@ verification_report: docs/superpowers/reports/2026-08-03-add-resource-document-m
 branch_status: pending
 created_at: 2026-08-03
 verified_at: 2026-08-02
-archive_confirmation: pending
-archived: false
+archive_confirmation: confirmed
+archived: true
 bound_branch: feature/20260803/add-resource-document-management
 direct_override: null
 handoff_context: openspec/changes/add-resource-document-management/.comet/handoff/design-context.json
