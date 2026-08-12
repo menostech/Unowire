@@ -1,6 +1,6 @@
 workflow: full
 language: en
-phase: build
+phase: archive
 context_compression: off
 build_mode: subagent-driven-development
 build_pause: null
@@ -13,14 +13,14 @@ auto_transition: true
 base_ref: c5e1931d33a842d85112ac4924c75b2971ee08db
 design_doc: docs/superpowers/specs/2026-08-08-membership-tiers-design.md
 plan: docs/superpowers/plans/2026-08-08-membership-tiers.md
-verify_result: pending
+verify_result: pass
 verify_failures: 0
-verification_report: null
+verification_report: docs/superpowers/reports/2026-08-12-add-membership-tiers-verify.md
 branch_status: pending
 created_at: 2026-08-08
-verified_at: null
-archive_confirmation: null
-archived: false
+verified_at: 2026-08-12
+archive_confirmation: confirmed
+archived: true
 bound_branch: feature/20260803/add-resource-document-management
 direct_override: null
 handoff_context: openspec/changes/add-membership-tiers/.comet/handoff/design-context.json
