@@ -52,25 +52,25 @@
 
 ## 8. Frontend Admin Pages & Components
 
-- [ ] 8.1 Create admin pages under `frontend/app/admin/(dashboard)/terminals/`: `page.tsx` (list), `new/page.tsx`, `[id]/page.tsx` (edit), `manufacturers/page.tsx` + `new` + `[id]`, `categories/page.tsx` + `new` + `[...id]`, `import/page.tsx` — mirror `admin/(dashboard)/equipment/` structure
-- [ ] 8.2 Create admin form components in `frontend/components/admin/form/`: `TerminalManufacturerForm.tsx`, `TerminalForm.tsx`, `TerminalCategoryForm.tsx` — mirror equipment form components
-- [ ] 8.3 Create `frontend/components/admin/list/TerminalSearchBox.tsx` — mirror `EquipmentSearchBox.tsx`
+- [x] 8.1 Create admin pages under `frontend/app/admin/(dashboard)/terminals/`: `page.tsx` (list), `new/page.tsx`, `[id]/page.tsx` (edit), `manufacturers/page.tsx` + `new` + `[id]`, `categories/page.tsx` + `new` + `[...id]`, `import/page.tsx` — mirror `admin/(dashboard)/equipment/` structure
+- [x] 8.2 Create admin form components in `frontend/components/admin/form/`: `TerminalManufacturerForm.tsx`, `TerminalForm.tsx`, `TerminalCategoryForm.tsx` — mirror equipment form components
+- [x] 8.3 Create `frontend/components/admin/list/TerminalSearchBox.tsx` — mirror `EquipmentSearchBox.tsx`
 
 ## 9. Frontend Portal Pages & Components
 
-- [ ] 9.1 Create portal pages under `frontend/app/portal/terminals/`: `page.tsx` (list), `new/page.tsx`, `[id]/page.tsx` (edit), `import/page.tsx`, `loading.tsx` — mirror `portal/equipment/` structure
-- [ ] 9.2 Create portal form components in `frontend/components/portal/form/`: `TerminalFormFields.tsx`, `TerminalCreateForm.tsx`, `TerminalEditForm.tsx`, `TerminalDeleteButton.tsx` — mirror equipment portal form components
-- [ ] 9.3 Create `frontend/components/portal/terminals/TerminalListToolbar.tsx` — mirror `EquipmentListToolbar.tsx`
+- [x] 9.1 Create portal pages under `frontend/app/portal/terminals/`: `page.tsx` (list), `new/page.tsx`, `[id]/page.tsx` (edit), `import/page.tsx`, `loading.tsx` — mirror `portal/equipment/` structure
+- [x] 9.2 Create portal form components in `frontend/components/portal/form/`: `TerminalFormFields.tsx`, `TerminalCreateForm.tsx`, `TerminalEditForm.tsx`, `TerminalDeleteButton.tsx` — mirror equipment portal form components
+- [x] 9.3 Create `frontend/components/portal/terminals/TerminalListToolbar.tsx` — mirror `EquipmentListToolbar.tsx`
 
 ## 10. Frontend Integration
 
-- [ ] 10.1 Add `TERMINAL_MANUFACTURER_NAV` array to `frontend/components/portal/layout/PortalSidebar.tsx` and select it by `scope_type === "terminal_manufacturer"` — mirror `EQUIPMENT_MANUFACTURER_NAV`
-- [ ] 10.2 Add "Terminal" as third option in `frontend/components/shared/SearchBox.tsx` category dropdown, routing to `/terminals?q=` with placeholder "Search terminal model, brand..."
-- [ ] 10.3 Add terminal entries to `frontend/lib/adminMenuRegistry.ts` `ADMIN_PAGES` and `frontend/lib/adminModules.ts` (scope_type label, module definitions) — mirror equipment entries
-- [ ] 10.4 Add terminal route handler pages under `frontend/app/api/admin/terminals/`, `frontend/app/api/admin/terminal-manufacturers/`, `frontend/app/api/admin/terminal-categories/`, `frontend/app/api/portal/terminals/` — mirror equipment route handlers
+- [x] 10.1 Add `TERMINAL_MANUFACTURER_NAV` array to `frontend/components/portal/layout/PortalSidebar.tsx` and select it by `scope_type === "terminal_manufacturer"` — mirror `EQUIPMENT_MANUFACTURER_NAV`
+- [x] 10.2 Add "Terminal" as third option in `frontend/components/shared/SearchBox.tsx` category dropdown, routing to `/terminals?q=` with placeholder "Search terminal model, brand..."
+- [x] 10.3 Add terminal entries to `frontend/lib/adminMenuRegistry.ts` `ADMIN_PAGES` and `frontend/lib/adminModules.ts` (scope_type label, module definitions) — mirror equipment entries
+- [x] 10.4 Add terminal route handler pages under `frontend/app/api/admin/terminals/`, `frontend/app/api/admin/terminal-manufacturers/`, `frontend/app/api/admin/terminal-categories/`, `frontend/app/api/portal/terminals/` — mirror equipment route handlers
 
 ## 11. Seed Data & Test Users
 
-- [ ] 11.1 Add `seed_terminals()` function to `backend/scripts/seed.py` — create sample terminal manufacturers, categories, and products from a data file — mirror `seed_equipment()`
-- [ ] 11.2 Create `frontend/data/recommended-terminals.json` seed data file — mirror `recommended-equipments.json` structure
-- [ ] 11.3 Add terminal test user to `backend/scripts/seed_portal_users.py` — `terminal_manager@test.com` / `test123456` with scope_type `terminal_manufacturer`, scope_id of a seeded terminal manufacturer, modules `media`, `terminals`
+- [x] 11.1 Add `seed_terminals()` function to `backend/scripts/seed.py` — create sample terminal manufacturers, categories, and products from a data file — mirror `seed_equipment()`
+- [x] 11.2 Create `frontend/data/recommended-terminals.json` seed data file — mirror `recommended-equipments.json` structure
+- [x] 11.3 Add terminal test user to `backend/scripts/seed_portal_users.py` — `terminal_manager@test.com` / `test123456` with scope_type `terminal_manufacturer`, scope_id of a seeded terminal manufacturer, modules `media`, `terminals`

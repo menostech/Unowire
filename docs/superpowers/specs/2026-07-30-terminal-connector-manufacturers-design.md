@@ -2,6 +2,8 @@
 comet_change: add-terminal-connector-manufacturers
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-08-12-add-terminal-connector-manufacturers
+status: final
 ---
 
 # Design Doc: Terminal & Connector Manufacturers Module
