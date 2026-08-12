@@ -4,6 +4,14 @@
 
 The post management module (delivered by `add-post-management`) currently uses plain text inputs for cover images and OG images, provides no way to insert images into article body content from the media library, and renders the public list and detail pages in a narrow 3-column layout (1-col sidebar + 3-col main) that does not showcase articles well. This change adds media-library-backed image selection to the admin editor and redesigns the public post list and detail pages into a 4-column equal-width grid with a dedicated article recommendation sidebar.
 
+## What Changes
+
+- **MODIFIED** `PostForm.tsx`: Cover image and OG image fields switch from text inputs to `ImageFieldWithPicker`; content editor gains an "Insert Image" button.
+- **MODIFIED** `PostView.tsx`: Wrapped in 4-column CSS Grid layout with recommendation sidebar.
+- **MODIFIED** `posts/page.tsx` and `posts/[category-slug]/page.tsx`: List pages use 4-column grid.
+- **MODIFIED** `[...slugs]/page.tsx`: Detail page passes data to 4-column `PostView`.
+- **ADDED** `RecommendationSidebar.tsx`: Shared component showing 8 same-category posts with site-wide fallback.
+
 ## Goals
 
 - **Admin cover image from media**: Replace the plain text `cover_image_url` and `og_image_url` inputs in `PostForm` with the existing `ImageFieldWithPicker` component so authors pick images from the media library (with upload support) instead of pasting URLs.
