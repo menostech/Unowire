@@ -322,7 +322,7 @@ async def seed_terminals(db: AsyncSession, dry_run: bool):
         ).scalar_one_or_none()
         if parent_existing is None:
             db.add(TerminalCategory(
-                id=parent_id, parent_id=None, label="Terminals by Type",
+                id=parent_id, parent_id=None, label="Connectivity by Type",
                 slug=parent_id, sort_order=0,
             ))
             if not dry_run:

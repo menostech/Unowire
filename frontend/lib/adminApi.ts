@@ -699,57 +699,57 @@ export const adminApi = {
   terminalManufacturers: {
     async all(page = 1, page_size = 20): Promise<{ items: BackendTerminalManufacturer[]; total: number }> {
       const data = await adminGet<ListResponse<BackendTerminalManufacturer>>(
-        `/api/terminal-manufacturers?page=${page}&page_size=${page_size}`
+        `/api/connectivity-manufacturers?page=${page}&page_size=${page_size}`
       );
       return { items: data.items, total: data.total };
     },
     async getById(id: string): Promise<BackendTerminalManufacturer | null> {
       try {
-        return await adminGet<BackendTerminalManufacturer>(`/api/terminal-manufacturers/${encodeURIComponent(id)}`);
+        return await adminGet<BackendTerminalManufacturer>(`/api/connectivity-manufacturers/${encodeURIComponent(id)}`);
       } catch {
         return null;
       }
     },
     async create(payload: Record<string, unknown>): Promise<BackendTerminalManufacturer> {
-      const res = await adminFetch('/api/terminal-manufacturers', { method: 'POST', body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-manufacturers`);
+      const res = await adminFetch('/api/connectivity-manufacturers', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity-manufacturers`);
       return await res.json() as BackendTerminalManufacturer;
     },
     async update(id: string, payload: Record<string, unknown>): Promise<BackendTerminalManufacturer> {
-      const res = await adminFetch(`/api/terminal-manufacturers/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-manufacturers/${id}`);
+      const res = await adminFetch(`/api/connectivity-manufacturers/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity-manufacturers/${id}`);
       return await res.json() as BackendTerminalManufacturer;
     },
     async remove(id: string): Promise<void> {
-      const res = await adminFetch(`/api/terminal-manufacturers/${encodeURIComponent(id)}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-manufacturers/${id}`);
+      const res = await adminFetch(`/api/connectivity-manufacturers/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity-manufacturers/${id}`);
     },
   },
 
   terminalCategories: {
     async all(): Promise<BackendTerminalCategory[]> {
-      return await adminGet<BackendTerminalCategory[]>('/api/terminal-categories');
+      return await adminGet<BackendTerminalCategory[]>('/api/connectivity-categories');
     },
     async getById(id: string): Promise<BackendTerminalCategory | null> {
       try {
-        return await adminGet<BackendTerminalCategory>(`/api/terminal-categories/${encodeURIComponent(id)}`);
+        return await adminGet<BackendTerminalCategory>(`/api/connectivity-categories/${encodeURIComponent(id)}`);
       } catch {
         return null;
       }
     },
     async create(payload: Record<string, unknown>): Promise<BackendTerminalCategory> {
-      const res = await adminFetch('/api/terminal-categories', { method: 'POST', body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-categories`);
+      const res = await adminFetch('/api/connectivity-categories', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity-categories`);
       return await res.json() as BackendTerminalCategory;
     },
     async update(id: string, payload: Record<string, unknown>): Promise<BackendTerminalCategory> {
-      const res = await adminFetch(`/api/terminal-categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-categories/${id}`);
+      const res = await adminFetch(`/api/connectivity-categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity-categories/${id}`);
       return await res.json() as BackendTerminalCategory;
     },
     async remove(id: string): Promise<void> {
-      const res = await adminFetch(`/api/terminal-categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminal-categories/${id}`);
+      const res = await adminFetch(`/api/connectivity-categories/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity-categories/${id}`);
     },
   },
 
@@ -759,29 +759,29 @@ export const adminApi = {
       if (filters?.category_id) params.set('category_id', filters.category_id);
       if (filters?.manufacturer_id) params.set('manufacturer_id', filters.manufacturer_id);
       if (filters?.q) params.set('q', filters.q);
-      const data = await adminGet<ListResponse<BackendTerminal>>(`/api/terminals?${params.toString()}`);
+      const data = await adminGet<ListResponse<BackendTerminal>>(`/api/connectivity?${params.toString()}`);
       return { items: data.items, total: data.total };
     },
     async getById(id: string): Promise<BackendTerminal | null> {
       try {
-        return await adminGet<BackendTerminal>(`/api/terminals/${encodeURIComponent(id)}`);
+        return await adminGet<BackendTerminal>(`/api/connectivity/${encodeURIComponent(id)}`);
       } catch {
         return null;
       }
     },
     async create(payload: Record<string, unknown>): Promise<BackendTerminal> {
-      const res = await adminFetch('/api/terminals', { method: 'POST', body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminals`);
+      const res = await adminFetch('/api/connectivity', { method: 'POST', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity`);
       return await res.json() as BackendTerminal;
     },
     async update(id: string, payload: Record<string, unknown>): Promise<BackendTerminal> {
-      const res = await adminFetch(`/api/terminals/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminals/${id}`);
+      const res = await adminFetch(`/api/connectivity/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity/${id}`);
       return await res.json() as BackendTerminal;
     },
     async remove(id: string): Promise<void> {
-      const res = await adminFetch(`/api/terminals/${encodeURIComponent(id)}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`API ${res.status}: /api/terminals/${id}`);
+      const res = await adminFetch(`/api/connectivity/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`API ${res.status}: /api/connectivity/${id}`);
     },
   },
 

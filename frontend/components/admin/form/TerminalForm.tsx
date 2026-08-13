@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -82,8 +82,8 @@ export function TerminalForm({ initial, manufacturers, categories }: TerminalFor
     };
     try {
       const url = initial
-        ? `/api/admin/terminals/${encodeURIComponent(initial.id)}`
-        : '/api/admin/terminals';
+        ? `/api/admin/connectivity/${encodeURIComponent(initial.id)}`
+        : '/api/admin/connectivity';
       const method = initial ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -91,7 +91,7 @@ export function TerminalForm({ initial, manufacturers, categories }: TerminalFor
         body: JSON.stringify(body),
       });
       if (res.ok) {
-        router.push('/admin/terminals');
+        router.push('/admin/connectivity');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -107,11 +107,11 @@ export function TerminalForm({ initial, manufacturers, categories }: TerminalFor
     if (!initial) return;
     if (!window.confirm('Delete this terminal?')) return;
     try {
-      const res = await fetch(`/api/admin/terminals/${encodeURIComponent(initial.id)}`, {
+      const res = await fetch(`/api/admin/connectivity/${encodeURIComponent(initial.id)}`, {
         method: 'DELETE',
       });
       if (res.ok || res.status === 204) {
-        router.push('/admin/terminals');
+        router.push('/admin/connectivity');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -269,7 +269,7 @@ export function TerminalForm({ initial, manufacturers, categories }: TerminalFor
           {saving ? 'Saving…' : 'Save'}
         </button>
         <Link
-          href="/admin/terminals"
+          href="/admin/connectivity"
           className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
         >
           Cancel
@@ -287,3 +287,4 @@ export function TerminalForm({ initial, manufacturers, categories }: TerminalFor
     </form>
   );
 }
+

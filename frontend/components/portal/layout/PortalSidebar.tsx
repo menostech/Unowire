@@ -39,7 +39,7 @@ const EQUIPMENT_MANUFACTURER_NAV: NavItem[] = [
 
 const TERMINAL_MANUFACTURER_NAV: NavItem[] = [
   { label: 'Dashboard', href: '/portal', icon: LayoutDashboard, module: 'dashboard' },
-  { label: 'Terminals', href: '/portal/terminals', icon: Wrench, module: 'terminals' },
+  { label: 'Connectivity', href: '/portal/connectivity', icon: Wrench, module: 'terminals' },
   { label: 'Inquiries', href: '/portal/inquiries', icon: Mail, module: 'inquiries' },
   { label: 'Messages', href: '/portal/messages', icon: Megaphone, module: 'messages' },
   { label: 'Media', href: '/portal/media', icon: ImageIcon, module: 'media' },
@@ -66,7 +66,7 @@ export function PortalSidebar({
   const baseNav =
     scopeType === 'equipment_manufacturer'
       ? EQUIPMENT_MANUFACTURER_NAV
-      : scopeType === 'terminal_manufacturer'
+      : (scopeType === 'connectivity_manufacturer' || scopeType === 'terminal_manufacturer')
         ? TERMINAL_MANUFACTURER_NAV
         : MANUFACTURER_NAV;
   const nav = baseNav.filter((item) => allowedModules.includes(item.module));

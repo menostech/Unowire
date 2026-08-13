@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -12,7 +12,7 @@ export function TerminalSearchBox() {
     e.preventDefault();
     const params = new URLSearchParams();
     if (q.trim()) params.set('q', q.trim());
-    router.push(`/admin/terminals${params.toString() ? `?${params.toString()}` : ''}`);
+    router.push(`/admin/connectivity${params.toString() ? `?${params.toString()}` : ''}`);
   }
 
   return (
@@ -33,3 +33,4 @@ export function TerminalSearchBox() {
     </form>
   );
 }
+

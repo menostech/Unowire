@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
 
-type TabKey = 'cable' | 'equipment' | 'terminal' | 'resources';
+type TabKey = 'cable' | 'equipment' | 'connectivity' | 'resources';
 
 const TABS: { key: TabKey; label: string; code: string; placeholder: string; action: string }[] = [
   {
@@ -22,18 +22,18 @@ const TABS: { key: TabKey; label: string; code: string; placeholder: string; act
     action: '/equipment',
   },
   {
-    key: 'terminal',
-    label: 'Terminal',
+    key: 'connectivity',
+    label: 'Connectivity',
     code: '03',
-    placeholder: 'Search terminal model or manufacturer...',
-    action: '/terminals',
+    placeholder: 'Search connectivity model or manufacturer...',
+    action: '/connectivity',
   },
 ];
 
 const POPULAR_SEARCHES: Record<TabKey, string[]> = {
   cable: ['UL1007', 'AVSS', 'UL1015', 'UL2468'],
   equipment: ['Komax', 'Alpha 488', 'Gamma 333', 'KMV'],
-  terminal: ['Ring Terminal', 'Butt Connector', 'Spade Terminal', 'Pin Terminal'],
+  connectivity: ['Ring Terminal', 'Butt Connector', 'Spade Terminal', 'Pin Terminal'],
   resources: ['Installation Guide', 'Datasheet', 'CAD Drawing', 'Manual'],
 };
 
@@ -106,13 +106,13 @@ export function HeroSearch() {
               >
                 Cable, equipment
                 <br />
-                <span className="text-primary">&amp;</span> terminal
+                <span className="text-primary">&amp;</span> connectivity
                 <br />
                 specifications.
               </h1>
 
               <p className="mb-10 max-w-xl text-base md:text-lg text-background/60 leading-relaxed">
-                The engineering reference for wire, cable, equipment, and terminal specs.
+                The engineering reference for wire, cable, equipment, and connectivity specs.
                 Query by model, manufacturer, or technical parameter.
               </p>
 

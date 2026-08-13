@@ -37,6 +37,25 @@ async def _trial_expiry_loop():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Ensure baseline seed (3 subscription plans) are present for all dev/prod runs.
+    # Membership tests rely on this; a missing plan would break every page and flow.
+    try:
+        from sqlalchemy import text
+        from app.core.database import async_session
+        async with async_session() as s:
+            await s.execute(text("""
+                INSERT INTO subscription_plans (name, tier_level, price_monthly, price_yearly, currency,
+                    search_limit_daily, detail_view_limit_daily, download_limit_monthly,
+                    is_sales_led, is_active, features, sort_order, trial_days, created_at, updated_at)
+                VALUES
+                    ('Freemium', 'freemium', 0, 0, 'USD', 10, 20, 0, false, true, '[]'::jsonb, 0, 0, NOW(), NOW()),
+                    ('Personal', 'personal', 15.00, 149.00, 'USD', NULL, NULL, NULL, false, true, '[]'::jsonb, 1, 14, NOW(), NOW()),
+                    ('Enterprise', 'enterprise', 0, 0, 'USD', NULL, NULL, NULL, true, true, '[]'::jsonb, 2, 0, NOW(), NOW())
+                ON CONFLICT (tier_level) DO NOTHING
+            """))
+            await s.commit()
+    except Exception:
+        logging.getLogger(__name__).exception("seed subscription_plans failed")
     task = asyncio.create_task(_trial_expiry_loop())
     try:
         yield
@@ -126,11 +145,16 @@ app.include_router(equipment_manufacturers.router, prefix=f"{settings.api_prefix
 app.include_router(equipment_categories.router, prefix=f"{settings.api_prefix}/equipment-categories", tags=["equipment-categories"])
 app.include_router(equipment_import.router, prefix=f"{settings.api_prefix}/admin/equipment/import", tags=["equipment-import"])
 app.include_router(equipment_import_templates.router, prefix=f"{settings.api_prefix}/admin/equipment/import", tags=["equipment-import"])
-app.include_router(terminals.router, prefix=f"{settings.api_prefix}/terminals", tags=["terminals"])
-app.include_router(terminal_manufacturers.router, prefix=f"{settings.api_prefix}/terminal-manufacturers", tags=["terminal-manufacturers"])
-app.include_router(terminal_categories.router, prefix=f"{settings.api_prefix}/terminal-categories", tags=["terminal-categories"])
-app.include_router(terminal_import.router, prefix=f"{settings.api_prefix}/admin/terminals/import", tags=["terminal-import"])
-app.include_router(terminal_import_templates.router, prefix=f"{settings.api_prefix}/admin/terminals/import", tags=["terminal-import"])
+app.include_router(terminals.router, prefix=f"{settings.api_prefix}/connectivity", tags=["connectivity"])
+app.include_router(terminals.legacy_router)
+app.include_router(terminal_manufacturers.router, prefix=f"{settings.api_prefix}/connectivity-manufacturers", tags=["connectivity-manufacturers"])
+app.include_router(terminal_manufacturers.legacy_router)
+app.include_router(terminal_categories.router, prefix=f"{settings.api_prefix}/connectivity-categories", tags=["connectivity-categories"])
+app.include_router(terminal_categories.legacy_router)
+app.include_router(terminal_import.router, prefix=f"{settings.api_prefix}/admin/connectivity/import", tags=["connectivity-import"])
+app.include_router(terminal_import.legacy_router)
+app.include_router(terminal_import_templates.router, prefix=f"{settings.api_prefix}/admin/connectivity/import", tags=["connectivity-import"])
+app.include_router(terminal_import_templates.legacy_router)
 app.include_router(admin_menu.router, prefix=f"{settings.api_prefix}/admin/menu", tags=["admin-menu"])
 app.include_router(admin_roles.router, prefix=f"{settings.api_prefix}/admin/roles", tags=["admin-roles"])
 app.include_router(admin_users.router, prefix=f"{settings.api_prefix}/admin/users", tags=["admin-users"])
@@ -159,7 +183,9 @@ app.include_router(portal_cable_import.router)
 app.include_router(portal_equipment.router)
 app.include_router(portal_equipment_import.router)
 app.include_router(portal_terminals.router)
+app.include_router(portal_terminals.legacy_router)
 app.include_router(portal_terminal_import.router)
+app.include_router(portal_terminal_import.legacy_router)
 app.include_router(portal_inquiries.router)
 app.include_router(portal_media.router)
 app.include_router(portal_messages.router)

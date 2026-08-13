@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -46,8 +46,8 @@ export function TerminalCategoryForm({ initial, topCategories }: TerminalCategor
     };
     try {
       const url = initial
-        ? `/api/admin/terminal-categories/${encodeURIComponent(compositeId)}`
-        : '/api/admin/terminal-categories';
+        ? `/api/admin/connectivity-categories/${encodeURIComponent(compositeId)}`
+        : '/api/admin/connectivity-categories';
       const method = initial ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -55,7 +55,7 @@ export function TerminalCategoryForm({ initial, topCategories }: TerminalCategor
         body: JSON.stringify(body),
       });
       if (res.ok) {
-        router.push('/admin/terminals/categories');
+        router.push('/admin/connectivity/categories');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -71,11 +71,11 @@ export function TerminalCategoryForm({ initial, topCategories }: TerminalCategor
     if (!initial) return;
     if (!window.confirm('Delete this terminal category?')) return;
     try {
-      const res = await fetch(`/api/admin/terminal-categories/${encodeURIComponent(initial.id)}`, {
+      const res = await fetch(`/api/admin/connectivity-categories/${encodeURIComponent(initial.id)}`, {
         method: 'DELETE',
       });
       if (res.ok || res.status === 204) {
-        router.push('/admin/terminals/categories');
+        router.push('/admin/connectivity/categories');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -182,7 +182,7 @@ export function TerminalCategoryForm({ initial, topCategories }: TerminalCategor
           {saving ? 'Saving…' : 'Save'}
         </button>
         <Link
-          href="/admin/terminals/categories"
+          href="/admin/connectivity/categories"
           className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
         >
           Cancel
@@ -200,3 +200,4 @@ export function TerminalCategoryForm({ initial, topCategories }: TerminalCategor
     </form>
   );
 }
+

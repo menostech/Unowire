@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -16,7 +16,7 @@ export function TerminalDeleteButton({ terminalId, terminalName }: TerminalDelet
 
   async function handleConfirm() {
     await portalApiClient.terminals.remove(terminalId);
-    router.push('/portal/terminals');
+    router.push('/portal/connectivity');
   }
 
   return (
@@ -29,7 +29,7 @@ export function TerminalDeleteButton({ terminalId, terminalName }: TerminalDelet
       </button>
       <DeleteConfirmDialog
         open={open}
-        title="Delete terminal"
+        title="Delete product"
         message={`Are you sure you want to delete ${terminalName}? This cannot be undone.`}
         onCancel={() => setOpen(false)}
         onConfirm={handleConfirm}
@@ -37,3 +37,4 @@ export function TerminalDeleteButton({ terminalId, terminalName }: TerminalDelet
     </>
   );
 }
+

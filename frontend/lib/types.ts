@@ -235,6 +235,14 @@ export interface TerminalListResponse {
   facets: TerminalFilterFacets;
 }
 
+
+// === Terminal → Connectivity aliases (deprecated old names still importable) ===
+export type Connectivity = Terminal;
+export type ConnectivityManufacturer = TerminalManufacturer;
+export type ConnectivityCategory = TerminalCategory;
+export type ConnectivityFilterParams = TerminalFilterParams;
+export type ConnectivityFilterFacets = TerminalFilterFacets;
+export type ConnectivityListResponse = TerminalListResponse;
 // === Filter / Query Params ===
 // NOTE: industry/category/product_type are REQUIRED route params (not query string).
 // They are part of this interface so filterCables receives a single params object.

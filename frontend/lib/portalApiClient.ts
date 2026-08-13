@@ -156,28 +156,28 @@ export const portalApiClient = {
   },
   terminals: {
     async create(data: PortalTerminalCreate): Promise<PortalTerminal> {
-      const res = await bffFetch('/api/portal/terminals', {
+      const res = await bffFetch('/api/portal/connectivity', {
         method: 'POST',
         body: JSON.stringify(data),
       });
       return res.json();
     },
     async update(id: string, data: PortalTerminalUpdate): Promise<PortalTerminal> {
-      const res = await bffFetch(`/api/portal/terminals/${id}`, {
+      const res = await bffFetch(`/api/portal/connectivity/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
       return res.json();
     },
     async remove(id: string): Promise<void> {
-      await bffFetch(`/api/portal/terminals/${id}`, { method: 'DELETE' });
+      await bffFetch(`/api/portal/connectivity/${id}`, { method: 'DELETE' });
     },
     import: {
       async validate(file: File, format: ImportFormat): Promise<ImportPreview> {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('format', format);
-        const res = await bffFetch('/api/portal/terminals/import/validate', {
+        const res = await bffFetch('/api/portal/connectivity/import/validate', {
           method: 'POST',
           body: formData,
           skipDefaultContentType: true,
@@ -188,7 +188,7 @@ export const portalApiClient = {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('format', format);
-        const res = await bffFetch('/api/portal/terminals/import/commit', {
+        const res = await bffFetch('/api/portal/connectivity/import/commit', {
           method: 'POST',
           body: formData,
           skipDefaultContentType: true,
@@ -196,11 +196,11 @@ export const portalApiClient = {
         return res.json();
       },
       async downloadCsvTemplate(): Promise<Blob> {
-        const res = await bffFetch('/api/portal/terminals/import/csv-template');
+        const res = await bffFetch('/api/portal/connectivity/import/csv-template');
         return res.blob();
       },
       async downloadJsonExample(): Promise<Blob> {
-        const res = await bffFetch('/api/portal/terminals/import/json-example');
+        const res = await bffFetch('/api/portal/connectivity/import/json-example');
         return res.blob();
       },
     },

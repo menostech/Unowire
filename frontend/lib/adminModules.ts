@@ -1,4 +1,4 @@
-// Mirrors backend/app/core/modules.py ADMIN_MODULES.
+﻿// Mirrors backend/app/core/modules.py ADMIN_MODULES.
 // Keep in sync when adding new modules.
 
 export interface AdminModule {
@@ -16,9 +16,9 @@ export const ADMIN_MODULES: AdminModule[] = [
   { id: "equipment_mfrs",  label: "Equipment Mfrs",  scopeAware: true,  scopeType: "equipment_manufacturer" },
   { id: "equipment_cats",  label: "Equipment Cats",  scopeAware: false, scopeType: null },
   { id: "equipment_list",  label: "Equipment List",  scopeAware: true,  scopeType: "equipment_manufacturer" },
-  { id: "terminal_mfrs",   label: "Terminal Mfrs",   scopeAware: true,  scopeType: "terminal_manufacturer" },
-  { id: "terminal_cats",   label: "Terminal Cats",   scopeAware: false, scopeType: null },
-  { id: "terminal_list",   label: "Terminal List",   scopeAware: true,  scopeType: "terminal_manufacturer" },
+  { id: "connectivity_mfrs",   label: "Connectivity Mfrs",   scopeAware: true,  scopeType: "connectivity_manufacturer" },
+  { id: "connectivity_cats",   label: "Connectivity Cats",   scopeAware: false, scopeType: null },
+  { id: "connectivity_list",   label: "Connectivity List",   scopeAware: true,  scopeType: "connectivity_manufacturer" },
   { id: "media",           label: "Media",           scopeAware: false, scopeType: null },
   { id: "menu_config",     label: "Menu Config",     scopeAware: false, scopeType: null },
   { id: "users",           label: "Users",           scopeAware: false, scopeType: null },
@@ -43,5 +43,6 @@ export const MODULE_BY_ID: Record<string, AdminModule> = Object.fromEntries(
 export const SCOPE_TYPE_LABELS: Record<string, string> = {
   manufacturer: "Cable Manufacturer",
   equipment_manufacturer: "Equipment Manufacturer",
+  connectivity_manufacturer: "Connectivity Manufacturer",
   terminal_manufacturer: "Terminal Manufacturer",
 };

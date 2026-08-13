@@ -66,15 +66,15 @@ async def _seed() -> None:
             {"ph": hash_password("test123456")},
         )
 
-        # terminal_manager@test.com (terminal_manufacturer scope)
+        # terminal_manager@test.com (connectivity_manufacturer scope)
         await conn.execute(
             text(
                 "INSERT INTO roles (id, name, scope_type, is_system) "
-                "VALUES ('terminal_manager_test', 'Terminal Manager Test', 'terminal_manufacturer', false) "
+                "VALUES ('terminal_manager_test', 'Connectivity Manager Test', 'connectivity_manufacturer', false) "
                 "ON CONFLICT (id) DO NOTHING"
             )
         )
-        for mod in ("media", "terminal_mfrs"):
+        for mod in ("media", "connectivity_mfrs"):
             await conn.execute(
                 text(
                     "INSERT INTO role_permissions (role_id, module) "
@@ -97,13 +97,13 @@ async def _seed() -> None:
     async with async_session() as s:
         await crud_folder.ensure_default(s, scope_type="manufacturer", scope_id="mfr-1")
         await crud_folder.ensure_default(s, scope_type="equipment_manufacturer", scope_id="em-1")
-        await crud_folder.ensure_default(s, scope_type="terminal_manufacturer", scope_id="panduit")
+        await crud_folder.ensure_default(s, scope_type="connectivity_manufacturer", scope_id="panduit")
         await s.commit()
 
     print("Portal test users seeded successfully:")
     print("  cable_manager@test.com / test123456 (manufacturer scope, mfr-1)")
     print("  equip_manager@test.com / test123456 (equipment_manufacturer scope, em-1)")
-    print("  terminal_manager@test.com / test123456 (terminal_manufacturer scope, panduit)")
+    print("  terminal_manager@test.com / test123456 (connectivity_manufacturer scope, panduit)")
 
 
 if __name__ == "__main__":

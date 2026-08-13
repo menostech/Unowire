@@ -1,10 +1,10 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import type { Terminal } from '@/lib/types';
 
 export function TerminalCard({ terminal }: { terminal: Terminal }) {
   return (
     <Link
-      href={`/terminals/${encodeURIComponent(terminal.slug)}`}
+      href={`/connectivity/${encodeURIComponent(terminal.slug)}`}
       className="group block overflow-hidden rounded-lg border border-gray-200 bg-white transition hover:shadow-md"
     >
       <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100">
@@ -39,3 +39,4 @@ export function TerminalCard({ terminal }: { terminal: Terminal }) {
     </Link>
   );
 }
+

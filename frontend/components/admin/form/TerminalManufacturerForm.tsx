@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -60,8 +60,8 @@ export function TerminalManufacturerForm({ initial }: TerminalManufacturerFormPr
     };
     try {
       const url = initial
-        ? `/api/admin/terminal-manufacturers/${encodeURIComponent(initial.id)}`
-        : '/api/admin/terminal-manufacturers';
+        ? `/api/admin/connectivity-manufacturers/${encodeURIComponent(initial.id)}`
+        : '/api/admin/connectivity-manufacturers';
       const method = initial ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -69,7 +69,7 @@ export function TerminalManufacturerForm({ initial }: TerminalManufacturerFormPr
         body: JSON.stringify(body),
       });
       if (res.ok) {
-        router.push('/admin/terminals/manufacturers');
+        router.push('/admin/connectivity/manufacturers');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -85,11 +85,11 @@ export function TerminalManufacturerForm({ initial }: TerminalManufacturerFormPr
     if (!initial) return;
     if (!window.confirm('Delete this terminal manufacturer?')) return;
     try {
-      const res = await fetch(`/api/admin/terminal-manufacturers/${encodeURIComponent(initial.id)}`, {
+      const res = await fetch(`/api/admin/connectivity-manufacturers/${encodeURIComponent(initial.id)}`, {
         method: 'DELETE',
       });
       if (res.ok || res.status === 204) {
-        router.push('/admin/terminals/manufacturers');
+        router.push('/admin/connectivity/manufacturers');
         return;
       }
       const data = await res.json().catch(() => ({}));
@@ -244,7 +244,7 @@ export function TerminalManufacturerForm({ initial }: TerminalManufacturerFormPr
           {saving ? 'Saving…' : 'Save'}
         </button>
         <Link
-          href="/admin/terminals/manufacturers"
+          href="/admin/connectivity/manufacturers"
           className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
         >
           Cancel
@@ -262,3 +262,4 @@ export function TerminalManufacturerForm({ initial }: TerminalManufacturerFormPr
     </form>
   );
 }
+

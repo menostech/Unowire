@@ -1,10 +1,10 @@
-"""Portal terminal import routes. Scope-forced: manufacturer_id = user.scope_id."""
+"""Portal connectivity import routes. Scope-forced: manufacturer_id = user.scope_id."""
 import csv
 import json
 from io import StringIO
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,7 +20,19 @@ from app.services.terminal_import import (
     validate_rows,
 )
 
-router = APIRouter(prefix="/api/portal/terminals/import", tags=["portal-terminals-import"])
+router = APIRouter(prefix="/api/portal/connectivity/import", tags=["portal-connectivity-import"])
+
+# Backward-compat alias router: legacy /api/portal/terminals/import paths return
+# 410 Gone with a Location header pointing to /api/portal/connectivity/import.
+legacy_router = APIRouter(prefix="/api/portal/terminals/import")
+
+
+@legacy_router.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def legacy_portal_terminal_import_redirect(path: str, request: Request):
+    new_url = f"/api/portal/connectivity/import/{path}" if path else "/api/portal/connectivity/import"
+    if request.url.query:
+        new_url += f"?{request.url.query}"
+    raise HTTPException(status_code=410, headers={"Location": new_url})
 
 
 def _force_manufacturer_id(parsed_rows, scope_id: str) -> None:
