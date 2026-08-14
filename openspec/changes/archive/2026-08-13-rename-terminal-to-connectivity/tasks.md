@@ -1,0 +1,1 @@
+﻿- [x] 10.5 Update any frontend tests or validation scripts that reference old terminal paths/labels

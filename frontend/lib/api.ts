@@ -746,22 +746,22 @@ export const api = {
     },
   },
 
-  terminals: {
+  connectivity: {
     async all(): Promise<Terminal[]> {
       const res = await fetchWithCache<{ items: BackendTerminal[] }>(
-        '/api/terminals?page_size=999'
+        '/api/connectivity?page_size=999'
       );
       return res.items.map(adaptTerminal);
     },
     async byCable(cableId: string): Promise<Terminal[]> {
       const res = await fetchWithCache<{ items: BackendTerminal[] }>(
-        `/api/terminals?cable_id=${encodeURIComponent(cableId)}`
+        `/api/connectivity?cable_id=${encodeURIComponent(cableId)}`
       );
       return res.items.map(adaptTerminal);
     },
     async getBySlug(slug: string): Promise<Terminal | null> {
       try {
-        const data = await fetchWithCache<BackendTerminal>(`/api/terminals/${encodeURIComponent(slug)}`);
+        const data = await fetchWithCache<BackendTerminal>(`/api/connectivity/${encodeURIComponent(slug)}`);
         return adaptTerminal(data);
       } catch {
         return null;
@@ -769,16 +769,16 @@ export const api = {
     },
   },
 
-  terminalManufacturers: {
+  connectivityManufacturers: {
     async all(): Promise<TerminalManufacturer[]> {
       const res = await fetchWithCache<{ items: BackendTerminalManufacturer[]; total: number; page: number; page_size: number }>(
-        '/api/terminal-manufacturers?page_size=999'
+        '/api/connectivity-manufacturers?page_size=999'
       );
       return (res.items ?? []).map(adaptTerminalManufacturer).filter((m): m is TerminalManufacturer => m !== null);
     },
     async getById(id: string): Promise<TerminalManufacturer | null> {
       try {
-        const data = await fetchWithCache<BackendTerminalManufacturer>(`/api/terminal-manufacturers/${encodeURIComponent(id)}`);
+        const data = await fetchWithCache<BackendTerminalManufacturer>(`/api/connectivity-manufacturers/${encodeURIComponent(id)}`);
         return adaptTerminalManufacturer(data);
       } catch {
         return null;
@@ -790,14 +790,14 @@ export const api = {
     },
   },
 
-  terminalCategories: {
+  connectivityCategories: {
     async tree(): Promise<TerminalCategory[]> {
-      const data = await fetchWithCache<BackendTerminalCategory[]>('/api/terminal-categories');
+      const data = await fetchWithCache<BackendTerminalCategory[]>('/api/connectivity-categories');
       return (data ?? []).map(c => adaptTerminalCategory(c)!).filter((c): c is TerminalCategory => c !== null);
     },
     async getById(id: string): Promise<TerminalCategory | null> {
       try {
-        const data = await fetchWithCache<BackendTerminalCategory>(`/api/terminal-categories/${encodeURIComponent(id)}`);
+        const data = await fetchWithCache<BackendTerminalCategory>(`/api/connectivity-categories/${encodeURIComponent(id)}`);
         return adaptTerminalCategory(data);
       } catch {
         return null;
@@ -955,5 +955,20 @@ export const api = {
     } catch {
       return null;
     }
+  },
+
+  // === Deprecated aliases — prefer `api.connectivity*` ===
+  // These getters exist for backward compatibility with callers that still
+  // use the historical `terminals` / `terminalManufacturers` /
+  // `terminalCategories` property names. They return the same namespace
+  // objects as the new names.
+  get terminals() {
+    return this.connectivity;
+  },
+  get terminalManufacturers() {
+    return this.connectivityManufacturers;
+  },
+  get terminalCategories() {
+    return this.connectivityCategories;
   },
 };

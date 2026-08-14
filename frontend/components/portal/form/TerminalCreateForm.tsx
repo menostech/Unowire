@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -109,7 +109,7 @@ export function TerminalCreateForm({ categories }: TerminalCreateFormProps) {
     setErrors({});
     try {
       const created = await portalApiClient.terminals.create(payload);
-      router.push(`/portal/terminals/${created.id}`);
+      router.push(`/portal/connectivity/${created.id}`);
     } catch (err) {
       if (err instanceof PortalApiError && err.fieldErrors) {
         setErrors(err.fieldErrors);
@@ -137,3 +137,4 @@ export function TerminalCreateForm({ categories }: TerminalCreateFormProps) {
     </div>
   );
 }
+

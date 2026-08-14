@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
@@ -20,7 +20,7 @@ export function TerminalListToolbar({ categories }: Props) {
       if (!params.get(key)) params.delete(key);
     }
     const qs = params.toString();
-    router.push(qs ? `/portal/terminals?${qs}` : '/portal/terminals');
+    router.push(qs ? `/portal/connectivity?${qs}` : '/portal/connectivity');
   }
 
   function handleSearchSubmit(e: FormEvent) {
@@ -68,3 +68,4 @@ export function TerminalListToolbar({ categories }: Props) {
     </div>
   );
 }
+

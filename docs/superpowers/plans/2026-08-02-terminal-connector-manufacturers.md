@@ -2,6 +2,7 @@
 change: add-terminal-connector-manufacturers
 design-doc: docs/superpowers/specs/2026-07-30-terminal-connector-manufacturers-design.md
 base-ref: 62319248623b63e63223edd5ccf3860e79d4ab42
+archived-with: 2026-08-12-add-terminal-connector-manufacturers
 ---
 
 # Terminal & Connector Manufacturers Implementation Plan

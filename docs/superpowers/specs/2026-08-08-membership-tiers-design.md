@@ -2,6 +2,8 @@
 comet_change: add-membership-tiers
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-08-12-add-membership-tiers
+status: final
 ---
 
 # Design Doc: Membership Tiers

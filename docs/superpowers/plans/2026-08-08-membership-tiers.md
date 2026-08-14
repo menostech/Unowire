@@ -2,6 +2,7 @@
 change: add-membership-tiers
 design-doc: docs/superpowers/specs/2026-08-08-membership-tiers-design.md
 base-ref: c5e1931d33a842d85112ac4924c75b2971ee08db
+archived-with: 2026-08-12-add-membership-tiers
 ---
 
 # Membership Tiers Implementation Plan

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import type { TerminalCategory } from '@/lib/types';
 
 export function TerminalCategoryNav({
@@ -25,7 +25,7 @@ export function TerminalCategoryNav({
         return (
           <Link
             key={cat.id}
-            href={`/terminals?category=${encodeURIComponent(cat.id)}#terminals-list`}
+            href={`/connectivity?category=${encodeURIComponent(cat.id)}#connectivity-list`}
             className={`flex w-32 shrink-0 flex-col overflow-hidden rounded-lg border transition ${
               isActive
                 ? 'border-accent-foreground ring-2 ring-accent-foreground/30'
@@ -55,3 +55,4 @@ export function TerminalCategoryNav({
     </div>
   );
 }
+

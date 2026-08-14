@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -60,7 +60,7 @@ export function TerminalFilters({ facets, allCategoryTree }: Props) {
         if (keyword) params.set('q', keyword);
         else params.delete('q');
         params.delete('page');
-        router.push(`/terminals?${params.toString()}#terminals-list`);
+        router.push(`/connectivity?${params.toString()}#connectivity-list`);
       }
     }, 300);
     return () => clearTimeout(t);
@@ -74,7 +74,7 @@ export function TerminalFilters({ facets, allCategoryTree }: Props) {
       else params.set(k, v);
     }
     params.delete('page'); // reset pagination on filter change
-    router.push(`/terminals?${params.toString()}#terminals-list`);
+    router.push(`/connectivity?${params.toString()}#connectivity-list`);
   }
 
   function toggleCategory(id: string) {
@@ -128,7 +128,7 @@ export function TerminalFilters({ facets, allCategoryTree }: Props) {
     setSelectedCategories(new Set());
     setSelectedManufacturers(new Set());
     setSpecFilters({});
-    router.push('/terminals#terminals-list');
+    router.push('/connectivity#connectivity-list');
   }
 
   const hasActiveFilters =
@@ -295,3 +295,5 @@ export function TerminalFilters({ facets, allCategoryTree }: Props) {
     </div>
   );
 }
+
+

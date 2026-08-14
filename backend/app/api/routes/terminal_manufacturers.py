@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_operator
@@ -15,6 +15,18 @@ from app.schemas.terminal import (
 
 router = APIRouter()
 
+# Backward-compat alias router: legacy /api/terminal-manufacturers paths return
+# 410 Gone with a Location header pointing to /api/connectivity-manufacturers.
+legacy_router = APIRouter(prefix="/api/terminal-manufacturers")
+
+
+@legacy_router.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def legacy_terminal_manufacturers_redirect(path: str, request: Request):
+    new_url = f"/api/connectivity-manufacturers/{path}" if path else "/api/connectivity-manufacturers"
+    if request.url.query:
+        new_url += f"?{request.url.query}"
+    raise HTTPException(status_code=410, headers={"Location": new_url})
+
 
 @router.get("", response_model=PaginatedResponse[TerminalManufacturerRead])
 async def list_terminal_manufacturers(
@@ -28,7 +40,7 @@ async def list_terminal_manufacturers(
 async def get_terminal_manufacturer(id: str, db: AsyncSession = Depends(get_db)):
     obj = await crud_terminal_manufacturer.get(db, id)
     if not obj:
-        raise HTTPException(status_code=404, detail={"code": 404, "message": "Terminal manufacturer not found"})
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Connectivity manufacturer not found"})
     return obj
 
 
@@ -36,14 +48,14 @@ async def get_terminal_manufacturer(id: str, db: AsyncSession = Depends(get_db))
 async def create_terminal_manufacturer(
     obj_in: TerminalManufacturerCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_operator("terminal_mfrs")),
+    user: User = Depends(require_operator("connectivity_mfrs")),
 ):
-    # Scope check: terminal_manager can only manage their own manufacturer
+    # Scope check: connectivity manufacturer can only manage their own manufacturer
     if user.role and user.role.scope_type == "terminal_manufacturer":
         if obj_in.id != user.scope_id:
             raise HTTPException(
                 status_code=403,
-                detail={"code": 403, "message": "Cannot create terminal manufacturer outside your scope"},
+                detail={"code": 403, "message": "Cannot create connectivity manufacturer outside your scope"},
             )
     obj = await crud_terminal_manufacturer.create(db, obj_in=obj_in)
     # Auto-provision media folder tree
@@ -58,17 +70,17 @@ async def update_terminal_manufacturer(
     id: str,
     obj_in: TerminalManufacturerUpdate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_operator("terminal_mfrs")),
+    user: User = Depends(require_operator("connectivity_mfrs")),
 ):
     obj = await crud_terminal_manufacturer.get(db, id)
     if not obj:
-        raise HTTPException(status_code=404, detail={"code": 404, "message": "Terminal manufacturer not found"})
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Connectivity manufacturer not found"})
     # Scope check
     if user.role and user.role.scope_type == "terminal_manufacturer":
         if id != user.scope_id:
             raise HTTPException(
                 status_code=403,
-                detail={"code": 403, "message": "Cannot modify terminal manufacturer outside your scope"},
+                detail={"code": 403, "message": "Cannot modify connectivity manufacturer outside your scope"},
             )
     old_name = obj.name
     obj = await crud_terminal_manufacturer.update(db, db_obj=obj, obj_in=obj_in)
@@ -84,14 +96,14 @@ async def update_terminal_manufacturer(
 async def delete_terminal_manufacturer(
     id: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_operator("terminal_mfrs")),
+    user: User = Depends(require_operator("connectivity_mfrs")),
 ):
     # Scope check
     if user.role and user.role.scope_type == "terminal_manufacturer":
         if id != user.scope_id:
             raise HTTPException(
                 status_code=403,
-                detail={"code": 403, "message": "Cannot delete terminal manufacturer outside your scope"},
+                detail={"code": 403, "message": "Cannot delete connectivity manufacturer outside your scope"},
             )
     # Cleanup media folders + uploads before deleting manufacturer
     await crud_folder.cleanup_for_manufacturer(
@@ -99,5 +111,5 @@ async def delete_terminal_manufacturer(
     )
     obj = await crud_terminal_manufacturer.remove(db, id=id)
     if not obj:
-        raise HTTPException(status_code=404, detail={"code": 404, "message": "Terminal manufacturer not found"})
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Connectivity manufacturer not found"})
     return obj

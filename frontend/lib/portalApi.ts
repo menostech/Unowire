@@ -153,15 +153,15 @@ export const portalApi = {
       if (params?.page != null) qs.set('page', String(params.page));
       if (params?.page_size != null) qs.set('page_size', String(params.page_size));
       const suffix = qs.toString() ? `?${qs}` : '';
-      return portalGet<{ items: PortalTerminal[]; total: number; page: number; page_size: number }>(`/api/portal/terminals${suffix}`);
+      return portalGet<{ items: PortalTerminal[]; total: number; page: number; page_size: number }>(`/api/portal/connectivity${suffix}`);
     },
     async getById(id: string): Promise<PortalTerminal> {
-      return portalGet<PortalTerminal>(`/api/portal/terminals/${id}`);
+      return portalGet<PortalTerminal>(`/api/portal/connectivity/${id}`);
     },
   },
   terminalCategories: {
     async all(): Promise<TerminalCategoryTree[]> {
-      return portalGet<TerminalCategoryTree[]>('/api/terminal-categories');
+      return portalGet<TerminalCategoryTree[]>('/api/connectivity-categories');
     },
   },
   resourceCategories: {

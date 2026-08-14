@@ -15,9 +15,9 @@ ADMIN_MODULES = [
     {"id": "equipment_mfrs",  "label": "Equipment Mfrs",  "scope_aware": True,  "scope_type": "equipment_manufacturer"},
     {"id": "equipment_cats",  "label": "Equipment Cats",  "scope_aware": False, "scope_type": None},
     {"id": "equipment_list",  "label": "Equipment List",  "scope_aware": True,  "scope_type": "equipment_manufacturer"},
-    {"id": "terminal_mfrs",   "label": "Terminal Mfrs",   "scope_aware": True,  "scope_type": "terminal_manufacturer"},
-    {"id": "terminal_cats",   "label": "Terminal Cats",   "scope_aware": False, "scope_type": None},
-    {"id": "terminal_list",   "label": "Terminal List",   "scope_aware": True,  "scope_type": "terminal_manufacturer"},
+    {"id": "connectivity_mfrs",   "label": "Connectivity Mfrs",   "scope_aware": True,  "scope_type": "connectivity_manufacturer"},
+    {"id": "connectivity_cats",   "label": "Connectivity Cats",   "scope_aware": False, "scope_type": None},
+    {"id": "connectivity_list",   "label": "Connectivity List",   "scope_aware": True,  "scope_type": "connectivity_manufacturer"},
     {"id": "media",           "label": "Media",           "scope_aware": True,  "scope_type": None},
     {"id": "menu_config",     "label": "Menu Config",     "scope_aware": False, "scope_type": None},
     {"id": "users",           "label": "Users",           "scope_aware": False, "scope_type": None},
@@ -36,12 +36,29 @@ ADMIN_MODULES = [
     {"id": "subscriptions",  "label": "Subscriptions",  "scope_aware": False, "scope_type": None},
 ]
 
-MODULE_BY_ID = {m["id"]: m for m in ADMIN_MODULES}
+# Backward-compat aliases: old terminal module ids → new connectivity ids.
+MODULE_ID_ALIASES = {
+    "terminal_mfrs": "connectivity_mfrs",
+    "terminal_cats": "connectivity_cats",
+    "terminal_list": "connectivity_list",
+}
 
-VALID_MODULE_IDS = {m["id"] for m in ADMIN_MODULES}
+MODULE_BY_ID = {m["id"]: m for m in ADMIN_MODULES}
+# Allow old terminal module ids to resolve to their connectivity equivalents.
+for _old_id, _new_id in MODULE_ID_ALIASES.items():
+    if _new_id in MODULE_BY_ID:
+        MODULE_BY_ID[_old_id] = MODULE_BY_ID[_new_id]
+
+VALID_MODULE_IDS = {m["id"] for m in ADMIN_MODULES} | set(MODULE_ID_ALIASES.keys())
 
 # Modules that the 'admin' role must always retain (lockout protection).
 ADMIN_PROTECTED_MODULES = {"users", "menu_config", "roles"}
 
+# Backward-compat alias: old terminal_manufacturer scope_type → new connectivity_manufacturer.
+SCOPE_TYPE_ALIASES = {"terminal_manufacturer": "connectivity_manufacturer"}
+
 # Valid scope_type values (null means global role, no scoping).
-VALID_SCOPE_TYPES = {None, "manufacturer", "equipment_manufacturer", "terminal_manufacturer"}
+VALID_SCOPE_TYPES = (
+    {None, "manufacturer", "equipment_manufacturer", "connectivity_manufacturer"}
+    | set(SCOPE_TYPE_ALIASES.keys())
+)

@@ -9,6 +9,7 @@ To add a new scope type:
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.modules import SCOPE_TYPE_ALIASES
 from app.crud.terminal import crud_terminal_manufacturer
 from app.models.equipment import EquipmentManufacturer
 from app.models.manufacturer import Manufacturer
@@ -33,11 +34,18 @@ async def validate_terminal_manufacturer_exists(db: AsyncSession, scope_id: str)
     return obj is not None
 
 
+async def validate_connectivity_manufacturer_exists(db: AsyncSession, scope_id: str) -> bool:
+    obj = await crud_terminal_manufacturer.get(db, scope_id)
+    return obj is not None
+
+
 # scope_type → async validator function (returns True if scope_id is valid)
 SCOPE_RESOLVERS = {
     "manufacturer": validate_manufacturer_exists,
     "equipment_manufacturer": validate_equipment_manufacturer_exists,
-    "terminal_manufacturer": validate_terminal_manufacturer_exists,
+    "connectivity_manufacturer": validate_connectivity_manufacturer_exists,
+    # Backward-compat alias: legacy terminal_manufacturer scope_type.
+    "terminal_manufacturer": validate_connectivity_manufacturer_exists,
 }
 
 
@@ -47,11 +55,15 @@ async def validate_scope_id(db: AsyncSession, scope_type: str | None, scope_id: 
     - scope_type=None: scope_id must be None (global role)
     - scope_type=<known>: scope_id must be a non-empty string that exists in the target table
     - scope_type=<unknown>: returns False (defensive)
+
+    Legacy terminal_manufacturer scope_type values are remapped to
+    connectivity_manufacturer before resolving.
     """
     if scope_type is None:
         return scope_id is None
     if scope_id is None or scope_id == "":
         return False
+    scope_type = SCOPE_TYPE_ALIASES.get(scope_type, scope_type)
     resolver = SCOPE_RESOLVERS.get(scope_type)
     if resolver is None:
         return False

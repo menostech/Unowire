@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -95,15 +95,15 @@ export function TerminalListClient({
       </aside>
 
       {/* Center column: terminals list */}
-      <div className="lg:col-span-2" id="terminals-list">
+      <div className="lg:col-span-2" id="connectivity-list">
         {response.items.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500">
-            No terminals found. Try adjusting your filters.
+            No connectivity products found. Try adjusting your filters.
           </div>
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500">
-              Showing {response.items.length} of {response.total} terminals
+              Showing {response.items.length} of {response.total} connectivity products
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {response.items.map((term) => (
@@ -123,7 +123,7 @@ export function TerminalListClient({
                       <span key={p} className="flex items-center gap-2">
                         {showEllipsis && <span className="text-gray-400">…</span>}
                         <a
-                          href={`/terminals?${params.toString()}#terminals-list`}
+                          href={`/connectivity?${params.toString()}#connectivity-list`}
                           className={`rounded border px-3 py-1 text-sm ${
                             p === response.page
                               ? 'border-accent-foreground bg-accent-foreground text-background'
@@ -143,3 +143,5 @@ export function TerminalListClient({
     </div>
   );
 }
+
+
