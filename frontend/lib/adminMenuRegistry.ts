@@ -1,4 +1,4 @@
-﻿export interface PageRegistryEntry {
+export interface PageRegistryEntry {
   pageId: string;
   href: string;
   defaultLabel: string;
@@ -10,12 +10,12 @@ export const ADMIN_PAGES: PageRegistryEntry[] = [
   { pageId: "cables",         href: "/admin/cables",                       defaultLabel: "Cables",           defaultIcon: "Cable" },
   { pageId: "manufacturers",  href: "/admin/manufacturers",                defaultLabel: "Manufacturers",    defaultIcon: "Factory" },
   { pageId: "industries",     href: "/admin/industries",                   defaultLabel: "Industries",       defaultIcon: "FolderOpen" },
-  { pageId: "equipment-mfrs", href: "/admin/equipment/manufacturers",      defaultLabel: "Equipment Mfrs",   defaultIcon: "Wrench" },
-  { pageId: "equipment-cats", href: "/admin/equipment/categories",         defaultLabel: "Equipment Cats",   defaultIcon: "Wrench" },
-  { pageId: "equipment-list", href: "/admin/equipment",                    defaultLabel: "Equipment",        defaultIcon: "Wrench" },
   { pageId: "connectivity-mfrs", href: "/admin/connectivity/manufacturers",       defaultLabel: "Connectivity Manufacturers", defaultIcon: "Wrench" },
   { pageId: "connectivity-cats", href: "/admin/connectivity/categories",          defaultLabel: "Connectivity Categories",   defaultIcon: "Wrench" },
   { pageId: "connectivity",     href: "/admin/connectivity",                     defaultLabel: "Connectivity",             defaultIcon: "Wrench" },
+  { pageId: "equipment-mfrs", href: "/admin/equipment/manufacturers",      defaultLabel: "Equipment Mfrs",   defaultIcon: "Wrench" },
+  { pageId: "equipment-cats", href: "/admin/equipment/categories",         defaultLabel: "Equipment Cats",   defaultIcon: "Wrench" },
+  { pageId: "equipment-list", href: "/admin/equipment",                    defaultLabel: "Equipment",        defaultIcon: "Wrench" },
   { pageId: "media",          href: "/admin/media",                        defaultLabel: "Media",            defaultIcon: "Image" },
   { pageId: "menu-config",    href: "/admin/menu",                         defaultLabel: "Menu Config",      defaultIcon: "Settings" },
   { pageId: "users",          href: "/admin/users",                        defaultLabel: "Users",            defaultIcon: "Users" },

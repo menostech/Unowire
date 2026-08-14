@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { Container } from './Container';
 import { fetchSiteMenu } from '@/lib/api/siteMenu';
 
@@ -40,7 +40,7 @@ export async function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-background/60 leading-relaxed">
-              The engineering reference for cable, equipment, and connectivity specifications.
+              The engineering reference for cable, connectivity, and equipment specifications.
             </p>
             <div className="mt-6 mono-label text-background/40">
               EST. 2024 · GLOBAL

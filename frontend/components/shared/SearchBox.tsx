@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect, type FormEvent } from 'react';
@@ -7,8 +7,8 @@ type Category = 'cable' | 'equipment' | 'connectivity';
 
 const CATEGORY_OPTIONS: { value: Category; label: string; code: string; placeholder: string; path: string }[] = [
   { value: 'cable',    label: 'Cable',      code: '01', placeholder: 'UL1007, AVSS…',           path: '/cables' },
-  { value: 'equipment', label: 'Equipments', code: '02', placeholder: 'Komax, Alpha 488…',      path: '/equipment' },
-  { value: 'connectivity', label: 'Connectivity',   code: '03', placeholder: 'Search connectivity model, brand…',  path: '/connectivity' },
+  { value: 'connectivity', label: 'Connectivity',   code: '02', placeholder: 'Search connectivity model, brand…',  path: '/connectivity' },
+  { value: 'equipment', label: 'Equipments', code: '03', placeholder: 'Komax, Alpha 488…',      path: '/equipment' },
 ];
 
 export function SearchBox() {

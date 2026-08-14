@@ -1,4 +1,4 @@
-﻿// Mirrors backend/app/core/modules.py ADMIN_MODULES.
+// Mirrors backend/app/core/modules.py ADMIN_MODULES.
 // Keep in sync when adding new modules.
 
 export interface AdminModule {
@@ -13,12 +13,12 @@ export const ADMIN_MODULES: AdminModule[] = [
   { id: "cables",          label: "Cables",          scopeAware: true,  scopeType: "manufacturer" },
   { id: "manufacturers",   label: "Manufacturers",   scopeAware: true,  scopeType: "manufacturer" },
   { id: "industries",      label: "Industries",      scopeAware: false, scopeType: null },
-  { id: "equipment_mfrs",  label: "Equipment Mfrs",  scopeAware: true,  scopeType: "equipment_manufacturer" },
-  { id: "equipment_cats",  label: "Equipment Cats",  scopeAware: false, scopeType: null },
-  { id: "equipment_list",  label: "Equipment List",  scopeAware: true,  scopeType: "equipment_manufacturer" },
   { id: "connectivity_mfrs",   label: "Connectivity Mfrs",   scopeAware: true,  scopeType: "connectivity_manufacturer" },
   { id: "connectivity_cats",   label: "Connectivity Cats",   scopeAware: false, scopeType: null },
   { id: "connectivity_list",   label: "Connectivity List",   scopeAware: true,  scopeType: "connectivity_manufacturer" },
+  { id: "equipment_mfrs",  label: "Equipment Mfrs",  scopeAware: true,  scopeType: "equipment_manufacturer" },
+  { id: "equipment_cats",  label: "Equipment Cats",  scopeAware: false, scopeType: null },
+  { id: "equipment_list",  label: "Equipment List",  scopeAware: true,  scopeType: "equipment_manufacturer" },
   { id: "media",           label: "Media",           scopeAware: false, scopeType: null },
   { id: "menu_config",     label: "Menu Config",     scopeAware: false, scopeType: null },
   { id: "users",           label: "Users",           scopeAware: false, scopeType: null },
