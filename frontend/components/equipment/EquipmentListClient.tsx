@@ -99,12 +99,12 @@ export function EquipmentListClient({
       {/* Center column: equipment list */}
       <div className="lg:col-span-2" id="equipment-list">
         {response.items.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500">
+          <div className="rounded-lg border border-border bg-muted/50 p-8 text-center text-muted-foreground">
             No equipment found. Try adjusting your filters.
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-500">
+            <div className="mb-4 text-sm text-muted-foreground">
               Showing {response.items.length} of {response.total} equipment
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -123,13 +123,13 @@ export function EquipmentListClient({
                     params.set('page', String(p));
                     return (
                       <span key={p} className="flex items-center gap-2">
-                        {showEllipsis && <span className="text-gray-400">…</span>}
+                        {showEllipsis && <span className="text-muted-foreground/60">…</span>}
                         <a
                           href={`/equipment?${params.toString()}#equipment-list`}
                           className={`rounded border px-3 py-1 text-sm ${
                             p === response.page
                               ? 'border-accent-foreground bg-accent-foreground text-background'
-                              : 'border-gray-300 hover:bg-gray-100'
+                              : 'border-border hover:bg-muted'
                           }`}
                         >
                           {p}

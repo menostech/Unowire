@@ -11,7 +11,7 @@ export function EquipmentCategoryGrid({ tree }: EquipmentCategoryGridProps) {
       <div className="mb-8 flex items-end justify-between border-b border-border pb-4">
         <div>
           <div className="mono-label text-primary mb-2">
-            SECTION / 03
+            SECTION / 02
           </div>
           <h2
             className="text-3xl font-bold tracking-tight text-foreground"

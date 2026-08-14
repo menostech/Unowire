@@ -74,7 +74,7 @@ export function SearchBox() {
         {open && (
           <div
             role="listbox"
-            className="absolute left-0 top-full z-50 mt-1 min-w-[9.6rem] overflow-hidden rounded-md border border-border bg-popover shadow-lg shadow-black/5"
+            className="animate-fade-in absolute left-0 top-full z-50 mt-1 min-w-[9.6rem] overflow-hidden rounded-md border border-border bg-popover shadow-lg shadow-black/5"
           >
             {/* Tiny header strip */}
             <div className="mono-label border-b border-border/60 bg-secondary/40 px-2.5 py-1 text-muted-foreground/50">

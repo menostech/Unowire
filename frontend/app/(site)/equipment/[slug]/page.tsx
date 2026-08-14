@@ -124,7 +124,7 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
         <div className="lg:col-span-3 space-y-6">
           {/* Header block */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
+            <div className="aspect-[4/3] w-full overflow-hidden rounded-lg bg-muted">
               {equipment.image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -133,13 +133,14 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
                   className="h-80 w-full object-cover"
                 />
               ) : (
-                <div className="flex h-80 w-full items-center justify-center text-gray-400">
+                <div className="flex h-80 w-full items-center justify-center text-muted-foreground/40">
                   No image available
                 </div>
               )}
             </div>
             <div className="space-y-3">
-              <h1 className="text-3xl font-bold text-gray-900">{equipment.model}</h1>
+              <div className="mono-label text-primary">SPECIFICATION</div>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>{equipment.model}</h1>
               {manufacturer && (
                 <Link
                   href={`/equipment/manufacturers/${encodeURIComponent(manufacturer.slug)}`}
@@ -149,7 +150,7 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
                 </Link>
               )}
               {category && (
-                <span className="inline-block rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
+                <span className="inline-block rounded-full bg-muted px-3 py-1 text-sm text-foreground/80">
                   {category.label}
                 </span>
               )}
@@ -158,7 +159,7 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
                   href={equipment.external_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+                  className="inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-95"
                 >
                   View Product →
                 </a>
@@ -177,7 +178,7 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
                 ) : (
                   <Link
                     href={`/login?redirect=${encodeURIComponent(`/equipment/${equipment.slug}`)}`}
-                    className="inline-block text-sm text-accent-foreground hover:underline"
+                    className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                   >
                     Login to Inquire
                   </Link>
@@ -189,21 +190,21 @@ export default async function EquipmentDetailPage({ params }: PageProps) {
           {/* Description */}
           {equipment.description && (
             <div>
-              <h2 className="mb-2 text-xl font-semibold text-gray-900">Description</h2>
-              <p className="text-gray-700 whitespace-pre-line">{equipment.description}</p>
+              <h2 className="mb-2 text-xl font-semibold text-foreground">Description</h2>
+              <p className="text-foreground/80 whitespace-pre-line">{equipment.description}</p>
             </div>
           )}
 
           {/* Applicable Specs Table */}
           <div>
-            <h2 className="mb-2 text-xl font-semibold text-gray-900">Applicable Specifications</h2>
+            <h2 className="mb-2 text-xl font-semibold text-foreground">Applicable Specifications</h2>
             <ApplicableSpecsTable specs={equipment.applicable_specs} />
           </div>
 
           {/* More from this manufacturer */}
           {sameManufacturerEquipment.length > 0 && (
             <div>
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              <h2 className="mb-4 text-xl font-semibold text-foreground">
                 More from {manufacturerName}
               </h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

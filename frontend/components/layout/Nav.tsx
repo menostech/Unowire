@@ -14,10 +14,10 @@ export async function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
       {/* Top utility strip — mono technical annotation */}
-      <div className="border-b border-border/60 bg-foreground text-background">
+      <div className="border-b border-border bg-foreground text-background">
         <Container className="flex h-7 items-center justify-between text-[11px]">
           <span className="mono-label opacity-70">
-            SPECS DATABASE · v2.4
+            SPECS DATABASE · v3.0
           </span>
           <span className="mono-label hidden sm:block opacity-70">
             ENGINEERING REFERENCE
@@ -150,7 +150,7 @@ export async function Nav() {
               </Link>
               <Link
                 href="/login"
-                className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-95"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Sign in
               </Link>

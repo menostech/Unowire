@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { TerminalCategoryNav } from '@/components/terminals/TerminalCategoryNav';
@@ -69,7 +69,8 @@ export default async function TerminalListPage({ searchParams }: PageProps) {
   return (
     <Container className="py-8">
       <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Connectivity Products' }]} />
-      <h1 className="mb-6 text-3xl font-bold text-gray-900">Connectivity Products</h1>
+      <div className="mono-label text-primary">DIRECTORY / 03</div>
+      <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>Connectivity Products</h1>
 
       <TerminalCategoryNav
         categories={categoryTree}

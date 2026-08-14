@@ -69,7 +69,8 @@ export default async function EquipmentListPage({ searchParams }: PageProps) {
   return (
     <Container className="py-8">
       <Breadcrumbs items={[{ name: 'Home', url: '/' }, { name: 'Equipment' }]} />
-      <h1 className="mb-6 text-3xl font-bold text-gray-900">Equipment</h1>
+      <div className="mono-label text-primary">DIRECTORY / 02</div>
+      <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>Equipment</h1>
 
       <EquipmentCategoryNav
         categories={categoryTree}

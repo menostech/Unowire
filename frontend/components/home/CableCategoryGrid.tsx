@@ -13,7 +13,7 @@ export function CableCategoryGrid({ taxonomy }: CableCategoryGridProps) {
       <div className="mb-8 flex items-end justify-between border-b border-border pb-4">
         <div>
           <div className="mono-label text-primary mb-2">
-            SECTION / 02
+            SECTION / 01
           </div>
           <h2
             className="text-3xl font-bold tracking-tight text-foreground"
