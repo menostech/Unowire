@@ -8,6 +8,7 @@ Usage:
 import argparse
 import asyncio
 import json
+import os
 from pathlib import Path
 
 from sqlalchemy import select
@@ -25,6 +26,9 @@ from app.models.terminal import Terminal, TerminalCategory, TerminalManufacturer
 from app.models.user import User
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "frontend" / "data"
+# In Docker, SEED_DATA_DIR points to the mounted data volume.
+if _dir_env := os.environ.get("SEED_DATA_DIR"):
+    DATA_DIR = Path(_dir_env)
 
 
 def load_json(filename: str):

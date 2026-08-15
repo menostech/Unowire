@@ -47,8 +47,10 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - SEED_DATA_DIR=/data
     volumes:
       - media_data:/app/media
+      - ./frontend/data:/data:ro
     depends_on:
       db:
         condition: service_healthy
