@@ -122,7 +122,8 @@ unowire/
 ├── deploy/nginx/               # Nginx 配置
 ├── docker-compose.yml          # 生产编排
 ├── docker-compose.dev.yml      # 开发覆盖
-└── .env.docker                 # 顶层环境变量
+├── .env.docker.example         # 环境变量模板（可提交）
+└── .env.docker                 # 顶层环境变量（gitignored，本地填充）
 ```
 
 ---

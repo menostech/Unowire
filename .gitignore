@@ -12,6 +12,7 @@ __pycache__/
 *.pyc
 .next/
 coverage/
+.env.docker
 .env.docker.local
 .trae/
 *.bak

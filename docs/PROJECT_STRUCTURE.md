@@ -323,7 +323,8 @@ Each feature follows the workflow: **brainstorming → spec → plan → SDD exe
 | `frontend/.env.local`         | Local dev env                                        |
 | `docker-compose.yml`          | Production service composition                       |
 | `docker-compose.dev.yml`      | Development overrides                                |
-| `.env.docker`                 | Docker secrets (DB_PASSWORD, JWT_SECRET, etc.)       |
+| `.env.docker.example`         | Docker env template (commit-safe; copy to `.env.docker`) |
+| `.env.docker`                 | Docker secrets (gitignored, server-only)             |
 | `deploy/nginx/nginx.conf`     | Container Nginx config                               |
 | `deploy/host-nginx.conf`      | Host Nginx config (HTTPS + certbot)                  |
 

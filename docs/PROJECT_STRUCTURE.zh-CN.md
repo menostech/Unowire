@@ -323,7 +323,8 @@ docs/
 | `frontend/.env.local`         | 本地开发环境变量                                  |
 | `docker-compose.yml`          | 生产服务组合                                      |
 | `docker-compose.dev.yml`      | 开发环境覆盖                                      |
-| `.env.docker`                 | Docker 密钥（DB_PASSWORD、JWT_SECRET 等）         |
+| `.env.docker.example`         | Docker 环境变量模板（可提交；复制为 `.env.docker`）   |
+| `.env.docker`                 | Docker 密钥（gitignored，仅服务器）                |
 | `deploy/nginx/nginx.conf`     | 容器 Nginx 配置                                   |
 | `deploy/host-nginx.conf`      | 宿主机 Nginx 配置（HTTPS + certbot）              |
 
