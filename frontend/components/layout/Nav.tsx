@@ -6,10 +6,11 @@ import { UnreadBadge } from '@/components/member/UnreadBadge';
 import { fetchSiteMenu } from '@/lib/api/siteMenu';
 
 export async function Nav() {
-  const cookieStore = await cookies();
+  const [cookieStore, tree] = await Promise.all([
+    cookies(),
+    fetchSiteMenu('header'),
+  ]);
   const memberToken = cookieStore.get('member_token')?.value;
-
-  const tree = await fetchSiteMenu('header');
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">

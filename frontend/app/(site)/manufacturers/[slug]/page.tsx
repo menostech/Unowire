@@ -76,15 +76,15 @@ export default async function ManufacturerDetailPage({
   params,
 }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const manufacturer = await api.manufacturers.getBySlug(slug);
+  const [manufacturer, memberToken, allManufacturers, allCables, productTypeMap] = await Promise.all([
+    api.manufacturers.getBySlug(slug),
+    cookies().then(c => c.get('member_token')?.value),
+    api.manufacturers.all(),
+    api.cables.all(),
+    buildProductTypeMap(),
+  ]);
   if (!manufacturer) notFound();
-
-  const memberToken = (await cookies()).get('member_token')?.value;
   const isMember = !!memberToken;
-
-  const allManufacturers = await api.manufacturers.all();
-  const allCables = await api.cables.all();
-  const productTypeMap = await buildProductTypeMap();
 
   const cables = allCables.filter(c => c.manufacturer_id === manufacturer.id);
 

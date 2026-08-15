@@ -37,6 +37,15 @@ const POPULAR_SEARCHES: Record<TabKey, string[]> = {
   resources: ['Installation Guide', 'Datasheet', 'CAD Drawing', 'Manual'],
 };
 
+const GRID_BG_STYLE = {
+  backgroundImage:
+    'linear-gradient(oklch(0.985 0.004 80) 1px, transparent 1px), linear-gradient(90deg, oklch(0.985 0.004 80) 1px, transparent 1px)',
+  backgroundSize: '40px 40px',
+} as const;
+const DOT_STYLE_1 = { background: 'oklch(0.705 0.165 65)' } as const;
+const DOT_STYLE_2 = { background: 'oklch(0.5 0.13 50)' } as const;
+const HEADING_STYLE = { fontFamily: 'var(--font-heading)' } as const;
+
 export function HeroSearch() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>('cable');
@@ -57,15 +66,11 @@ export function HeroSearch() {
   return (
     <section className="relative overflow-hidden bg-foreground text-background">
       {/* Engineering grid background */}
-      <div className="absolute inset-0 opacity-[0.07]" style={{
-        backgroundImage:
-          'linear-gradient(oklch(0.985 0.004 80) 1px, transparent 1px), linear-gradient(90deg, oklch(0.985 0.004 80) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-      }} />
+      <div className="absolute inset-0 opacity-[0.07]" style={GRID_BG_STYLE} />
       {/* Amber glow accent — top right */}
-      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-20 blur-3xl" style={{ background: 'oklch(0.705 0.165 65)' }} />
+      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-20 blur-3xl" style={DOT_STYLE_1} />
       {/* Deep copper accent — bottom left, same family as amber primary */}
-      <div className="absolute -left-40 bottom-0 h-80 w-80 rounded-full opacity-10 blur-3xl" style={{ background: 'oklch(0.5 0.13 50)' }} />
+      <div className="absolute -left-40 bottom-0 h-80 w-80 rounded-full opacity-10 blur-3xl" style={DOT_STYLE_2} />
 
       <div className="relative">
         {/* Asymmetric layout: left annotation column + main content */}
@@ -102,7 +107,7 @@ export function HeroSearch() {
               {/* Headline — bold typographic hierarchy */}
               <h1
                 className="mb-5 text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight"
-                style={{ fontFamily: 'var(--font-heading)' }}
+                style={HEADING_STYLE}
               >
                 Cable, connectivity
                 <br />

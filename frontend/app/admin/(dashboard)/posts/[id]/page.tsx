@@ -9,10 +9,13 @@ interface PageProps {
 
 export default async function EditPostPage({ params }: PageProps) {
   const { id } = await params;
-  const post = await adminApi.posts.getById(id);
+  const [post, allCategories] = await Promise.all([
+    adminApi.posts.getById(id),
+    adminApi.postCategories.all(),
+  ]);
   if (!post) notFound();
 
-  const categories = (await adminApi.postCategories.all()).map((c) => ({
+  const categories = allCategories.map((c) => ({
     id: c.id,
     label: c.label,
   }));

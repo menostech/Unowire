@@ -73,9 +73,11 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
   }
 
   // Default: show all product types grouped by industry
-  const industries = await api.taxonomy.industries();
-  const allCables = await api.cables.all();
-  const taxonomyAll = await api.taxonomy.all();
+  const [industries, allCables, taxonomyAll] = await Promise.all([
+    api.taxonomy.industries(),
+    api.cables.all(),
+    api.taxonomy.all(),
+  ]);
 
   // Build flat list of all product types with cable/manufacturer counts, grouped by industry
   const industryGroups = industries.map(ind => {
