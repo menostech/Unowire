@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { portalApi } from '@/lib/portalApi';
+import { portalApiClient } from '@/lib/portalApiClient';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 
 interface ResourceDeleteButtonProps {
@@ -15,7 +15,7 @@ export function ResourceDeleteButton({ resourceId, resourceTitle }: ResourceDele
   const [open, setOpen] = useState(false);
 
   async function handleConfirm() {
-    await portalApi.resources.remove(resourceId);
+    await portalApiClient.resources.remove(resourceId);
     router.push('/portal/resources');
     router.refresh();
   }

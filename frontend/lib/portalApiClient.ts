@@ -205,6 +205,11 @@ export const portalApiClient = {
       },
     },
   },
+  resources: {
+    async remove(id: string): Promise<void> {
+      await bffFetch(`/api/portal/resources/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    },
+  },
   inquiries: {
     async reply(id: number, replyBody: string): Promise<PortalInquiry> {
       const res = await bffFetch(`/api/portal/inquiries/${id}/reply`, {
