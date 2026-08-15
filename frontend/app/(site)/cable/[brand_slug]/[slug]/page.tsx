@@ -29,13 +29,15 @@ export default async function CableDetailPage({
   params,
 }: { params: Promise<{ brand_slug: string; slug: string }> }) {
   const { brand_slug, slug } = await params;
-  const detail = await api.getCableDetail(brand_slug, slug);
+  const [detail, memberToken, allManufacturers] = await Promise.all([
+    api.getCableDetail(brand_slug, slug),
+    cookies().then(c => c.get('member_token')?.value),
+    api.manufacturers.all(),
+  ]);
   if (!detail) notFound();
   const { cable, manufacturer, categories, recommended_equipments } = detail;
 
   const similar = await api.cables.similar(cable, 4);
-  const allManufacturers = await api.manufacturers.all();
-  const memberToken = (await cookies()).get('member_token')?.value;
   const isMember = !!memberToken;
 
   // Fire-and-forget page view tracking. Errors are silently ignored.

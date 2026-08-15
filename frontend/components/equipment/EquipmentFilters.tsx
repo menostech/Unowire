@@ -22,14 +22,14 @@ export function EquipmentFilters({ facets, allCategoryTree }: Props) {
 
   const [keyword, setKeyword] = useState(searchParams.get('q') ?? '');
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
-    new Set((searchParams.get('category') ?? '').split(',').filter(Boolean))
+    () => new Set((searchParams.get('category') ?? '').split(',').filter(Boolean))
   );
   const [selectedManufacturers, setSelectedManufacturers] = useState<Set<string>>(
-    new Set((searchParams.get('manufacturer') ?? '').split(',').filter(Boolean))
+    () => new Set((searchParams.get('manufacturer') ?? '').split(',').filter(Boolean))
   );
 
   // Spec filter state: { specKey: { min?, max?, values? } }
-  const [specFilters, setSpecFilters] = useState<Record<string, { min?: string; max?: string; values?: Set<string> }>>({});
+  const [specFilters, setSpecFilters] = useState<Record<string, { min?: string; max?: string; values?: Set<string> }>>(() => ({}));
 
   // Initialize spec filter state from URL once
   useEffect(() => {

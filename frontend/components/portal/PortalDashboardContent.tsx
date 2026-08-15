@@ -1,8 +1,14 @@
 import type { PortalDashboard } from '@/lib/types/portal';
+import dynamic from 'next/dynamic';
 import { DashboardStats } from '@/components/portal/DashboardStats';
-import { InquiryTrendChart } from '@/components/portal/InquiryTrendChart';
-import { ViewsTrendChart } from '@/components/portal/ViewsTrendChart';
 import { RecentInquiries } from '@/components/portal/RecentInquiries';
+
+const InquiryTrendChart = dynamic(() => import('@/components/portal/InquiryTrendChart').then(m => m.InquiryTrendChart), {
+  loading: () => <div className="h-64 animate-pulse rounded-lg bg-muted" />,
+});
+const ViewsTrendChart = dynamic(() => import('@/components/portal/ViewsTrendChart').then(m => m.ViewsTrendChart), {
+  loading: () => <div className="h-64 animate-pulse rounded-lg bg-muted" />,
+});
 
 export function PortalDashboardContent({ data }: { data: PortalDashboard }) {
   return (

@@ -4,11 +4,12 @@ import { portalApi } from '@/lib/portalApi';
 import { PortalSidebar } from '@/components/portal/layout/PortalSidebar';
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
-  const [user, perms] = await Promise.all([
+  const [user, perms, headerList] = await Promise.all([
     portalApi.auth.me(),
     portalApi.auth.permissions(),
+    headers(),
   ]);
-  const pathname = (await headers()).get('x-pathname') || '';
+  const pathname = headerList.get('x-pathname') || '';
 
   const isPublicPortalPath = pathname === '/portal/login' || pathname === '/portal/claim';
   if (!user && !isPublicPortalPath) {

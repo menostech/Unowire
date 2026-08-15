@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import type { Plan } from '@/lib/types';
-import { EnterpriseContactModal } from './EnterpriseContactModal';
+
+const EnterpriseContactModal = dynamic(() => import('./EnterpriseContactModal').then(m => m.EnterpriseContactModal), {
+  loading: () => <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" />,
+});
 
 function priceLabel(plan: Plan): string {
   if (plan.tier_level === 'freemium') return 'Free';

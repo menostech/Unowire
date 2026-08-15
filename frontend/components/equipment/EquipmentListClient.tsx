@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type {
   EquipmentCategory,
@@ -23,16 +23,14 @@ interface Props {
 }
 
 export function EquipmentListClient({
-  initialResponse,
   allEquipment,
   allManufacturers,
   categoryTree,
 }: Props) {
   const searchParams = useSearchParams();
-  const [response, setResponse] = useState<EquipmentListResponse>(initialResponse);
 
   // Build a simplified category tree for the filter component
-  const filterCategoryTree = categoryTree.map((top) => ({
+  const filterCategoryTree = useMemo(() => categoryTree.map((top) => ({
     id: top.id,
     label: top.label,
     parent_id: top.parent_id,
@@ -40,9 +38,9 @@ export function EquipmentListClient({
       id: child.id,
       label: child.label,
     })),
-  }));
+  })), [categoryTree]);
 
-  useEffect(() => {
+  const response = useMemo(() => {
     const params: EquipmentFilterParams & { page?: number; page_size?: number } = {
       q: searchParams.get('q') ?? undefined,
       category_ids: (searchParams.get('category') ?? '').split(',').filter(Boolean),
@@ -74,12 +72,11 @@ export function EquipmentListClient({
     }
 
     // Pure in-memory filtering — no network calls
-    const result = filterEquipment(params, {
+    return filterEquipment(params, {
       allEquipment,
       allManufacturers,
       categoryTree,
     });
-    setResponse(result);
   }, [searchParams, allEquipment, allManufacturers, categoryTree]);
 
   const activeCategoryId = searchParams.get('category')?.split(',')[0];

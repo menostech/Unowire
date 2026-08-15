@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -65,10 +65,11 @@ function buildBreadcrumbJsonLd(model: string, manufacturerName: string) {
 
 export default async function TerminalDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const terminal = await findTerminalBySlug(slug);
+  const [terminal, cookieStore] = await Promise.all([
+    findTerminalBySlug(slug),
+    cookies(),
+  ]);
   if (!terminal) notFound();
-
-  const cookieStore = await cookies();
   const memberToken = cookieStore.get('member_token')?.value;
 
   const manufacturer = terminal.manufacturer;

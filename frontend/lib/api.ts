@@ -9,6 +9,8 @@ import type {
 
 import categoriesData from '@/data/categories.json';
 
+import { cache } from 'react';
+
 // === API Base URL ===
 // Server-side: use internal URL (set in Docker env) for absolute fetch
 // Client-side: NEXT_PUBLIC_API_BASE (empty in production for same-origin browser requests)
@@ -17,16 +19,16 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE
   || (typeof window === 'undefined' ? process.env.INTERNAL_API_BASE || 'http://backend:8000' : '');
 
 // === In-memory cache + ISR ===
-const cache = new Map<string, { data: unknown; expires: number }>();
+const responseCache = new Map<string, { data: unknown; expires: number }>();
 
 async function fetchWithCache<T>(url: string, ttlMs: number = 60_000): Promise<T> {
   const fullUrl = `${API_BASE}${url}`;
-  const cached = cache.get(fullUrl);
+  const cached = responseCache.get(fullUrl);
   if (cached && cached.expires > Date.now()) return cached.data as T;
   const res = await fetch(fullUrl, { next: { revalidate: 60 } });
   if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText} at ${fullUrl}`);
   const data = await res.json();
-  cache.set(fullUrl, { data, expires: Date.now() + ttlMs });
+  responseCache.set(fullUrl, { data, expires: Date.now() + ttlMs });
   return data as T;
 }
 
@@ -594,10 +596,10 @@ export function getCableUrl(cable: Cable): string {
 // === API object ===
 export const api = {
   manufacturers: {
-    async all(): Promise<Manufacturer[]> {
+    all: cache(async (): Promise<Manufacturer[]> => {
       const res = await fetchWithCache<{ items: BackendManufacturer[] }>('/api/manufacturers?page_size=999');
       return res.items.map(adaptManufacturer);
-    },
+    }),
     async getById(id: string): Promise<Manufacturer | null> {
       try {
         const data = await fetchWithCache<BackendManufacturer>(`/api/manufacturers/${id}`);
@@ -656,14 +658,14 @@ export const api = {
   },
 
   cables: {
-    async all(): Promise<Cable[]> {
+    all: cache(async (): Promise<Cable[]> => {
       const res = await fetchWithCache<BackendCableListResponse>('/api/cables?page_size=999');
       return res.items.map(c => {
         const adapted = adaptCable(c);
         (adapted as unknown as Record<string, unknown>).manufacturer_slug = c.manufacturer?.slug ?? 'unknown';
         return adapted;
       });
-    },
+    }),
     async getById(id: string): Promise<Cable | null> {
       try {
         const data = await fetchWithCache<BackendCable>(`/api/cables/${id}`);
@@ -862,10 +864,10 @@ export const api = {
   },
 
   taxonomy: {
-    async all(): Promise<Taxonomy> {
+    all: cache(async (): Promise<Taxonomy> => {
       const tree = await fetchWithCache<unknown>('/api/taxonomy');
       return adaptTaxonomyTree(tree);
-    },
+    }),
     async industries(): Promise<TaxonomyIndustry[]> {
       const tax = await this.all();
       return Object.values(tax);
