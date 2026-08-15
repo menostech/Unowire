@@ -15,25 +15,25 @@ const TABS: { key: TabKey; label: string; code: string; placeholder: string; act
     action: '/cables',
   },
   {
-    key: 'equipment',
-    label: 'Equipment',
-    code: '02',
-    placeholder: 'Search equipment model or manufacturer...',
-    action: '/equipment',
-  },
-  {
     key: 'connectivity',
     label: 'Connectivity',
-    code: '03',
+    code: '02',
     placeholder: 'Search connectivity model or manufacturer...',
     action: '/connectivity',
+  },
+  {
+    key: 'equipment',
+    label: 'Equipment',
+    code: '03',
+    placeholder: 'Search equipment model or manufacturer...',
+    action: '/equipment',
   },
 ];
 
 const POPULAR_SEARCHES: Record<TabKey, string[]> = {
   cable: ['UL1007', 'AVSS', 'UL1015', 'UL2468'],
-  equipment: ['Komax', 'Alpha 488', 'Gamma 333', 'KMV'],
   connectivity: ['Ring Terminal', 'Butt Connector', 'Spade Terminal', 'Pin Terminal'],
+  equipment: ['Komax', 'Alpha 488', 'Gamma 333', 'KMV'],
   resources: ['Installation Guide', 'Datasheet', 'CAD Drawing', 'Manual'],
 };
 
@@ -104,15 +104,15 @@ export function HeroSearch() {
                 className="mb-5 text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight"
                 style={{ fontFamily: 'var(--font-heading)' }}
               >
-                Cable, equipment
+                Cable, connectivity
                 <br />
-                <span className="text-primary">&amp;</span> connectivity
+                <span className="text-primary">&amp;</span> equipment
                 <br />
                 specifications.
               </h1>
 
               <p className="mb-10 max-w-xl text-base md:text-lg text-background/60 leading-relaxed">
-                The engineering reference for wire, cable, equipment, and connectivity specs.
+                The engineering reference for wire, cable, connectivity, and equipment specs.
                 Query by model, manufacturer, or technical parameter.
               </p>
 

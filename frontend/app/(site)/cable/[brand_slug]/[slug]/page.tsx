@@ -35,7 +35,6 @@ export default async function CableDetailPage({
 
   const similar = await api.cables.similar(cable, 4);
   const allManufacturers = await api.manufacturers.all();
-  const jsonUrl = `/api/cables/${brand_slug}/${slug}`;
   const memberToken = (await cookies()).get('member_token')?.value;
   const isMember = !!memberToken;
 
@@ -71,11 +70,11 @@ export default async function CableDetailPage({
         { name: cable.model, url: getCableUrl(cable) },
       ])} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* 主内容 */}
         <div className="lg:col-span-3 space-y-8">
           {/* 产品图片 */}
-          <div className="max-w-[300px] h-auto bg-gray-100 rounded-lg overflow-hidden">
+          <div className="max-w-[300px] h-auto bg-muted rounded-lg overflow-hidden">
             <img
               src={cable.image_url || '/cable-default.svg'}
               alt={cable.model}
@@ -85,14 +84,15 @@ export default async function CableDetailPage({
 
           {/* 标题 */}
           <div>
-            <h1 className="mb-1">{cable.model}</h1>
-            <p className="text-gray-600">
+            <div className="mono-label text-primary">SPECIFICATION</div>
+            <h1 className="mb-1 text-3xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{cable.model}</h1>
+            <p className="text-muted-foreground">
               {manufacturer?.name ?? 'Unknown'}{manufacturer ? ` · ${manufacturer.country}` : ''}
             </p>
           </div>
 
           {/* 描述 */}
-          <p className="text-gray-700 leading-relaxed">{cable.base_description}</p>
+          <p className="text-foreground/80 leading-relaxed">{cable.base_description}</p>
 
           {/* Common Specs */}
           <CableSpecTable specs={cable.common_specs} title="Common Specifications" />
@@ -107,7 +107,7 @@ export default async function CableDetailPage({
           <div>
             <h2 className="mb-3">Recommended Equipment</h2>
             {recommended_equipments.length === 0 ? (
-              <p className="text-gray-500 text-sm">No recommended equipment available for this cable.</p>
+              <p className="text-muted-foreground text-sm">No recommended equipment available for this cable.</p>
             ) : (
               <div className="grid gap-3">
                 {recommended_equipments.map(r => (
@@ -126,9 +126,9 @@ export default async function CableDetailPage({
           {/* Manufacturer */}
           {manufacturer && (
             <div>
-              <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Manufacturer</h3>
-              <Link href={`/manufacturers/${manufacturer.slug}`} className="text-sm font-medium text-gray-900 hover:text-accent-foreground">{manufacturer.name}</Link>
-              <p className="text-sm text-gray-500">{manufacturer.country}</p>
+              <h3 className="mono-label text-muted-foreground mb-2">Manufacturer</h3>
+              <Link href={`/manufacturers/${manufacturer.slug}`} className="text-sm font-medium text-foreground hover:text-accent-foreground">{manufacturer.name}</Link>
+              <p className="text-sm text-muted-foreground">{manufacturer.country}</p>
               {manufacturer.website && (
                 <a
                   href={manufacturer.website}
@@ -150,7 +150,7 @@ export default async function CableDetailPage({
                 ) : (
                   <Link
                     href={`/login?from=/cable/${brand_slug}/${slug}`}
-                    className="bg-accent-foreground text-background px-4 py-2 rounded hover:brightness-95 text-sm font-medium inline-block"
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded hover:brightness-95 text-sm font-medium inline-block"
                   >
                     Login to Contact
                   </Link>
@@ -165,7 +165,7 @@ export default async function CableDetailPage({
           {/* Categories */}
           {categories.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-gray-900 uppercase mb-2">Categories</h3>
+              <h3 className="mono-label text-muted-foreground mb-2">Categories</h3>
               <ul className="space-y-1">
                 {categories.map(c => (
                   <li key={c.id}>
@@ -177,18 +177,6 @@ export default async function CableDetailPage({
               </ul>
             </div>
           )}
-
-          {/* View JSON */}
-          <div>
-            <a
-              href={jsonUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-gray-400 hover:text-gray-600"
-            >
-              View JSON
-            </a>
-          </div>
         </aside>
       </div>
     </Container>

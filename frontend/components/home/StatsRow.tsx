@@ -20,21 +20,27 @@ export function StatsRow({ cables, industries, equipment, manufacturers }: Stats
   ];
 
   return (
-    <section className="border-b border-border bg-card">
+    <section className="relative border-b border-border bg-card">
+      {/* Top accent line */}
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
       <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
-        {stats.map((stat) => (
+        {stats.map((stat, i) => (
           <div
             key={stat.label}
-            className="group relative px-6 py-8 transition-colors hover:bg-secondary/50"
+            className="group relative px-6 py-8 transition-colors hover:bg-secondary/50 animate-fade-in-up"
+            style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="mono-label text-muted-foreground/50">
               {stat.code} /
             </div>
             <p
-              className="mt-2 text-4xl font-bold tracking-tight tabular-nums text-foreground"
+              className="mt-2 text-4xl font-bold tracking-tight tabular-nums text-foreground transition-colors group-hover:text-primary"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               {stat.value.toLocaleString()}
+              {stat.value > 0 && (
+                <span className="ml-1 text-xs align-top text-primary">↑</span>
+              )}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
             {/* Amber underline on hover */}

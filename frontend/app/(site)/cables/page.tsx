@@ -31,27 +31,27 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
     const result = await filterCablesByText({ q: sp.q, page, page_size: 16 });
     const totalPages = Math.ceil(result.total / result.page_size);
     return (
-      <Container className="py-6">
+      <Container className="py-8">
         <Breadcrumbs items={[
           { name: 'Home', url: '/' },
           { name: 'Cables', url: '/cables' },
           { name: `Search: ${sp.q}` },
         ]} />
-        <h1 className="text-2xl font-bold mb-1">Search Results</h1>
-        <p className="text-sm text-gray-600 mb-4">
+        <h1 className="text-3xl font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-heading)' }}>Search Results</h1>
+        <p className="text-sm text-muted-foreground mb-4">
           {result.total} cable{result.total !== 1 ? 's' : ''} matching &ldquo;{sp.q}&rdquo;
         </p>
         <div className="mb-6">
           <SearchBox />
         </div>
         {result.items.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">
+          <div className="text-center py-16 text-muted-foreground">
             <p className="mb-4">No cables found. Try a different search term.</p>
             <a href="/cables" className="text-accent-foreground hover:underline text-sm">Back to Cable Directory</a>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {result.items.map(item => (
                 <CableCard
                   key={item.cable.id}
@@ -107,15 +107,16 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
   const totalProductTypes = industryGroups.reduce((sum, g) => sum + g.productTypes.length, 0);
 
   return (
-    <Container className="py-6">
+    <Container className="py-8">
       <Breadcrumbs items={[
         { name: 'Home', url: '/' },
         { name: 'Cables' },
       ]} />
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1">Cable Directory</h1>
-        <p className="text-sm text-gray-600 mb-4">
+        <div className="mono-label text-primary">DIRECTORY / 01</div>
+        <h1 className="text-3xl font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-heading)' }}>Cable Directory</h1>
+        <p className="text-sm text-muted-foreground mb-4">
           {totalCables} cables across {totalProductTypes} product types. Select a product type to browse cables.
         </p>
         <SearchBox />
@@ -123,7 +124,7 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
 
       {industryGroups.map(group => (
         <div key={group.industry.slug} className="mb-8">
-          <h2 className="text-gray-800 mb-3 pb-2 border-b">
+          <h2 className="text-foreground mb-3 pb-2 border-b">
             {group.industry.label}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -133,23 +134,23 @@ export default async function CablesOverviewPage({ searchParams }: { searchParam
                 <a
                   key={`${industry.slug}/${category.slug}/${productType.slug}`}
                   href={`/cables/${industry.slug}/${category.slug}/${productType.slug}`}
-                  className="flex items-stretch border rounded-lg overflow-hidden hover:shadow-md transition bg-white"
+                  className="flex items-stretch border border-border rounded-lg overflow-hidden transition hover:border-primary/30 bg-card"
                 >
                   {/* Left: image */}
-                  <div className="w-[8.4rem] shrink-0 bg-gray-100 overflow-hidden aspect-square">
+                  <div className="w-[8.4rem] shrink-0 bg-muted overflow-hidden aspect-square">
                     <ProductCardImage src={imgSrc} alt={productType.label} />
                   </div>
                   {/* Right: text */}
                   <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
                     <div>
-                      <h3 className="text-base font-bold text-gray-900 truncate">{productType.label}</h3>
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{category.label}</p>
+                      <h3 className="text-base font-bold text-foreground truncate">{productType.label}</h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{category.label}</p>
                     </div>
-                    <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
                       <span>
                         {manufacturerCount} manufacturer{manufacturerCount !== 1 ? 's' : ''}
                       </span>
-                      <span className="text-gray-300">|</span>
+                      <span className="text-border">|</span>
                       <span>
                         {cableCount} cable{cableCount !== 1 ? 's' : ''}
                       </span>

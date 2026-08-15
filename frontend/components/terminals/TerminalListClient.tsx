@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -83,7 +83,7 @@ export function TerminalListClient({
   const activeCategoryId = searchParams.get('category')?.split(',')[0];
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       {/* Left column: filters */}
       <aside className="lg:col-span-1">
         <div className="sticky top-20">
@@ -97,12 +97,12 @@ export function TerminalListClient({
       {/* Center column: terminals list */}
       <div className="lg:col-span-2" id="connectivity-list">
         {response.items.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-gray-500">
+          <div className="rounded-lg border border-border bg-muted/50 p-8 text-center text-muted-foreground">
             No connectivity products found. Try adjusting your filters.
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-500">
+            <div className="mb-4 text-sm text-muted-foreground">
               Showing {response.items.length} of {response.total} connectivity products
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -121,13 +121,13 @@ export function TerminalListClient({
                     params.set('page', String(p));
                     return (
                       <span key={p} className="flex items-center gap-2">
-                        {showEllipsis && <span className="text-gray-400">…</span>}
+                        {showEllipsis && <span className="text-muted-foreground/60">…</span>}
                         <a
                           href={`/connectivity?${params.toString()}#connectivity-list`}
                           className={`rounded border px-3 py-1 text-sm ${
                             p === response.page
                               ? 'border-accent-foreground bg-accent-foreground text-background'
-                              : 'border-gray-300 hover:bg-gray-100'
+                              : 'border-border hover:bg-muted'
                           }`}
                         >
                           {p}
@@ -143,5 +143,3 @@ export function TerminalListClient({
     </div>
   );
 }
-
-

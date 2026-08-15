@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect, type FormEvent } from 'react';
@@ -7,8 +7,8 @@ type Category = 'cable' | 'equipment' | 'connectivity';
 
 const CATEGORY_OPTIONS: { value: Category; label: string; code: string; placeholder: string; path: string }[] = [
   { value: 'cable',    label: 'Cable',      code: '01', placeholder: 'UL1007, AVSS…',           path: '/cables' },
-  { value: 'equipment', label: 'Equipments', code: '02', placeholder: 'Komax, Alpha 488…',      path: '/equipment' },
-  { value: 'connectivity', label: 'Connectivity',   code: '03', placeholder: 'Search connectivity model, brand…',  path: '/connectivity' },
+  { value: 'connectivity', label: 'Connectivity',   code: '02', placeholder: 'Search connectivity model, brand…',  path: '/connectivity' },
+  { value: 'equipment', label: 'Equipments', code: '03', placeholder: 'Komax, Alpha 488…',      path: '/equipment' },
 ];
 
 export function SearchBox() {
@@ -74,7 +74,7 @@ export function SearchBox() {
         {open && (
           <div
             role="listbox"
-            className="absolute left-0 top-full z-50 mt-1 min-w-[9.6rem] overflow-hidden rounded-md border border-border bg-popover shadow-lg shadow-black/5"
+            className="animate-fade-in absolute left-0 top-full z-50 mt-1 min-w-[9.6rem] overflow-hidden rounded-md border border-border bg-popover shadow-lg shadow-black/5"
           >
             {/* Tiny header strip */}
             <div className="mono-label border-b border-border/60 bg-secondary/40 px-2.5 py-1 text-muted-foreground/50">
