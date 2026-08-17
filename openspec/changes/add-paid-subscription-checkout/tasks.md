@@ -2,7 +2,7 @@
 
 - [x] 1.1 Add Alembic migration to extend `MemberSubscription.status` enum with `paid` and `past_due` values (`ALTER TYPE ... ADD VALUE`). _(Note: status is String(20), not a PG enum — migration adds columns only; paid/past_due are plain strings. Implemented in Task 1.)_
 - [x] 1.2 Add any missing columns on `MemberSubscription` (`period_end`, `grace_period_end`, `gateway`, `gateway_subscription_id`, `payment_method_id`) if not already introduced by change #1. _(Note: reuses existing `current_period_end`; no new `period_end` column. Implemented in Task 1.)_
-- [ ] 1.3 Update `MemberSubscription` model to reflect the new enum values and columns (Python-side enum/mapper).
+- [x] 1.3 Update `MemberSubscription` model to reflect the new enum values and columns (Python-side enum/mapper). _(Implemented in Task 2 — added 4 mapped_column attrs; no enum class to extend since status is String(20).)_
 - [ ] 1.4 Update `SubscriptionService.resolve_effective_plan` to treat `paid` and `past_due` (within grace) as Personal-tier-effective; keep `trialing`/`active`/`expired`/`cancelled` behavior intact.
 - [ ] 1.5 Add `SubscriptionService` methods: `create_checkout_session`, `activate_paid_subscription`, `attempt_renewal`, `mark_past_due`, `apply_grace_expiry`, `cancel_until_period_end`.
 - [ ] 1.6 Ensure `check_and_expire_trial` still downgrades trialing subscriptions that did not convert to paid (preserve existing trial-expiry path).
