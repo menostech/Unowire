@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock
 
 from app.services.subscription import SubscriptionService
 
@@ -140,3 +141,98 @@ async def test_apply_grace_expiry_downgrades_past_due(db_session, personal_plan,
     assert count == 1
     await db_session.refresh(sub)
     assert sub.status == "expired"
+
+
+@pytest.mark.asyncio
+async def test_create_subscription_checkout_stripe(db_session, personal_plan, monkeypatch):
+    """Stripe checkout uses mode=subscription with the plan's price ID and returns a redirect URL."""
+    from app.core.config import settings
+    from app.services.payment import PaymentService
+
+    monkeypatch.setattr(settings, "stripe_secret_key", "sk_test_sub_checkout")
+
+    personal_plan.stripe_price_id_monthly = "price_test_monthly"
+    db_session.add(personal_plan)
+    await db_session.commit()
+
+    fake_session = MagicMock()
+    fake_session.id = "cs_test_123"
+    fake_session.url = "https://checkout.stripe.com/c/pay/cs_test_123"
+
+    def fake_create(*args, **kwargs):
+        return fake_session
+
+    monkeypatch.setattr("stripe.checkout.Session.create", fake_create)
+
+    try:
+        svc = PaymentService(db_session)
+        result = await svc.create_subscription_checkout(
+            gateway="stripe", member_id=1, plan_id=personal_plan.id,
+            billing_cycle="monthly", plan=personal_plan,
+        )
+        assert "redirect_url" in result
+        assert result["redirect_url"].startswith("https://checkout.stripe.com/")
+        # Order row was persisted
+        from app.models.order import Order
+        from sqlalchemy import select
+        stmt = select(Order).where(Order.gateway == "stripe").where(Order.member_id == 1)
+        order = (await db_session.execute(stmt)).scalar_one()
+        assert order.status == "pending"
+        assert order.gateway_order_id == "cs_test_123"
+    finally:
+        # Clean up the Order row so it doesn't block subscription_plans cleanup
+        # in subsequent tests (Order.plan_id has ondelete=RESTRICT).
+        from sqlalchemy import delete
+        from app.models.order import Order
+        await db_session.execute(
+            delete(Order).where(Order.member_id == 1).where(Order.gateway == "stripe")
+        )
+        await db_session.commit()
+
+
+@pytest.mark.asyncio
+async def test_create_subscription_checkout_paypal(db_session, personal_plan, monkeypatch):
+    """PayPal checkout creates a subscription via /v1/billing/subscriptions and returns the approve URL."""
+    import respx
+    from app.core.config import settings
+    from app.services.payment import PaymentService
+
+    monkeypatch.setattr(settings, "paypal_client_id", "test_id")
+    monkeypatch.setattr(settings, "paypal_client_secret", "test_secret")
+    monkeypatch.setattr(settings, "paypal_plan_personal_monthly", "P-TESTPLAN")
+
+    async def fake_token(self):
+        return "fake_token"
+    monkeypatch.setattr(PaymentService, "_get_paypal_access_token", fake_token)
+
+    try:
+        with respx.mock(base_url="https://api-m.sandbox.paypal.com") as mock:
+            mock.post("/v1/billing/subscriptions").respond(
+                201,
+                json={
+                    "id": "I-TESTSUB123",
+                    "links": [
+                        {"rel": "approve", "href": "https://www.sandbox.paypal.com/approve?token=abc"},
+                    ],
+                },
+            )
+            svc = PaymentService(db_session)
+            result = await svc.create_subscription_checkout(
+                gateway="paypal", member_id=1, plan_id=personal_plan.id,
+                billing_cycle="monthly", plan=personal_plan,
+            )
+        assert result["redirect_url"] == "https://www.sandbox.paypal.com/approve?token=abc"
+        from app.models.order import Order
+        from sqlalchemy import select
+        stmt = select(Order).where(Order.gateway == "paypal").where(Order.member_id == 1)
+        order = (await db_session.execute(stmt)).scalar_one()
+        assert order.gateway_order_id == "I-TESTSUB123"
+    finally:
+        # Clean up the Order row so it doesn't block subscription_plans cleanup
+        # in subsequent tests (Order.plan_id has ondelete=RESTRICT).
+        from sqlalchemy import delete
+        from app.models.order import Order
+        await db_session.execute(
+            delete(Order).where(Order.member_id == 1).where(Order.gateway == "paypal")
+        )
+        await db_session.commit()

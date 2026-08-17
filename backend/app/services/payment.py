@@ -303,6 +303,62 @@ class PaymentService:
             detail={"code": 400, "message": f"Unsupported gateway: {gateway}"},
         )
 
+    async def create_subscription_checkout(
+        self,
+        gateway: str,
+        member_id: int,
+        plan_id: int,
+        billing_cycle: str,
+        plan,
+    ) -> dict:
+        """Create a recurring subscription checkout at the gateway.
+
+        Persists an Order row (status=pending) and returns
+        {"redirect_url": str, "order_id": int}.
+        """
+        if gateway == "stripe":
+            intent_id, redirect_url = await self._stripe_create_subscription_session(
+                member_id, plan_id, billing_cycle, plan
+            )
+        elif gateway == "paypal":
+            intent_id, redirect_url = await self._paypal_create_subscription(
+                member_id, plan_id, billing_cycle
+            )
+        else:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": f"Unsupported gateway: {gateway}"},
+            )
+
+        order = Order(
+            member_id=member_id,
+            plan_id=plan_id,
+            billing_cycle=billing_cycle,
+            gateway=gateway,
+            gateway_order_id=intent_id,
+            amount_cents=0,  # recurring; amount determined by gateway price
+            currency="usd",
+            status="pending",
+        )
+        self.db.add(order)
+        await self.db.commit()
+        await self.db.refresh(order)
+        return {"redirect_url": redirect_url, "order_id": order.id}
+
+    async def cancel_gateway_subscription(self, gateway: str, gateway_subscription_id: str) -> None:
+        """Cancel a subscription at the gateway (at period end)."""
+        if gateway == "stripe":
+            await self._stripe_cancel_subscription(gateway_subscription_id)
+        elif gateway == "paypal":
+            await self._paypal_suspend_subscription(gateway_subscription_id)
+        else:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": f"Unsupported gateway: {gateway}"},
+            )
+
     # ------------------------------------------------------------------
     # Stripe provider
     # ------------------------------------------------------------------
@@ -355,6 +411,45 @@ class PaymentService:
             refund_id=getattr(refund, "id", None),
             amount_cents=refunded_amount if refunded_amount is not None else (amount_cents or 0),
         )
+
+    async def _stripe_create_subscription_session(
+        self, member_id: int, plan_id: int, billing_cycle: str, plan
+    ) -> tuple[str, str]:
+        self._init_stripe()
+        price_id = plan.stripe_price_id_monthly if billing_cycle == "monthly" else plan.stripe_price_id_yearly
+        if not price_id:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=502,
+                detail={"code": 502, "message": f"Stripe Price ID for {billing_cycle} not configured on plan"},
+            )
+        success_url = settings.public_base_url + "/member/billing?status=success"
+        cancel_url = settings.public_base_url + "/member/checkout?status=cancelled"
+        session = await asyncio.to_thread(
+            stripe.checkout.Session.create,
+            mode="subscription",
+            line_items=[{"price": price_id, "quantity": 1}],
+            success_url=success_url,
+            cancel_url=cancel_url,
+            client_reference_id=str(member_id),
+        )
+        return session.id, session.url
+
+    async def _stripe_cancel_subscription(self, subscription_id: str) -> None:
+        self._init_stripe()
+        await asyncio.to_thread(
+            stripe.Subscription.delete,
+            subscription_id,
+            prorate=False,
+        )
+
+    async def _stripe_retrieve_subscription(self, subscription_id: str) -> dict:
+        self._init_stripe()
+        sub = await asyncio.to_thread(stripe.Subscription.retrieve, subscription_id)
+        return {
+            "status": getattr(sub, "status", ""),
+            "current_period_end": getattr(sub, "current_period_end", None),
+        }
 
     async def verify_stripe_webhook(self, payload: bytes, signature_header: str) -> dict:
         """Verify a Stripe webhook signature and return the constructed event.
@@ -467,6 +562,69 @@ class PaymentService:
             refund_id=data.get("id"),
             amount_cents=refunded_amount if refunded_amount is not None else (amount_cents or 0),
         )
+
+    async def _paypal_create_subscription(
+        self, member_id: int, plan_id: int, billing_cycle: str
+    ) -> tuple[str, str]:
+        self._require_paypal_config()
+        token = await self._get_paypal_access_token()
+        plan_id_pp = (
+            settings.paypal_plan_personal_monthly
+            if billing_cycle == "monthly"
+            else settings.paypal_plan_personal_yearly
+        )
+        if not plan_id_pp:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=502,
+                detail={"code": 502, "message": f"PayPal Plan ID for {billing_cycle} not configured"},
+            )
+        url = f"{self._paypal_base_url()}/v1/billing/subscriptions"
+        body = {
+            "plan_id": plan_id_pp,
+            "custom_id": str(member_id),
+            "application_context": {
+                "return_url": settings.public_base_url + "/member/billing?status=success",
+                "cancel_url": settings.public_base_url + "/member/checkout?status=cancelled",
+                "user_action": "SUBSCRIBE_NOW",
+            },
+        }
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(url, json=body, headers=self._paypal_headers(token))
+            resp.raise_for_status()
+            data = resp.json()
+        sub_id = data["id"]
+        approve_url = ""
+        for link in data.get("links", []):
+            if link.get("rel") == "approve":
+                approve_url = link.get("href", "")
+                break
+        return sub_id, approve_url
+
+    async def _paypal_suspend_subscription(self, subscription_id: str) -> None:
+        self._require_paypal_config()
+        token = await self._get_paypal_access_token()
+        url = f"{self._paypal_base_url()}/v1/billing/subscriptions/{subscription_id}/suspend"
+        body = {"reason": "User requested cancellation"}
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(url, json=body, headers=self._paypal_headers(token))
+            # 204 is success; 422 UNPROCESSABLE_ENTITY often means already suspended
+            if resp.status_code not in (204, 422):
+                resp.raise_for_status()
+
+    async def _paypal_retrieve_subscription(self, subscription_id: str) -> dict:
+        self._require_paypal_config()
+        token = await self._get_paypal_access_token()
+        url = f"{self._paypal_base_url()}/v1/billing/subscriptions/{subscription_id}"
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.get(url, headers=self._paypal_headers(token))
+            resp.raise_for_status()
+            data = resp.json()
+        next_billing_time = (data.get("billing_info") or {}).get("next_billing_time")
+        return {
+            "status": data.get("status", ""),
+            "current_period_end": next_billing_time,
+        }
 
     async def verify_paypal_webhook(self, headers: dict, body: dict) -> dict:
         """Verify a PayPal webhook signature via the verify-webhook-signature API.
