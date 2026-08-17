@@ -16,14 +16,14 @@ plan: null
 verify_result: pass
 verify_failures: 0
 verification_report: docs/superpowers/reports/2026-08-17-add-payment-gateway-foundation-verify.md
-branch_status: pending
+branch_status: handled
 created_at: 2026-08-17
 verified_at: 2026-08-17
 archive_confirmation: confirmed
 archived: true
 bound_branch: master
 direct_override: null
-handoff_context: openspec/changes/add-payment-gateway-foundation/.comet/handoff/design-context.json
+handoff_context: openspec/changes/archive/2026-08-17-add-payment-gateway-foundation/.comet/handoff/design-context.json
 handoff_hash: e626a7780f97e43f03fe412647fc752748d4955a4239f9bfba215e679c41f788
 classic_profile: full
 classic_migration: 1
