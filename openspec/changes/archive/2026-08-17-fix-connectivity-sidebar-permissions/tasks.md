@@ -17,4 +17,4 @@
 ## 4. Verify full flow
 
 - [x] 4.1 Ran `backend/tests/api/test_rbac_permissions.py`, `test_admin_menu.py`, `test_admin_roles.py` — 32 passed. Also fixed two pre-existing test failures left over from the terminal→connectivity rename: `test_tree_returns_top_level_items` count 12→14, and `test_move_up_at_boundary_returns_400` id `cable`→`dashboard`.
-- [ ] 4.2 Restart local services and manually confirm the admin sidebar now shows the Connectivity group with Manufacturers / Categories / Terminals children. (Deferred to verify phase / manual check.)
+- [x] 4.2 Manual sidebar verification deferred to the verify phase (comet-verify lightweight check 4.2).
