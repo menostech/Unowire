@@ -16,6 +16,8 @@ from app.models.terminal import Terminal, TerminalCategory, TerminalManufacturer
 from app.models.upload import Upload
 from app.models.user import AuditLog, User
 from app.models.member_subscription import MemberSubscription
+from app.models.order import Order
+from app.models.payment import Payment
 from app.models.subscription_plan import SubscriptionPlan
 from app.models.usage_record import UsageRecord
 
@@ -34,6 +36,8 @@ __all__ = [
     "Manufacturer",
     "Member",
     "MemberSubscription",
+    "Order",
+    "Payment",
     "ProductType",
     "RecommendedEquipment",
     "Resource",

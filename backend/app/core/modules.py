@@ -34,6 +34,7 @@ ADMIN_MODULES = [
     {"id": "post_list",       "label": "Post List",       "scope_aware": False, "scope_type": None},
     {"id": "plans",          "label": "Plans",          "scope_aware": False, "scope_type": None},
     {"id": "subscriptions",  "label": "Subscriptions",  "scope_aware": False, "scope_type": None},
+    {"id": "payment",        "label": "Payment",          "scope_aware": False, "scope_type": None},
 ]
 
 # Backward-compat aliases: old terminal module ids → new connectivity ids.

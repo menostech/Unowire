@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     admin_password: str = ""
     public_base_url: str = "https://www.unowire.com"
 
+    # Payment gateway
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    paypal_client_id: str = ""
+    paypal_client_secret: str = ""
+    paypal_webhook_id: str = ""
+    payment_mode: str = "test"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
