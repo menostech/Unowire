@@ -339,3 +339,93 @@ async def personal_plan(db_session):
     await db_session.commit()
     await db_session.refresh(plan)
     return plan
+
+
+@pytest.fixture
+async def enterprise_plan(db_session):
+    from app.models.subscription_plan import SubscriptionPlan
+
+    plan = SubscriptionPlan(
+        name="Enterprise",
+        tier_level="enterprise",
+        price_monthly=0,
+        price_yearly=0,
+        search_limit_daily=None,
+        detail_view_limit_daily=None,
+        download_limit_monthly=None,
+        is_sales_led=True,
+        is_active=True,
+        features=[],
+        sort_order=3,
+        trial_days=0,
+    )
+    db_session.add(plan)
+    await db_session.commit()
+    await db_session.refresh(plan)
+    return plan
+
+
+@pytest.fixture
+def member_token(client, db_session, personal_plan):
+    """Register a unique test member, verify them via raw SQL, log in, and
+    return the JWT token string (not a dict)."""
+    import asyncio
+    import uuid
+    from sqlalchemy import text
+    from app.core.database import async_session
+
+    email = f"checkout-{uuid.uuid4().hex[:8]}@test-member.com"
+    res = client.post("/api/member/register", json={
+        "email": email, "password": "test123456", "name": "Checkout Test",
+    })
+    assert res.status_code == 200, f"Register failed: {res.text}"
+
+    async def _verify():
+        async with async_session() as s:
+            await s.execute(text("UPDATE members SET is_verified = true WHERE email = :e"), {"e": email})
+            await s.commit()
+
+    asyncio.run(_verify())
+
+    res = client.post("/api/member/login", json={"email": email, "password": "test123456"})
+    assert res.status_code == 200, f"Login failed: {res.text}"
+    # The login endpoint sets the token in an httponly cookie (member_token),
+    # not in the JSON body (which only contains the member profile).
+    token = res.json().get("token") or res.cookies.get("member_token")
+    assert token, f"No token in login response: {res.text}"
+    return token
+
+
+@pytest.fixture
+async def paid_subscription(member_token, personal_plan, db_session):
+    """Insert a MemberSubscription with status=paid for the authenticated member.
+
+    Decodes the member_id from the token (member_token returns only the token
+    string) and inserts via a fresh async_session so the row is committed
+    independently of the test's request-scoped session.
+    """
+    from datetime import datetime, timedelta
+    from app.core.security import decode_member_token
+    from app.models.member_subscription import MemberSubscription
+    from app.core.database import async_session
+
+    payload = decode_member_token(member_token)
+    member_id = int(payload["sub"])
+
+    async with async_session() as s:
+        sub = MemberSubscription(
+            member_id=member_id,
+            plan_id=personal_plan.id,
+            status="paid",
+            billing_cycle="monthly",
+            current_period_end=datetime.utcnow() + timedelta(days=30),
+            snapshot_search_limit=personal_plan.search_limit_daily,
+            snapshot_detail_limit=personal_plan.detail_view_limit_daily,
+            snapshot_download_limit=personal_plan.download_limit_monthly,
+            gateway="stripe",
+            gateway_subscription_id=f"sub_test_{member_id}",
+        )
+        s.add(sub)
+        await s.commit()
+        await s.refresh(sub)
+        return sub

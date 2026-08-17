@@ -9,6 +9,8 @@ from app.models.member import Member
 from app.models.subscription_plan import SubscriptionPlan
 from app.schemas.member_subscription import (
     CancelResponse,
+    CheckoutRequest,
+    CheckoutResponse,
     EnterpriseInquiryCreate,
     SubscriptionRead,
     TrialRequest,
@@ -91,6 +93,26 @@ async def start_trial(
         member.id, plan.id, plan.trial_days, body.billing_cycle
     )
     return _to_subscription_read(sub, plan)
+
+
+@router.post("/subscription/checkout", response_model=CheckoutResponse)
+async def create_checkout(
+    body: CheckoutRequest,
+    member: Member = Depends(get_current_member),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a paid subscription checkout session at the chosen gateway.
+
+    Returns {redirect_url, order_id}. The frontend redirects to redirect_url.
+    """
+    svc = SubscriptionService(db)
+    result = await svc.create_checkout_session(
+        gateway=body.gateway,
+        member_id=member.id,
+        plan_id=body.plan_id,
+        billing_cycle=body.billing_cycle,
+    )
+    return CheckoutResponse(**result)
 
 
 @router.post("/subscription/cancel", response_model=CancelResponse)
