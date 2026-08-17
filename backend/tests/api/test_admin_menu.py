@@ -42,7 +42,7 @@ class TestMenuFlat:
         res = client.get("/api/admin/menu", headers=admin_headers)
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 33  # all admin_menu_items including resources/posts/terminals/plans/subscriptions
+        assert len(data) == 32  # all admin_menu_items including resources/posts/connectivity/plans/subscriptions
 
 
 class TestMenuCreate:

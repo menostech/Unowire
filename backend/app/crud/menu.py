@@ -20,6 +20,9 @@ ALLOWED_PAGE_IDS = {
     "equipment-mfrs",
     "equipment-cats",
     "equipment-list",
+    "connectivity",
+    "connectivity-mfrs",
+    "connectivity-cats",
     "media",
     "menu-config",
     "users",
@@ -28,6 +31,15 @@ ALLOWED_PAGE_IDS = {
     "email_config",
     "members",
     "messages",
+    "pages",
+    "site-menu",
+    "claims",
+    "resources-list",
+    "resources-cats",
+    "posts-list",
+    "posts-cats",
+    "plans",
+    "subscriptions",
 }
 
 # IDs that cannot be deleted (would lock admin out of menu editor).
