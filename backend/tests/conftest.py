@@ -284,3 +284,58 @@ def factory_user_headers(cable_manager_headers):
 def equipment_factory_user_headers(equipment_manager_headers):
     """Alias for equipment_manager_headers — factory user with equipment_manufacturer scope."""
     return equipment_manager_headers
+
+
+# ---------------------------------------------------------------------------
+# Subscription plan fixtures
+#
+# Used by service-level tests that need a Personal or Freemium plan row
+# pre-inserted. The `db_session` fixture wipes `subscription_plans` before each
+# test, so each test re-inserts the plan(s) it needs.
+# ---------------------------------------------------------------------------
+@pytest.fixture
+async def freemium_plan(db_session):
+    from app.models.subscription_plan import SubscriptionPlan
+
+    plan = SubscriptionPlan(
+        name="Freemium",
+        tier_level="freemium",
+        price_monthly=0,
+        price_yearly=0,
+        search_limit_daily=10,
+        detail_view_limit_daily=20,
+        download_limit_monthly=0,
+        is_sales_led=False,
+        is_active=True,
+        features=[],
+        sort_order=0,
+        trial_days=0,
+    )
+    db_session.add(plan)
+    await db_session.commit()
+    await db_session.refresh(plan)
+    return plan
+
+
+@pytest.fixture
+async def personal_plan(db_session):
+    from app.models.subscription_plan import SubscriptionPlan
+
+    plan = SubscriptionPlan(
+        name="Personal",
+        tier_level="personal",
+        price_monthly=15,
+        price_yearly=149,
+        search_limit_daily=None,
+        detail_view_limit_daily=None,
+        download_limit_monthly=None,
+        is_sales_led=False,
+        is_active=True,
+        features=[],
+        sort_order=1,
+        trial_days=14,
+    )
+    db_session.add(plan)
+    await db_session.commit()
+    await db_session.refresh(plan)
+    return plan
