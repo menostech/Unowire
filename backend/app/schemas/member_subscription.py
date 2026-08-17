@@ -18,8 +18,22 @@ class SubscriptionRead(BaseModel):
     search_limit_daily: int | None
     detail_view_limit_daily: int | None
     download_limit_monthly: int | None
+    gateway: str | None = None
+    gateway_subscription_id: str | None = None
+    grace_period_end: datetime | None = None
 
     model_config = {"from_attributes": True}
+
+
+class CheckoutRequest(BaseModel):
+    gateway: str  # "stripe" | "paypal"
+    plan_id: int
+    billing_cycle: str  # "monthly" | "yearly"
+
+
+class CheckoutResponse(BaseModel):
+    redirect_url: str
+    order_id: int
 
 
 class TrialRequest(BaseModel):
