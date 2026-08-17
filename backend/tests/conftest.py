@@ -401,31 +401,65 @@ async def paid_subscription(member_token, personal_plan, db_session):
     """Insert a MemberSubscription with status=paid for the authenticated member.
 
     Decodes the member_id from the token (member_token returns only the token
-    string) and inserts via a fresh async_session so the row is committed
-    independently of the test's request-scoped session.
+    string) and inserts via the test's ``db_session`` so the returned object
+    stays attached to that session — letting service-level tests call
+    ``db_session.refresh(sub)`` after a handler mutation.
     """
     from datetime import datetime, timedelta
     from app.core.security import decode_member_token
     from app.models.member_subscription import MemberSubscription
-    from app.core.database import async_session
 
     payload = decode_member_token(member_token)
     member_id = int(payload["sub"])
 
-    async with async_session() as s:
-        sub = MemberSubscription(
-            member_id=member_id,
-            plan_id=personal_plan.id,
-            status="paid",
-            billing_cycle="monthly",
-            current_period_end=datetime.utcnow() + timedelta(days=30),
-            snapshot_search_limit=personal_plan.search_limit_daily,
-            snapshot_detail_limit=personal_plan.detail_view_limit_daily,
-            snapshot_download_limit=personal_plan.download_limit_monthly,
-            gateway="stripe",
-            gateway_subscription_id=f"sub_test_{member_id}",
-        )
-        s.add(sub)
-        await s.commit()
-        await s.refresh(sub)
-        return sub
+    sub = MemberSubscription(
+        member_id=member_id,
+        plan_id=personal_plan.id,
+        status="paid",
+        billing_cycle="monthly",
+        current_period_end=datetime.utcnow() + timedelta(days=30),
+        snapshot_search_limit=personal_plan.search_limit_daily,
+        snapshot_detail_limit=personal_plan.detail_view_limit_daily,
+        snapshot_download_limit=personal_plan.download_limit_monthly,
+        gateway="stripe",
+        gateway_subscription_id=f"sub_test_{member_id}",
+    )
+    db_session.add(sub)
+    await db_session.commit()
+    await db_session.refresh(sub)
+    return sub
+
+
+@pytest.fixture
+async def past_due_subscription(member_token, personal_plan, db_session):
+    """Insert a MemberSubscription with status=past_due for the authenticated member.
+
+    Mirrors the ``paid_subscription`` fixture pattern: inserts via the test's
+    ``db_session`` so the returned object stays attached. Used by webhook
+    handler tests that exercise the payment_succeeded rollback path
+    (past_due -> paid).
+    """
+    from datetime import datetime, timedelta
+    from app.core.security import decode_member_token
+    from app.models.member_subscription import MemberSubscription
+
+    payload = decode_member_token(member_token)
+    member_id = int(payload["sub"])
+
+    sub = MemberSubscription(
+        member_id=member_id,
+        plan_id=personal_plan.id,
+        status="past_due",
+        billing_cycle="monthly",
+        current_period_end=datetime.utcnow() + timedelta(days=20),
+        grace_period_end=datetime.utcnow() + timedelta(days=5),
+        snapshot_search_limit=personal_plan.search_limit_daily,
+        snapshot_detail_limit=personal_plan.detail_view_limit_daily,
+        snapshot_download_limit=personal_plan.download_limit_monthly,
+        gateway="stripe",
+        gateway_subscription_id=f"sub_pd_{member_id}",
+    )
+    db_session.add(sub)
+    await db_session.commit()
+    await db_session.refresh(sub)
+    return sub
