@@ -123,7 +123,90 @@ def test_admin_create_enterprise_subscription(client, admin_headers):
 def test_admin_subscriptions_list(client, admin_headers):
     res = client.get("/api/admin/subscriptions", headers=admin_headers)
     assert res.status_code == 200, res.text
-    assert isinstance(res.json(), list)
+    data = res.json()
+    assert "items" in data
+    assert "total" in data
+    assert isinstance(data["items"], list)
+
+
+def test_admin_subscriptions_detail(client, admin_headers):
+    import asyncio
+    import uuid
+    from sqlalchemy import text
+    from app.core.database import async_session
+
+    email = f"subdetail-{uuid.uuid4().hex[:8]}@test-member.com"
+
+    async def _seed():
+        async with async_session() as s:
+            await s.execute(text(
+                "INSERT INTO members (email, password_hash, name, is_active, is_verified, created_at, updated_at) "
+                "VALUES (:email, 'x', 'Sub Detail', true, true, NOW(), NOW())"
+            ), {"email": email})
+            row = (await s.execute(text(
+                "SELECT m.id, p.id FROM members m, subscription_plans p "
+                "WHERE m.email = :email AND p.tier_level = 'enterprise' LIMIT 1"
+            ), {"email": email})).first()
+            assert row is not None, "enterprise plan or member missing"
+            member_id, plan_id = row[0], row[1]
+            sub_row = (await s.execute(text(
+                "INSERT INTO member_subscriptions "
+                "(member_id, plan_id, status, billing_cycle, current_period_start, current_period_end, "
+                " gateway, gateway_subscription_id, created_at, updated_at) "
+                "VALUES (:mid, :pid, 'active', 'yearly', NOW(), NOW() + INTERVAL '365 days', "
+                " 'stripe', :gwid, NOW(), NOW()) RETURNING id"
+            ), {"mid": member_id, "pid": plan_id, "gwid": f"sub_{email}"})).first()
+            sub_id = sub_row[0]
+            order_row = (await s.execute(text(
+                "INSERT INTO orders (member_id, plan_id, billing_cycle, gateway, gateway_order_id, "
+                " amount_cents, currency, status, created_at, updated_at) "
+                "VALUES (:mid, :pid, 'yearly', 'stripe', :goid, 1999, 'usd', 'paid', NOW(), NOW()) RETURNING id"
+            ), {"mid": member_id, "pid": plan_id, "goid": f"order_{email}"})).first()
+            order_id = order_row[0]
+            await s.execute(text(
+                "INSERT INTO payments (order_id, gateway, gateway_payment_id, type, status, "
+                " amount_cents, created_at) "
+                "VALUES (:oid, 'stripe', :pid, 'payment', 'succeeded', 1999, NOW())"
+            ), {"oid": order_id, "pid": f"pay_{email}"})
+            await s.commit()
+            return sub_id
+
+    sub_id = asyncio.run(_seed())
+
+    res = client.get(f"/api/admin/subscriptions/{sub_id}", headers=admin_headers)
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["id"] == sub_id
+    assert data["member_email"] == email
+    assert data["member_name"] == "Sub Detail"
+    assert data["plan"] == "enterprise"
+    assert data["status"] == "active"
+    assert data["billing_cycle"] == "yearly"
+    assert data["gateway"] == "stripe"
+    assert data["gateway_subscription_id"] == f"sub_{email}"
+    for key in ("member_id", "current_period_start", "current_period_end", "created_at"):
+        assert key in data, f"missing top-level key: {key}"
+    assert isinstance(data["orders"], list)
+    assert len(data["orders"]) == 1
+    order = data["orders"][0]
+    for key in ("id", "amount_cents", "currency", "status", "gateway", "gateway_order_id",
+                "created_at", "updated_at", "payments"):
+        assert key in order, f"missing order key: {key}"
+    assert order["amount_cents"] == 1999
+    assert order["currency"] == "usd"
+    assert order["status"] == "paid"
+    assert order["gateway"] == "stripe"
+    assert order["gateway_order_id"] == f"order_{email}"
+    assert isinstance(order["payments"], list)
+    assert len(order["payments"]) == 1
+    payment = order["payments"][0]
+    for key in ("id", "type", "status", "amount_cents", "gateway",
+                "gateway_payment_id", "gateway_event_id", "created_at"):
+        assert key in payment, f"missing payment key: {key}"
+    assert payment["amount_cents"] == 1999
+    assert payment["gateway"] == "stripe"
+    assert payment["gateway_payment_id"] == f"pay_{email}"
+    assert payment["status"] == "succeeded"
 
 
 def test_admin_usage_analytics(client, admin_headers):

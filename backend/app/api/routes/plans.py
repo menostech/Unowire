@@ -125,6 +125,9 @@ async def admin_create_enterprise_subscription(
 async def admin_list_subscriptions(
     plan: str | None = None,
     status: str | None = None,
+    gateway: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_operator("subscriptions")),
 ):
@@ -138,8 +141,33 @@ async def admin_list_subscriptions(
         stmt = stmt.where(SubscriptionPlan.tier_level == plan)
     if status:
         stmt = stmt.where(MemberSubscription.status == status)
+    if gateway:
+        stmt = stmt.where(MemberSubscription.gateway == gateway)
+
+    # Count total for pagination
+    count_stmt = (
+        select(func.count())
+        .select_from(MemberSubscription)
+        .join(SubscriptionPlan, MemberSubscription.plan_id == SubscriptionPlan.id)
+        .join(Member, MemberSubscription.member_id == Member.id)
+    )
+    if plan:
+        count_stmt = count_stmt.where(SubscriptionPlan.tier_level == plan)
+    if status:
+        count_stmt = count_stmt.where(MemberSubscription.status == status)
+    if gateway:
+        count_stmt = count_stmt.where(MemberSubscription.gateway == gateway)
+
+    total_result = await db.execute(count_stmt)
+    total = total_result.scalar() or 0
+
+    # Apply pagination
+    page = max(page, 1)
+    page_size = max(min(page_size, 100), 1)
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(stmt)
-    return [
+
+    items = [
         {
             "id": sub.id,
             "member_id": sub.member_id,
@@ -148,12 +176,98 @@ async def admin_list_subscriptions(
             "plan": plan_model.tier_level,
             "status": sub.status,
             "billing_cycle": sub.billing_cycle,
+            "gateway": sub.gateway,
             "trial_end": sub.trial_end,
+            "current_period_start": sub.current_period_start,
             "current_period_end": sub.current_period_end,
             "created_at": sub.created_at,
         }
         for sub, plan_model, member in result.all()
     ]
+    return {"items": items, "total": total, "page": page, "page_size": page_size}
+
+
+@router.get("/api/admin/subscriptions/{subscription_id}")
+async def admin_get_subscription_detail(
+    subscription_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_operator("subscriptions")),
+):
+    from app.models.order import Order
+    from app.models.payment import Payment
+
+    # Fetch the subscription with joins
+    stmt = (
+        select(MemberSubscription, SubscriptionPlan, Member)
+        .join(SubscriptionPlan, MemberSubscription.plan_id == SubscriptionPlan.id)
+        .join(Member, MemberSubscription.member_id == Member.id)
+        .where(MemberSubscription.id == subscription_id)
+    )
+    result = await db.execute(stmt)
+    row = result.first()
+    if row is None:
+        raise HTTPException(status_code=404, detail={"code": 404, "message": "Subscription not found"})
+    sub, plan_model, member = row
+
+    # Fetch linked orders (matched by member_id + plan_id)
+    orders_stmt = (
+        select(Order)
+        .where(Order.member_id == sub.member_id, Order.plan_id == sub.plan_id)
+        .order_by(Order.created_at.desc())
+    )
+    orders_result = await db.execute(orders_stmt)
+    orders = orders_result.scalars().all()
+
+    # Fetch linked payments for all orders
+    order_ids = [o.id for o in orders]
+    payments_by_order: dict[int, list] = {}
+    if order_ids:
+        payments_stmt = (
+            select(Payment)
+            .where(Payment.order_id.in_(order_ids))
+            .order_by(Payment.created_at.desc())
+        )
+        payments_result = await db.execute(payments_stmt)
+        for p in payments_result.scalars().all():
+            payments_by_order.setdefault(p.order_id, []).append({
+                "id": p.id,
+                "type": p.type,
+                "status": p.status,
+                "amount_cents": p.amount_cents,
+                "gateway": p.gateway,
+                "gateway_payment_id": p.gateway_payment_id,
+                "gateway_event_id": p.gateway_event_id,
+                "created_at": p.created_at,
+            })
+
+    return {
+        "id": sub.id,
+        "member_id": sub.member_id,
+        "member_email": member.email,
+        "member_name": member.name,
+        "plan": plan_model.tier_level,
+        "status": sub.status,
+        "billing_cycle": sub.billing_cycle,
+        "current_period_start": sub.current_period_start,
+        "current_period_end": sub.current_period_end,
+        "gateway": sub.gateway,
+        "gateway_subscription_id": sub.gateway_subscription_id,
+        "created_at": sub.created_at,
+        "orders": [
+            {
+                "id": o.id,
+                "amount_cents": o.amount_cents,
+                "currency": o.currency,
+                "status": o.status,
+                "gateway": o.gateway,
+                "gateway_order_id": o.gateway_order_id,
+                "created_at": o.created_at,
+                "updated_at": o.updated_at,
+                "payments": payments_by_order.get(o.id, []),
+            }
+            for o in orders
+        ],
+    }
 
 
 @router.get("/api/admin/usage-analytics")
