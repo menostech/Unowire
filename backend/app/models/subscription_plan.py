@@ -24,5 +24,7 @@ class SubscriptionPlan(Base):
     features: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     trial_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    stripe_price_id_monthly: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    stripe_price_id_yearly: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
