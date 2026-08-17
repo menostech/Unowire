@@ -47,3 +47,33 @@ def test_checkout_conflict_when_already_paid(client, member_token, paid_subscrip
         json={"gateway": "stripe", "plan_id": paid_subscription.plan_id, "billing_cycle": "monthly"},
     )
     assert res.status_code == 409, res.text
+
+
+def test_get_subscription_returns_paid_fields(client, member_token, paid_subscription):
+    """GET /api/member/subscription returns gateway and grace_period_end fields for paid subs."""
+    res = client.get(
+        "/api/member/subscription",
+        headers={"Authorization": f"Bearer {member_token}"},
+    )
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["status"] == "paid"
+    assert data["gateway"] == "stripe"
+    assert data["gateway_subscription_id"] == paid_subscription.gateway_subscription_id
+
+
+def test_cancel_paid_subscription_keeps_access(client, member_token, paid_subscription):
+    """POST /api/member/subscription/cancel marks paid as cancelled but retains period_end."""
+    with patch(
+        "app.services.payment.PaymentService.cancel_gateway_subscription",
+        new=AsyncMock(return_value=None),
+    ):
+        res = client.post(
+            "/api/member/subscription/cancel",
+            headers={"Authorization": f"Bearer {member_token}"},
+        )
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["status"] == "cancelled"
+    # current_period_end should be unchanged (in the future)
+    assert data["current_period_end"] is not None

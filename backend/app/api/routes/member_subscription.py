@@ -38,6 +38,9 @@ def _to_subscription_read(sub, plan: SubscriptionPlan) -> SubscriptionRead:
         search_limit_daily=sub.snapshot_search_limit,
         detail_view_limit_daily=sub.snapshot_detail_limit,
         download_limit_monthly=sub.snapshot_download_limit,
+        gateway=sub.gateway,
+        gateway_subscription_id=sub.gateway_subscription_id,
+        grace_period_end=sub.grace_period_end,
     )
 
 
