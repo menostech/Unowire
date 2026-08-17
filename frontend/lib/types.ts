@@ -575,13 +575,16 @@ export interface SubscriptionStatus {
   plan_id: number;
   plan_name: string;
   tier_level: string;
-  status: 'active' | 'trialing' | 'expired' | 'cancelled' | string;
+  status: 'active' | 'trialing' | 'expired' | 'cancelled' | 'paid' | 'past_due' | string;
   billing_cycle: string | null;
   trial_end: string | null;
   current_period_end: string | null;
   search_limit_daily: number | null;
   detail_view_limit_daily: number | null;
   download_limit_monthly: number | null;
+  gateway?: string | null;
+  gateway_subscription_id?: string | null;
+  grace_period_end?: string | null;
 }
 
 export interface UsageSummary {

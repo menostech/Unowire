@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { SubscriptionStatus } from '@/lib/types';
 
 export function SubscriptionPanel({ subscription }: { subscription: SubscriptionStatus }) {
@@ -38,14 +39,40 @@ export function SubscriptionPanel({ subscription }: { subscription: Subscription
         {sub.billing_cycle && <><dt className="text-muted-foreground">Billing</dt><dd className="capitalize">{sub.billing_cycle}</dd></>}
         {sub.trial_end && <><dt className="text-muted-foreground">Trial ends</dt><dd>{new Date(sub.trial_end).toLocaleDateString()}</dd></>}
         {sub.current_period_end && <><dt className="text-muted-foreground">Period ends</dt><dd>{new Date(sub.current_period_end).toLocaleDateString()}</dd></>}
+        {sub.gateway && <><dt className="text-muted-foreground">Payment</dt><dd className="capitalize">{sub.gateway}</dd></>}
       </dl>
-      <div className="mt-4 flex gap-2">
+
+      {sub.status === 'paid' && sub.current_period_end && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Active — renews on {new Date(sub.current_period_end).toLocaleDateString()}.
+        </p>
+      )}
+
+      {sub.status === 'past_due' && sub.grace_period_end && (
+        <div className="mt-2 rounded-md border border-amber-400 bg-amber-50 p-3 text-sm text-amber-800">
+          <strong>Payment failed.</strong> Update your payment method before {new Date(sub.grace_period_end).toLocaleDateString()} to keep your subscription.
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-col gap-2">
         {sub.tier_level === 'freemium' && (
-          <button onClick={startTrial} disabled={busy} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-            Start Free Trial
-          </button>
+          <>
+            <button onClick={startTrial} disabled={busy} className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50">
+              Start Free Trial
+            </button>
+            <Link href="/member/checkout?plan=personal&cycle=monthly"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground text-center hover:brightness-95">
+              Start Paid Subscription
+            </Link>
+          </>
         )}
-        {(sub.status === 'active' || sub.status === 'trialing') && (
+        {sub.status === 'trialing' && (
+          <Link href="/member/checkout?plan=personal&cycle=monthly"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground text-center hover:brightness-95">
+            Upgrade to Paid
+          </Link>
+        )}
+        {(sub.status === 'active' || sub.status === 'trialing' || sub.status === 'paid' || sub.status === 'past_due') && (
           <button onClick={cancel} disabled={busy} className="rounded-md border border-border px-4 py-2 text-sm disabled:opacity-50">
             Cancel Subscription
           </button>

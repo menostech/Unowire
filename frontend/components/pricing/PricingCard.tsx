@@ -57,10 +57,18 @@ export function PricingCard({
             {enterpriseOpen && <EnterpriseContactModal onClose={() => setEnterpriseOpen(false)} />}
           </>
         ) : cta.href ? (
-          <Link href={cta.href}
-            className="inline-flex w-full justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:brightness-95">
-            {cta.label}
-          </Link>
+          <>
+            <Link href={cta.href}
+              className="inline-flex w-full justify-center rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+              {cta.label}
+            </Link>
+            {!isCurrent && memberToken && plan.tier_level === 'personal' && (
+              <Link href="/member/checkout?plan=personal&cycle=monthly"
+                className="mt-2 inline-flex w-full justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:brightness-95">
+                Start Paid Subscription
+              </Link>
+            )}
+          </>
         ) : (
           <span className="inline-flex w-full justify-center rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground">
             {cta.label}
