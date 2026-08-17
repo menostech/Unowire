@@ -236,3 +236,71 @@ async def test_create_subscription_checkout_paypal(db_session, personal_plan, mo
             delete(Order).where(Order.member_id == 1).where(Order.gateway == "paypal")
         )
         await db_session.commit()
+
+
+@pytest.mark.asyncio
+async def test_renewal_loop_extends_period_end(db_session, paid_subscription, monkeypatch):
+    """_renewal_loop's reconciliation step extends period_end from gateway state."""
+    from app.services.payment import PaymentService
+    from datetime import datetime, timedelta, UTC
+
+    # Force period_end into the reconciliation window (within 1 hour)
+    paid_subscription.current_period_end = datetime.utcnow() + timedelta(minutes=30)
+    db_session.add(paid_subscription)
+    await db_session.commit()
+
+    new_period_end = int((datetime.now(UTC) + timedelta(days=30)).timestamp())
+
+    async def fake_retrieve(self, sub_id):
+        return {"status": "active", "current_period_end": new_period_end}
+
+    monkeypatch.setattr(PaymentService, "_stripe_retrieve_subscription", fake_retrieve)
+
+    from app.services.subscription_renewal import reconcile_paid_subscriptions
+    await reconcile_paid_subscriptions(db_session)
+
+    await db_session.refresh(paid_subscription)
+    assert paid_subscription.status == "paid"
+    # period_end was extended (no longer the near-expiry value)
+    assert paid_subscription.current_period_end is not None
+    assert paid_subscription.current_period_end > datetime.utcnow() + timedelta(days=1)
+
+
+@pytest.mark.asyncio
+async def test_renewal_loop_marks_past_due_on_failure(db_session, paid_subscription, monkeypatch):
+    """When the gateway reports the subscription is past_due/unpaid, reconcile marks it past_due."""
+    from app.services.payment import PaymentService
+    from datetime import datetime, timedelta
+
+    # Force period_end into the reconciliation window (within 1 hour)
+    paid_subscription.current_period_end = datetime.utcnow() + timedelta(minutes=30)
+    db_session.add(paid_subscription)
+    await db_session.commit()
+
+    async def fake_retrieve(self, sub_id):
+        return {"status": "past_due", "current_period_end": None}
+
+    monkeypatch.setattr(PaymentService, "_stripe_retrieve_subscription", fake_retrieve)
+
+    from app.services.subscription_renewal import reconcile_paid_subscriptions
+    await reconcile_paid_subscriptions(db_session)
+
+    await db_session.refresh(paid_subscription)
+    assert paid_subscription.status == "past_due"
+    assert paid_subscription.grace_period_end is not None
+
+
+@pytest.mark.asyncio
+async def test_apply_grace_expiry_in_renewal_loop(db_session, past_due_subscription, freemium_plan):
+    """_renewal_loop calls apply_grace_expiry to downgrade expired past_due subs."""
+    from datetime import datetime, timedelta
+    from app.services.subscription_renewal import reconcile_paid_subscriptions
+
+    # Force grace_period_end into the past
+    past_due_subscription.grace_period_end = datetime.utcnow() - timedelta(days=1)
+    db_session.add(past_due_subscription)
+    await db_session.commit()
+
+    count = await reconcile_paid_subscriptions(db_session, apply_grace=True)
+    await db_session.refresh(past_due_subscription)
+    assert past_due_subscription.status == "expired"

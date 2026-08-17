@@ -35,6 +35,24 @@ async def _trial_expiry_loop():
         await asyncio.sleep(3600)
 
 
+async def _renewal_loop():
+    """Hourly reconciliation of paid subscriptions and grace-window expiry.
+
+    The gateways (Stripe, PayPal) auto-renew; this loop reconciles local
+    state with the gateway to catch missed webhooks and to downgrade
+    past_due subscriptions whose grace has elapsed.
+    """
+    from app.core.database import async_session
+    from app.services.subscription_renewal import reconcile_paid_subscriptions
+    while True:
+        try:
+            async with async_session() as s:
+                await reconcile_paid_subscriptions(s)
+        except Exception:
+            logging.getLogger(__name__).exception("renewal loop failed")
+        await asyncio.sleep(3600)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure baseline seed (3 subscription plans) are present for all dev/prod runs.
@@ -58,12 +76,27 @@ async def lifespan(app: FastAPI):
         logging.getLogger(__name__).exception("seed subscription_plans failed")
     logger.info(f"PAYMENT_MODE={settings.payment_mode}")
     task = asyncio.create_task(_trial_expiry_loop())
+
+    # Register webhook handlers for paid subscription lifecycle
+    try:
+        from app.services.payment_webhooks import register_all as register_payment_webhooks
+        register_payment_webhooks()
+        logger.info("payment webhook handlers registered")
+    except Exception:
+        logging.getLogger(__name__).exception("payment webhook registration failed")
+
+    renewal_task = asyncio.create_task(_renewal_loop())
     try:
         yield
     finally:
         task.cancel()
+        renewal_task.cancel()
         try:
             await task
+        except asyncio.CancelledError:
+            pass
+        try:
+            await renewal_task
         except asyncio.CancelledError:
             pass
 
