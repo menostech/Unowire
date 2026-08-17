@@ -10,6 +10,7 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.modules import MODULE_ID_ALIASES
 from app.core.security import create_access_token, verify_password
 from app.models.role import Role
 from app.models.user import User
@@ -98,7 +99,14 @@ async def me(user: User = Depends(get_current_user)):
 
 @router.get("/me/permissions")
 async def my_permissions(user: User = Depends(get_current_user)):
-    """Return the current user's role + allowed modules. Used by frontend sidebar."""
+    """Return the current user's role + allowed modules. Used by frontend sidebar.
+
+    Legacy module ids (e.g. terminal_*) are remapped to their canonical
+    equivalents (e.g. connectivity_*) via MODULE_ID_ALIASES so the frontend
+    sidebar always sees canonical ids regardless of stale role_permissions rows.
+    """
+    raw_modules = getattr(user, "role_permissions", set()) or set()
+    canonical = {MODULE_ID_ALIASES.get(m, m) for m in raw_modules}
     return {
         "user_id": user.id,
         "email": user.email,
@@ -106,5 +114,5 @@ async def my_permissions(user: User = Depends(get_current_user)):
         "role_name": user.role.name if user.role else None,
         "scope_type": user.role.scope_type if user.role else None,
         "scope_id": user.scope_id,
-        "allowed_modules": sorted(getattr(user, "role_permissions", set())),
+        "allowed_modules": sorted(canonical),
     }

@@ -6,7 +6,7 @@ class TestMenuTree:
         res = client.get("/api/admin/menu/tree")
         assert res.status_code == 200
         data = res.json()
-        assert len(data) == 12  # top-level items including cable/resources/posts/terminal/plans/subscriptions/claims
+        assert len(data) == 14  # top-level items: dashboard/cables/manufacturers/industries/equipment/media/menu-inquiries/resources/posts/settings/menu-claims/connectivity-group/plans/subscriptions
         # Equipment group has 3 children
         equipment = next(i for i in data if i["id"] == "equipment")
         assert equipment["type"] == "group"
@@ -189,9 +189,9 @@ class TestMenuSort:
         assert res.status_code == 400
 
     def test_move_up_at_boundary_returns_400(self, client, admin_headers):
-        # 'cable' is the first top-level item (sort_order=0, id=cable comes first alphabetically among sort=0 items).
+        # 'dashboard' is the first top-level item (sort_order=0).
         res = client.put(
-            "/api/admin/menu/cable/sort",
+            "/api/admin/menu/dashboard/sort",
             json={"direction": "up"},
             headers=admin_headers,
         )
