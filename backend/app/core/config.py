@@ -20,6 +20,16 @@ class Settings(BaseSettings):
     paypal_webhook_id: str = ""
     payment_mode: str = "test"
 
+    # Pre-created gateway Price/Plan IDs (fallbacks if SubscriptionPlan row is missing the value)
+    stripe_price_personal_monthly: str = ""
+    stripe_price_personal_yearly: str = ""
+    paypal_product_id: str = ""
+    paypal_plan_personal_monthly: str = ""
+    paypal_plan_personal_yearly: str = ""
+
+    # Feature flag: gate the paid checkout until change #1 is confirmed deployed
+    paid_checkout_enabled: bool = False
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
