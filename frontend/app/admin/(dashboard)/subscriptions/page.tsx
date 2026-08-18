@@ -48,8 +48,8 @@ export default async function SubscriptionsPage({
           className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-accent-foreground focus:outline-none focus:ring-1 focus:ring-accent-foreground"
         >
           <option value="">All plans</option>
-          <option value="free">Free</option>
-          <option value="pro">Pro</option>
+          <option value="freemium">Freemium</option>
+          <option value="personal">Personal</option>
           <option value="enterprise">Enterprise</option>
         </select>
         <select
