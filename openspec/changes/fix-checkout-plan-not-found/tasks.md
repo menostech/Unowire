@@ -3,7 +3,7 @@
 - [x] 1.1 In `frontend/app/member/checkout/page.tsx`, fetch `GET /api/plans` on mount and resolve the `plan_id` by matching `tier_level` against the `?plan=` query param (default `personal`). Store in state.
 - [x] 1.2 Use the resolved `plan_id` in the checkout POST body instead of the hardcoded `2`. Disable pay buttons while loading and if no plan matches.
 - [x] 1.3 Run `npx tsc --noEmit` in `frontend/` - 0 errors.
-- [ ] 1.4 Commit.
+- [x] 1.4 Commit.
 
 ## 2. Regression verification
 
