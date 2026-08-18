@@ -244,7 +244,7 @@ def test_admin_subscriptions_list(client, admin_headers):
 Run: `cd backend && python -m pytest tests/api/test_admin_plans.py -v`
 Expected: All tests PASS, including the updated `test_admin_subscriptions_list`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd backend
