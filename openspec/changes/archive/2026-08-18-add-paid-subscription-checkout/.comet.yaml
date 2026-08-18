@@ -16,14 +16,14 @@ plan: docs/superpowers/plans/2026-08-17-paid-subscription-checkout.md
 verify_result: pass
 verify_failures: 0
 verification_report: docs/superpowers/reports/2026-08-18-add-paid-subscription-checkout-verify.md
-branch_status: pending
+branch_status: handled
 created_at: 2026-08-17
 verified_at: 2026-08-18
 archive_confirmation: confirmed
 archived: true
 bound_branch: master
 direct_override: null
-handoff_context: openspec/changes/add-paid-subscription-checkout/.comet/handoff/design-context.json
+handoff_context: null
 handoff_hash: 86476596c9e79ce1ead59b5675fd9a66492df4a52620e7d28452c2e701232bd9
 classic_profile: full
 classic_migration: 1
