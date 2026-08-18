@@ -7,5 +7,5 @@
 
 ## 2. Regression verification
 
-- [ ] 2.1 Manually verify `GET /api/plans` returns the Personal plan with a valid `id`; confirm the checkout POST now sends that id (no more 404).
-- [ ] 2.2 Confirm the "Plan not found" error no longer appears for the default `?plan=personal` checkout flow.
+- [x] 2.1 Manually verify `GET /api/plans` returns the Personal plan with a valid `id`; confirm the checkout POST now sends that id (no more 404).
+- [x] 2.2 Confirm the "Plan not found" error no longer appears for the default `?plan=personal` checkout flow.
