@@ -2,7 +2,8 @@
 comet_change: add-paid-subscription-checkout
 role: technical-design
 canonical_spec: openspec
-status: draft
+archived-with: 2026-08-18-add-paid-subscription-checkout
+status: final
 ---
 
 # Design Doc: Paid Subscription Checkout (Stripe + PayPal Recurring)

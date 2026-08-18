@@ -80,18 +80,4 @@ The system SHALL allow a member to cancel a paid subscription via `POST /api/mem
 - **WHEN** a member cancels an active paid subscription
 - **THEN** `cancelled_at` is set to now, but `status` remains `active` and the member retains access until `current_period_end`
 
-## MODIFIED Requirements
 
-### Requirement: Trial expiry without payment downgrades to freemium
-
-The existing free-trial flow SHALL continue to work unchanged: a `trialing` subscription that reaches `trial_end` without being converted to a paid subscription SHALL transition to `expired` and the member SHALL revert to the Freemium effective plan. Paid subscriptions are NOT affected by trial expiry.
-
-#### Scenario: Free trial expires without payment
-
-- **WHEN** a `trialing` subscription reaches `trial_end` and no paid checkout was completed
-- **THEN** the subscription status changes to `expired` and the member's effective plan becomes Freemium
-
-#### Scenario: Paid subscription is not affected by trial expiry
-
-- **WHEN** a member upgrades from trial to paid before `trial_end`
-- **THEN** the trial subscription is replaced by an `active` paid subscription and trial expiry logic does not trigger

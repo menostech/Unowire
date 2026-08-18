@@ -27,7 +27,7 @@ The system SHALL define exactly three subscription plan tiers: `freemium`, `pers
 
 ### Requirement: Subscription lifecycle state machine
 
-The system SHALL track each member's subscription with a status field: `active`, `trialing`, `expired`, or `cancelled`. A `trialing` subscription SHALL have `trial_start` and `trial_end` timestamps. An `active` subscription SHALL have `current_period_start` and `current_period_end` timestamps. A `cancelled` subscription SHALL remain active until `current_period_end`, then downgrade to `freemium`.
+The system SHALL track each member's subscription with a status field: `active`, `trialing`, `expired`, `cancelled`, `paid`, or `past_due`. A `trialing` subscription SHALL have `trial_start` and `trial_end` timestamps. A `paid` subscription SHALL have `current_period_start` and `current_period_end` timestamps and store the `gateway` and `gateway_subscription_id`. A `past_due` subscription SHALL have a `grace_period_end` timestamp. A `cancelled` subscription SHALL remain active until `current_period_end`, then downgrade to `freemium`.
 
 #### Scenario: Personal tier trial subscription
 
@@ -39,13 +39,17 @@ The system SHALL track each member's subscription with a status field: `active`,
 
 #### Scenario: Trial expiry without payment
 
-- **WHEN** a `trialing` subscription reaches `trial_end` and no payment has been processed
-- **THEN** the subscription SHALL downgrade to `freemium` with status `active`
-- **AND** the member SHALL lose Personal tier access immediately
+- **WHEN** a `trialing` subscription reaches `trial_end` and no paid checkout was completed
+- **THEN** the subscription status changes to `expired` and the member's effective plan becomes Freemium
+
+#### Scenario: Paid subscription is not affected by trial expiry
+
+- **WHEN** a member upgrades from trial to paid before `trial_end`
+- **THEN** the trial subscription is replaced by a `paid` subscription and trial expiry logic does not trigger
 
 #### Scenario: Subscription cancellation
 
-- **WHEN** a member cancels an `active` Personal subscription
+- **WHEN** a member cancels an `active` or `paid` Personal subscription
 - **THEN** the subscription status SHALL change to `cancelled`
 - **AND** the member SHALL retain Personal access until `current_period_end`
 - **AND** after `current_period_end`, the subscription SHALL downgrade to `freemium`
