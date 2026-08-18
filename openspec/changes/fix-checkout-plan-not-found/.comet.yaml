@@ -1,6 +1,6 @@
 workflow: hotfix
 language: en
-phase: verify
+phase: archive
 context_compression: off
 build_mode: direct
 build_pause: null
@@ -13,13 +13,13 @@ auto_transition: true
 base_ref: b5715defa8b6191bbf071dccb2719cb09356ce6b
 design_doc: null
 plan: null
-verify_result: pending
+verify_result: pass
 verify_failures: 0
 verification_report: docs/superpowers/reports/2026-08-18-fix-checkout-plan-not-found-verify.md
 branch_status: pending
 created_at: 2026-08-18
-verified_at: null
-archive_confirmation: null
+verified_at: 2026-08-18
+archive_confirmation: pending
 archived: false
 bound_branch: master
 direct_override: null
