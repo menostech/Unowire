@@ -10,10 +10,13 @@ from fastapi.responses import JSONResponse
 import os
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import IntegrityError
+import httpx
+import stripe
 
 from app.api.routes import auth, cable_import, cable_import_templates, cables, categories, equipment, equipment_categories, equipment_import, equipment_import_templates, equipment_manufacturers, terminals, terminal_categories, terminal_import, terminal_import_templates, terminal_manufacturers, folders, health, industries, manufacturers, pages, post, post_categories, plans, payments, product_types, taxonomy, uploads, site_menu, admin_menu, admin_orders, admin_roles, admin_users, member, member_subscription, admin_inquiries, admin_email, admin_members, admin_claims, admin_messages, resource, resource_categories, portal_auth, page_views, portal_dashboard, portal_cables, portal_cable_import, portal_claim, portal_equipment, portal_equipment_import, portal_terminals, portal_terminal_import, portal_inquiries, portal_media, portal_messages, portal_resource
 from app.core.config import settings
 from app.schemas.common import ValidationErrorDetail, ValidationErrorResponse
+from app.services.payment import PaymentConfigError
 
 # Ensure modern image MIME types are recognized (some base images lack .webp)
 mimetypes.add_type("image/webp", ".webp")
@@ -163,6 +166,33 @@ async def integrity_error_handler(request: Request, exc: IntegrityError):
     return JSONResponse(
         status_code=409,
         content={"code": 409, "message": "Resource already exists or violates a constraint"},
+    )
+
+
+@app.exception_handler(PaymentConfigError)
+async def payment_config_error_handler(request: Request, exc: PaymentConfigError):
+    logger.warning("Payment gateway not configured: %s", exc)
+    return JSONResponse(
+        status_code=503,
+        content={"code": 503, "message": "Payment gateway is not configured. Please contact support."},
+    )
+
+
+@app.exception_handler(stripe.error.StripeError)
+async def stripe_error_handler(request: Request, exc: stripe.error.StripeError):
+    logger.warning("Stripe gateway error: %s", exc)
+    return JSONResponse(
+        status_code=502,
+        content={"code": 502, "message": "Payment gateway error. Please try again later."},
+    )
+
+
+@app.exception_handler(httpx.HTTPError)
+async def httpx_error_handler(request: Request, exc: httpx.HTTPError):
+    logger.warning("HTTP gateway error: %s", exc)
+    return JSONResponse(
+        status_code=502,
+        content={"code": 502, "message": "Payment gateway error. Please try again later."},
     )
 
 
