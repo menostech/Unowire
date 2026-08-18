@@ -14,8 +14,8 @@ export default async function MemberSubscriptionPage({
   if (!member) notFound();
 
   // Fetch all subscriptions and filter to this member.
-  const allSubs = await adminApi.subscriptions.list().catch(() => [] as any[]);
-  const memberSubs = allSubs.filter(
+  const subsResult = await adminApi.subscriptions.list().catch(() => ({ items: [] as any[], total: 0, page: 1, page_size: 20 }));
+  const memberSubs = subsResult.items.filter(
     (s: any) => s.member_id === memberId || s.member?.id === memberId
   );
 

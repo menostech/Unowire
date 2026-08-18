@@ -1349,12 +1349,15 @@ export const adminApi = {
   },
 
   subscriptions: {
-    async list(params?: { plan?: string; status?: string }): Promise<any[]> {
+    async list(params?: { plan?: string; status?: string; gateway?: string; page?: number; page_size?: number }): Promise<{ items: any[]; total: number; page: number; page_size: number }> {
       const qs = new URLSearchParams();
       if (params?.plan) qs.set('plan', params.plan);
       if (params?.status) qs.set('status', params.status);
+      if (params?.gateway) qs.set('gateway', params.gateway);
+      if (params?.page) qs.set('page', String(params.page));
+      if (params?.page_size) qs.set('page_size', String(params.page_size));
       const query = qs.toString();
-      return adminGet<any[]>(`/api/admin/subscriptions${query ? `?${query}` : ''}`);
+      return adminGet<{ items: any[]; total: number; page: number; page_size: number }>(`/api/admin/subscriptions${query ? `?${query}` : ''}`);
     },
   },
 
