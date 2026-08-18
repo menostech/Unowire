@@ -446,7 +446,7 @@ app.include_router(admin_orders.router)
 Run: `cd backend && python -m pytest tests/api/test_admin_plans.py -v -x`
 Expected: All existing tests still PASS (the new router doesn't interfere with existing routes).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd backend
