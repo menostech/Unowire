@@ -2,6 +2,7 @@
 change: fix-admin-subscriptions-refunds
 design-doc: openspec/changes/fix-admin-subscriptions-refunds/design.md
 base-ref: 042b03dd0c9731a0bce5d575bed7894fc756cc1b
+archived-with: 2026-08-18-fix-admin-subscriptions-refunds
 ---
 
 # Fix Admin Subscriptions & Refunds Implementation Plan

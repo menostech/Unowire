@@ -1,5 +1,8 @@
-## ADDED Requirements
+# admin-subscription-management Specification
 
+## Purpose
+TBD - created by archiving change fix-admin-subscriptions-refunds. Update Purpose after archive.
+## Requirements
 ### Requirement: Admin subscriptions list page
 
 The system SHALL provide a `/admin/subscriptions` page in the frontend that renders a server-paginated table of all subscriptions. Each row SHALL display: member (name + email), plan (Freemium / Personal / Enterprise), status (`active` | `canceled` | `past_due` | `refunded`), gateway (`stripe` | `paypal` | `—`), amount, current period (start – end), and an actions column. The page SHALL NOT return a 404. This replaces the broken sidebar entry where `adminMenuRegistry.ts` mapped `subscriptions` to `/admin/subscriptions` while no such page existed.
@@ -184,13 +187,3 @@ The frontend `adminApi.ts` SHALL expose a `refund(orderId: string, amount?: numb
 - **WHEN** an admin clicks the "Subscriptions" sidebar item
 - **THEN** the browser navigates to `/admin/subscriptions` and the page renders
 
-## MODIFIED Requirements
-
-### Requirement: membership-plans admin navigation
-
-The `membership-plans` capability's admin navigation SHALL be expanded: the previously orphaned member subscription sub-page (`/admin/members/[id]/subscription`) SHALL be reachable from the member detail page, and a dedicated `/admin/subscriptions` list page SHALL replace the broken sidebar entry.
-
-#### Scenario: Member detail links to subscription sub-page
-
-- **WHEN** an admin views a member at `/admin/members/{id}`
-- **THEN** a "Subscription" tab/section links to `/admin/members/{id}/subscription` (previously orphaned)
