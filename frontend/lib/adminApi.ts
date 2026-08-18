@@ -1374,4 +1374,19 @@ export const adminApi = {
       return res.json();
     },
   },
+
+  orders: {
+    async refund(orderId: number, amount?: number): Promise<{ order: any; refund_payment: any }> {
+      const body = amount !== undefined ? { amount } : {};
+      const res = await adminFetch(`/api/admin/orders/${orderId}/refund`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.message || err?.message || `API ${res.status}`);
+      }
+      return res.json();
+    },
+  },
 };
