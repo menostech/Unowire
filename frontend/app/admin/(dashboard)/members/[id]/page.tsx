@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { adminApi } from '@/lib/adminApi';
 import { MemberForm } from '@/components/admin/form/MemberForm';
@@ -31,6 +32,17 @@ export default async function EditMemberPage({
       <div className="border-t pt-6">
         <h2 className="mb-4 text-lg font-semibold">Actions</h2>
         <MemberActions member={member} />
+      </div>
+
+      {/* Subscription management */}
+      <div className="border-t pt-6">
+        <h2 className="mb-4 text-lg font-semibold">Subscription</h2>
+        <Link
+          href={`/admin/members/${member.id}/subscription`}
+          className="inline-block rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-accent-foreground hover:bg-gray-50"
+        >
+          Manage Subscription
+        </Link>
       </div>
 
       {/* Metadata */}
