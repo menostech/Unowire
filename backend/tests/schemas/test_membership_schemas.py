@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from pydantic import ValidationError
 
 from app.schemas.subscription_plan import SubscriptionPlanCreate, SubscriptionPlanUpdate
@@ -50,3 +50,39 @@ def test_usage_summary_response_shape():
     )
     assert u.plan == "freemium"
     assert u.today["search"]["limit"] == 10
+
+
+def test_invoice_read_derives_pdf_available():
+    from datetime import datetime
+    from app.schemas.invoice import InvoiceRead
+
+    data = {
+        "id": 1,
+        "invoice_number": "INV-2026-000001",
+        "status": "paid",
+        "amount_cents": 1500,
+        "tax_amount_cents": None,
+        "currency": "usd",
+        "period_start": None,
+        "period_end": None,
+        "plan_name": "Personal",
+        "created_at": datetime.utcnow(),
+        "pdf_available": True,
+    }
+    inv = InvoiceRead(**data)
+    assert inv.pdf_available is True
+    assert inv.plan_name == "Personal"
+
+
+def test_invoice_list_response_pagination():
+    from app.schemas.invoice import InvoiceListResponse, InvoiceRead
+    from datetime import datetime
+
+    item = InvoiceRead(
+        id=1, invoice_number="INV-2026-000001", status="paid", amount_cents=1500,
+        tax_amount_cents=None, currency="usd", period_start=None, period_end=None,
+        plan_name="Personal", created_at=datetime.utcnow(), pdf_available=False,
+    )
+    resp = InvoiceListResponse(items=[item], total=1, page=1, page_size=20)
+    assert resp.total == 1
+    assert resp.items[0].invoice_number == "INV-2026-000001"
