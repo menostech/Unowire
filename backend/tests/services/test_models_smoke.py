@@ -39,3 +39,9 @@ def test_usage_record_unique_constraint():
         if hasattr(c, "name") and c.name:
             names.add(c.name)
     assert any("usage_member_date" in n for n in names), f"Expected unique usage_member_date, got {names}"
+
+
+def test_invoice_model_importable():
+    from app.models.invoice import Invoice, InvoiceSequence
+    assert Invoice.__tablename__ == "invoices"
+    assert InvoiceSequence.__tablename__ == "invoice_sequences"

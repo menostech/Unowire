@@ -18,6 +18,7 @@ from app.models.user import AuditLog, User
 from app.models.member_subscription import MemberSubscription
 from app.models.order import Order
 from app.models.payment import Payment
+from app.models.invoice import Invoice, InvoiceSequence
 from app.models.subscription_plan import SubscriptionPlan
 from app.models.usage_record import UsageRecord
 
@@ -33,6 +34,8 @@ __all__ = [
     "Folder",
     "Industry",
     "Inquiry",
+    "Invoice",
+    "InvoiceSequence",
     "Manufacturer",
     "Member",
     "MemberSubscription",
