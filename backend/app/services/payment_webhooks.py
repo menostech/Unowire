@@ -105,6 +105,16 @@ async def _handle_stripe_payment_succeeded(event: dict, raw_payload: dict, db: A
     db.add(sub)
     await db.commit()
 
+    # --- Invoice generation (best-effort, never fails the webhook) ---
+    try:
+        from app.services.invoice import InvoiceService
+        order_id_str = (obj.get("metadata") or {}).get("order_id")
+        if order_id_str:
+            order_id = int(order_id_str)
+            await InvoiceService(db).create_from_order(order_id)
+    except Exception:
+        logger.exception("invoice generation failed for stripe event")
+
 
 async def _handle_stripe_payment_failed(event: dict, raw_payload: dict, db: AsyncSession) -> None:
     """invoice.payment_failed -> mark past_due."""
@@ -172,6 +182,16 @@ async def _handle_paypal_payment_completed(event: dict, raw_payload: dict, db: A
         sub.grace_period_end = None
     db.add(sub)
     await db.commit()
+
+    # --- Invoice generation (best-effort, never fails the webhook) ---
+    try:
+        from app.services.invoice import InvoiceService
+        order_id_str = resource.get("custom_id")
+        if order_id_str:
+            order_id = int(order_id_str)
+            await InvoiceService(db).create_from_order(order_id)
+    except Exception:
+        logger.exception("invoice generation failed for paypal event")
 
 
 async def _handle_paypal_subscription_cancelled(event: dict, raw_payload: dict, db: AsyncSession) -> None:
