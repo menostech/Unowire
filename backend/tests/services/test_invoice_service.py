@@ -208,3 +208,106 @@ async def test_pdf_failure_resilience(db_session, monkeypatch):
     await db_session.delete(plan)
     await db_session.delete(member)
     await db_session.commit()
+
+
+@pytest.mark.asyncio
+async def test_get_by_member_returns_invoice_for_owner(db_session, monkeypatch):
+    """get_by_member returns (invoice, plan_name) for the owner, None for non-owner."""
+    monkeypatch.setenv("MEDIA_DIR", "/tmp/test-media-invoices")
+    order, plan, member = await _make_order_plan_member(db_session, tag="getowner")
+    other_member = Member(
+        email=f"inv-other-{uuid.uuid4().hex[:8]}@test-member.com",
+        password_hash=hash_password("test123456"),
+        name="Other",
+    )
+    db_session.add(other_member)
+    await db_session.commit()
+    await db_session.refresh(other_member)
+
+    svc = InvoiceService(db_session)
+    invoice = await svc.create_from_order(order.id)
+
+    result = await svc.get_by_member(invoice.id, member.id)
+    assert result is not None
+    inv, plan_name = result
+    assert inv.id == invoice.id
+    assert plan_name == plan.name
+
+    # Non-owner gets None
+    result_other = await svc.get_by_member(invoice.id, other_member.id)
+    assert result_other is None
+
+    # Cleanup
+    if invoice.pdf_path and os.path.isfile(invoice.pdf_path):
+        os.remove(invoice.pdf_path)
+    await db_session.delete(invoice)
+    await db_session.delete(order)
+    await db_session.delete(plan)
+    await db_session.delete(member)
+    await db_session.delete(other_member)
+    await db_session.commit()
+
+
+@pytest.mark.asyncio
+async def test_list_by_member_paginated(db_session, monkeypatch):
+    """list_by_member returns only the member's invoices, paginated."""
+    monkeypatch.setenv("MEDIA_DIR", "/tmp/test-media-invoices")
+    order, plan, member = await _make_order_plan_member(db_session, tag="list")
+
+    svc = InvoiceService(db_session)
+    invoice = await svc.create_from_order(order.id)
+
+    items, total = await svc.list_by_member(member.id, page=1, page_size=20)
+    assert total == 1
+    assert len(items) == 1
+    inv, plan_name = items[0]
+    assert inv.id == invoice.id
+    assert plan_name == plan.name
+
+    # Cleanup
+    if invoice.pdf_path and os.path.isfile(invoice.pdf_path):
+        os.remove(invoice.pdf_path)
+    await db_session.delete(invoice)
+    await db_session.delete(order)
+    await db_session.delete(plan)
+    await db_session.delete(member)
+    await db_session.commit()
+
+
+@pytest.mark.asyncio
+async def test_regenerate_pending_pdfs(db_session, monkeypatch):
+    """regenerate_pending_pdfs scans invoices with pdf_path=None and regenerates."""
+    monkeypatch.setenv("MEDIA_DIR", "/tmp/test-media-invoices")
+    order, plan, member = await _make_order_plan_member(db_session, tag="regen")
+
+    # Create an invoice with no PDF (simulate a prior failure).
+    invoice = Invoice(
+        invoice_number=f"INV-{datetime.utcnow().year}-999999",
+        order_id=order.id,
+        member_id=member.id,
+        plan_id=plan.id,
+        amount_cents=1500,
+        currency="usd",
+        status="paid",
+        pdf_path=None,
+    )
+    db_session.add(invoice)
+    await db_session.commit()
+    await db_session.refresh(invoice)
+
+    svc = InvoiceService(db_session)
+    count = await svc.regenerate_pending_pdfs()
+
+    assert count >= 1
+    await db_session.refresh(invoice)
+    assert invoice.pdf_path is not None
+    assert os.path.isfile(invoice.pdf_path)
+
+    # Cleanup
+    if invoice.pdf_path and os.path.isfile(invoice.pdf_path):
+        os.remove(invoice.pdf_path)
+    await db_session.delete(invoice)
+    await db_session.delete(order)
+    await db_session.delete(plan)
+    await db_session.delete(member)
+    await db_session.commit()

@@ -255,3 +255,76 @@ class InvoiceService:
         # Should not reach here under normal conditions.
         logger.error("Failed to assign invoice number after 3 attempts")
         raise RuntimeError("Failed to assign invoice number")
+
+    async def get_by_member(
+        self, invoice_id: int, member_id: int
+    ) -> tuple[Invoice, str] | None:
+        """Fetch a single invoice with ownership check.
+
+        Returns ``(invoice, plan_name)`` or ``None`` if the invoice
+        does not exist or does not belong to ``member_id``.
+        """
+        stmt = (
+            select(Invoice, SubscriptionPlan.name)
+            .join(SubscriptionPlan, Invoice.plan_id == SubscriptionPlan.id)
+            .where(Invoice.id == invoice_id)
+            .where(Invoice.member_id == member_id)
+            .limit(1)
+        )
+        result = await self.db.execute(stmt)
+        row = result.first()
+        if row is None:
+            return None
+        return row[0], row[1]
+
+    async def list_by_member(
+        self, member_id: int, page: int, page_size: int
+    ) -> tuple[list[tuple[Invoice, str]], int]:
+        """Paginated list of a member's invoices, ordered by created_at desc.
+
+        Returns ``([(invoice, plan_name), ...], total)``.
+        """
+        return await self._list_invoices(member_id, page, page_size)
+
+    async def list_by_member_for_admin(
+        self, member_id: int, page: int, page_size: int
+    ) -> tuple[list[tuple[Invoice, str]], int]:
+        """Admin-scoped list of a member's invoices (no ownership check)."""
+        return await self._list_invoices(member_id, page, page_size)
+
+    async def _list_invoices(
+        self, member_id: int, page: int, page_size: int
+    ) -> tuple[list[tuple[Invoice, str]], int]:
+        count_stmt = (
+            select(func.count(Invoice.id))
+            .where(Invoice.member_id == member_id)
+        )
+        total = (await self.db.execute(count_stmt)).scalar() or 0
+
+        stmt = (
+            select(Invoice, SubscriptionPlan.name)
+            .join(SubscriptionPlan, Invoice.plan_id == SubscriptionPlan.id)
+            .where(Invoice.member_id == member_id)
+            .order_by(Invoice.created_at.desc())
+            .offset(max(0, (page - 1) * page_size))
+            .limit(page_size)
+        )
+        result = await self.db.execute(stmt)
+        rows = result.all()
+        return [(row[0], row[1]) for row in rows], total
+
+    async def regenerate_pending_pdfs(self) -> int:
+        """Scan invoices with pdf_path IS NULL and regenerate their PDFs.
+
+        Returns the count of invoices that were processed.
+        """
+        stmt = select(Invoice).where(Invoice.pdf_path.is_(None))
+        result = await self.db.execute(stmt)
+        count = 0
+        for invoice in result.scalars().all():
+            try:
+                await self.generate_pdf(invoice)
+                count += 1
+            except Exception:
+                logger.exception("regenerate_pending_pdfs failed for invoice %s", invoice.id)
+        return count
