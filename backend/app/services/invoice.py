@@ -147,3 +147,111 @@ class InvoiceService:
         except Exception:
             logger.exception("PDF generation failed for invoice %s", invoice.id)
             return None
+
+    async def create_from_order(self, order_id: int) -> Invoice | None:
+        """Idempotently create an invoice from a paid order.
+
+        Returns the existing invoice if one already exists for this
+        ``order_id`` (idempotency via the unique constraint on
+        ``invoices.order_id``). Resolves the order + member + plan,
+        assigns a sequential invoice number, inserts the invoice row
+        with ``status='paid'`` and ``pdf_path=None``, then attempts
+        ``generate_pdf``. PDF failures are caught and logged — the
+        invoice row is still returned with ``pdf_path=None``.
+        """
+        from sqlalchemy.exc import IntegrityError
+
+        # 1. Idempotency: check for existing invoice
+        stmt = select(Invoice).where(Invoice.order_id == order_id).limit(1)
+        result = await self.db.execute(stmt)
+        existing = result.scalar_one_or_none()
+        if existing is not None:
+            return existing
+
+        # 2. Resolve order + member + plan
+        order = await self.db.get(Order, order_id)
+        if order is None:
+            logger.warning("create_from_order: order %s not found", order_id)
+            return None
+
+        plan = await self.db.get(SubscriptionPlan, order.plan_id)
+        if plan is None:
+            logger.warning("create_from_order: plan %s not found for order %s", order.plan_id, order_id)
+            return None
+
+        # 3. Assign invoice number
+        invoice_number = await self._assign_invoice_number()
+
+        # 4. Insert invoice row
+        invoice = Invoice(
+            invoice_number=invoice_number,
+            order_id=order.id,
+            member_id=order.member_id,
+            plan_id=order.plan_id,
+            amount_cents=order.amount_cents,
+            tax_amount_cents=None,
+            currency=order.currency,
+            period_start=None,
+            period_end=None,
+            pdf_path=None,
+            status="paid",
+        )
+        self.db.add(invoice)
+        try:
+            await self.db.commit()
+        except IntegrityError:
+            # Race condition: another transaction created the invoice first.
+            await self.db.rollback()
+            result = await self.db.execute(stmt)
+            return result.scalar_one_or_none()
+        await self.db.refresh(invoice)
+
+        # 5. Try generate_pdf — catch exceptions, leave pdf_path=null
+        try:
+            await self.generate_pdf(invoice)
+        except Exception:
+            logger.exception("generate_pdf failed during create_from_order for invoice %s", invoice.id)
+
+        return invoice
+
+    async def _assign_invoice_number(self) -> str:
+        """Assign a sequential invoice number: INV-{YYYY}-{000001}.
+
+        Uses the ``invoice_sequences`` table with ``SELECT ... FOR UPDATE``
+        to ensure gapless numbering. If the year row doesn't exist, it is
+        inserted. The unique constraint on ``invoice_number`` is the
+        backstop for any race that slips past the row lock.
+        """
+        from sqlalchemy.exc import IntegrityError
+
+        year = datetime.utcnow().year
+
+        for _attempt in range(3):
+            stmt = (
+                select(InvoiceSequence)
+                .where(InvoiceSequence.year == year)
+                .with_for_update()
+            )
+            result = await self.db.execute(stmt)
+            seq_row = result.scalar_one_or_none()
+
+            if seq_row is None:
+                # Insert the year row. If another transaction inserts first,
+                # IntegrityError -> retry (row will exist on next iteration).
+                seq_row = InvoiceSequence(year=year, next_seq=1)
+                self.db.add(seq_row)
+                try:
+                    await self.db.flush()
+                except IntegrityError:
+                    await self.db.rollback()
+                    continue
+
+            seq = seq_row.next_seq
+            seq_row.next_seq = seq + 1
+            self.db.add(seq_row)
+            await self.db.commit()
+            return f"INV-{year}-{seq:06d}"
+
+        # Should not reach here under normal conditions.
+        logger.error("Failed to assign invoice number after 3 attempts")
+        raise RuntimeError("Failed to assign invoice number")
